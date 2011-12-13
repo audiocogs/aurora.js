@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+<body>
+    <script src="http://localhost:8080/"></script>
+    <script>
+        var player = Player.fromURL("../year.caf");
+        player.on('error', function(e) { console.log(e) });
+        player.preload();
+        player.play();
+    </script>
+</body>
+</html>
