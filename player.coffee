@@ -34,9 +34,14 @@ class Player extends EventEmitter
         
     play: ->
         @playing = true
+        @_timer = setInterval =>
+            @currentTime = (@sink?.getPlaybackTime() or 0) / 44100 * 1000 | 0
+            @emit 'progress', @currentTime if @currentTime > 0
+        , 200
         
     pause: ->
         @playing = false
+        clearInterval @_timer
         
     probe: (chunk) =>
         demuxer = Demuxer.find(chunk)
@@ -46,6 +51,8 @@ class Player extends EventEmitter
             
         @demuxer = new demuxer(@source, chunk)
         @demuxer.on 'format', @findDecoder
+        @demuxer.on 'duration', (d) =>
+            @duration = d
         
     findDecoder: (format) =>
         console.log format
