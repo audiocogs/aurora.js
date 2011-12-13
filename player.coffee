@@ -15,6 +15,10 @@ class Player extends EventEmitter
         @source.on 'error', (err) =>
             @pause()
             @emit 'error', err
+            
+        @source.on 'progress', (percent) =>
+            @buffered = percent
+            @emit 'buffer', percent
         
     @fromURL: (url) ->
         source = new HTTPSource(url)

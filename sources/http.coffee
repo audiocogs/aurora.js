@@ -35,6 +35,9 @@ class HTTPSource extends Source
             
         @inflight = true
         @xhr = new XMLHttpRequest()
+        
+        @xhr.onprogress = (event) =>
+            @emit 'progress', (@offset + event.loaded) / @length * 100
 
         @xhr.onload = (event) =>
             if @xhr.response
