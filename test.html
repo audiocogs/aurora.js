@@ -1,12 +1,15 @@
 <!doctype html>
 <html>
 <body>
+    <input type="file">
     <script src="http://localhost:8080/"></script>
     <script>
-        var player = Player.fromURL("../year.caf");
-        player.on('error', function(e) { console.log(e) });
-        player.preload();
-        player.play();
+        document.querySelector("input").onchange = function(e) {
+            var player = Player.fromFile(e.target.files[0]);
+            player.on('error', function(e) { console.log(e) });
+            player.preload();
+            player.play();
+        }
     </script>
 </body>
 </html>

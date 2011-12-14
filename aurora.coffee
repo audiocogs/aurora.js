@@ -2,6 +2,7 @@
 #import "shared/buffer.coffee"
 #import "shared/queue.coffee"
 #import "sources/http.coffee"
+#import "sources/file.coffee"
 #import "demuxer.coffee"
 #import "decoder.coffee"
 #import "sink.js"

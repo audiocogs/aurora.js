@@ -27,7 +27,7 @@ class Player extends EventEmitter
         
     @fromFile: (file) ->
         source = new FileSource(file)
-        return new Player(file)
+        return new Player(source)
         
     preload: ->
         return unless @source
