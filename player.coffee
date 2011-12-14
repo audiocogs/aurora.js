@@ -10,6 +10,7 @@ class Player extends EventEmitter
         @demuxer = null
         @decoder = null
         @queue = null
+        @_pausedTime = @_timePaused = 0
         
         @source.once 'data', @probe
         @source.on 'error', (err) =>
@@ -35,13 +36,21 @@ class Player extends EventEmitter
     play: ->
         @playing = true
         @_timer = setInterval =>
-            @currentTime = (@sink?.getPlaybackTime() or 0) / 44100 * 1000 | 0
+            return unless @sink and @playing
+            
+            time = @sink.getPlaybackTime()
+            if @_timePaused > 0
+                @_pausedTime += time - @_timePaused
+                @_timePaused = 0
+            
+            @currentTime = (time - @_pausedTime) / 44100 * 1000 | 0
             @emit 'progress', @currentTime if @currentTime > 0
         , 200
         
     pause: ->
         @playing = false
         clearInterval @_timer
+        @_timePaused = @sink?.getPlaybackTime() or 0
         
     probe: (chunk) =>
         demuxer = Demuxer.find(chunk)
