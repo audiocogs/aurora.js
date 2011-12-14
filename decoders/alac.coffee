@@ -10,16 +10,15 @@ class ALACDec extends Decoder
     setCookie: (buffer) ->
         @decoder = new ALACDecoder(buffer)
         
-    readChunk: ->
-        return unless @decoder
+    readChunk: =>
+        unless @bitstream.available(4096 << 6)
+            @once 'available', @readChunk
         
-        @waiting = not @bitstream.available(4096 << 6)
-        return if @waiting
+        else
+            out = @decoder.decode(@bitstream, @format.framesPerPacket, @format.channelsPerFrame)
         
-        out = @decoder.decode(@bitstream, @format.framesPerPacket, @format.channelsPerFrame)
-        
-        if out[0] isnt 0
-            return @emit 'error', "Error in ALAC decoder: #{out[0]}"
+            if out[0] isnt 0
+                return @emit 'error', "Error in ALAC decoder: #{out[0]}"
             
-        if out[1]
-            @emit 'data', out[1]
+            if out[1]
+                @emit 'data', out[1]

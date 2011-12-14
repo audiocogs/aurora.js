@@ -3,14 +3,13 @@ class Decoder extends EventEmitter
         list = new BufferList
         @stream = new Stream(list)
         @bitstream = new Bitstream(@stream)
-        @waiting = true
         
         demuxer.on 'cookie', (cookie) =>
             @setCookie cookie
             
         demuxer.on 'data', (chunk, final) =>
             list.push chunk
-            @readChunk() if @waiting
+            @emit 'available'
             
     setCookie: (cookie) ->
         return

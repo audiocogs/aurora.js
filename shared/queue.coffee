@@ -6,6 +6,7 @@ class Queue extends EventEmitter
         
         @buffers = []
         @decoder.on 'data', @write
+        @decoder.readChunk()
         
     write: (buffer) =>
         @buffers.push buffer
