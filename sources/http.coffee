@@ -1,4 +1,4 @@
-class HTTPSource extends Source
+class HTTPSource extends EventEmitter
     constructor: (@url) ->
         @chunkSize = 1 << 20
         @inflight = false

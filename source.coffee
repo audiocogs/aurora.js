@@ -1,2 +1,0 @@
-class Source extends EventEmitter
-    
