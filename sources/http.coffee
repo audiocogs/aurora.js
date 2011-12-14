@@ -75,7 +75,7 @@ class HTTPSource extends EventEmitter
         
     pause: ->
         @inflight = false
-        @xhr.abort() if @xhr
+        @xhr?.abort()
         
     reset: ->
         @pause()

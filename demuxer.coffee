@@ -7,9 +7,9 @@ class Demuxer extends EventEmitter
         list.push(chunk)
         @stream = new Stream(list)
         
-        source.on 'data', (chunk, final) =>
+        source.on 'data', (chunk) =>
             list.push chunk
-            @readChunk chunk, final
+            @readChunk chunk
             
         source.on 'error', (err) =>
             @emit 'error', err
