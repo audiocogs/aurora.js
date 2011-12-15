@@ -60,8 +60,9 @@ class Player extends EventEmitter
             
         @demuxer = new demuxer(@source, chunk)
         @demuxer.on 'format', @findDecoder
-        @demuxer.on 'duration', (d) =>
-            @duration = d
+        @demuxer.on 'duration', (@duration) =>
+        @demuxer.on 'metadata', (@metadata) =>
+            @emit 'metadata', @metadata
         
     findDecoder: (format) =>
         console.log format

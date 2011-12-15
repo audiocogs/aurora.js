@@ -1,12 +1,34 @@
 <!doctype html>
 <html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
 <body>
-    <input type="file">
+    <input type="file"><br><br>
     <script src="http://localhost:8080/"></script>
     <script>
         document.querySelector("input").onchange = function(e) {
-            var player = Player.fromFile(e.target.files[0]);
+            player = Player.fromFile(e.target.files[0]);
             player.on('error', function(e) { console.log(e) });
+            
+            player.on('metadata', function(data) {
+                var buf = data['Cover Art'];
+                if (!buf) return;
+                
+                // Use the BlobBuilder API to construct a URL
+                var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder,
+                    URL = window.URL || window.webkitURL;
+
+                var blob = new BlobBuilder();
+                blob.append(buf);
+                blob = blob.getBlob();
+                
+                // Show the album art
+                var img = document.createElement("img");
+                img.src = URL.createObjectURL(blob);
+                document.body.appendChild(img);
+            });
+            
             player.preload();
             player.play();
         }
