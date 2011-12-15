@@ -95,7 +95,8 @@ class Stream
     ToFloat32 = new Uint32Array(Float32)
     
     constructor: (@list) ->
-        @localOffset = 0; @offset = 0
+        @localOffset = 0
+        @offset = 0
     
     copy: () ->
         result = new Stream(@list.copy)
@@ -240,7 +241,8 @@ class Stream
         @localOffset += 1; @offset += 1
         
         if @localOffset == @list.first.length
-            @localOffset = 0; @buffers.shift()
+            @localOffset = 0
+            @list.shift()
         
         return a0
     
