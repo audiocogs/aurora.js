@@ -67,92 +67,79 @@ class M4ADemuxer extends Demuxer
         "Duet", "Punk Rock", "Drum Solo", "A Capella", "Euro-House",
         "Dance Hall"
     ]
-        
+    
     readChunk: ->
-        return unless @stream.available(1)
+        while @stream.available(1)
+            if not @readHeaders and @stream.available(8)
+                @len = @stream.readUInt32() - 8
+                @type = @stream.readString(4)
                 
-        if not @readHeaders and @stream.available(8)
-            @len = @stream.readUInt32() - 8
-            @type = @stream.readString(4)
-            
-            return @readChunk() if @len is 0
-            @readHeaders = true
-            
-        if @type is 'mdat'
-            buffer = @stream.readSingleBuffer(@len)
-            @len -= buffer.length
-            @readHeaders = @len > 0
-            
-            if @sentCookie
-                @emit 'data', buffer
-            else
-                @dataSections ?= []
-                @dataSections.push buffer
+                continue if @len is 0
+                @readHeaders = true
                 
-        else if @type is 'meta'
-            @stream.advance(4) # random zeros
-            
-            @metadata = {}
-            @readHeaders = false
-            @readChunk()
-            
-            return @emit 'metadata', @metadata
-        
-        else if @type of metafields
-            @metafield = @type
-            @readHeaders = false
-            
-        else if @type is 'data' and @stream.available(@len)
-            field = metafields[@metafield]
-            @readHeaders = false
-        
-            switch @metafield
-                when 'disk', 'trkn'
-                    pos = @stream.offset
-                    @stream.advance(10)
-                    
-                    @metadata[field] = @stream.readUInt16() + ' of ' + @stream.readUInt16()
-                    @stream.advance(@len - (@stream.offset - pos))
-                    
-                when 'cpil', 'pgap', 'pcst'
-                    @stream.advance(8)
-                    @metadata[field] = @stream.readUInt8() is 1
-                    
-                when 'gnre'
-                    @stream.advance(8)
-                    @metadata[field] = genres[@stream.readUInt16() - 1]
-                    
-                when 'rtng'
-                    @stream.advance(8)
-                    rating = @stream.readUInt8()
-                    @metadata[field] = if rating == 2 then 'Clean' else if rating != 0 then 'Explicit' else 'None'
+            if @type of metafields
+                @metafield = @type
+                @readHeaders = false
+                continue
                 
-                when 'tmpo'
-                    @stream.advance(8)
-                    @metadata[field] = @stream.readUInt16()
-                    
-                when 'covr'
-                    return @readChunk() unless @stream.available(@len)
-                
-                    @stream.advance(8)
-                    @metadata[field] = @stream.readBuffer(@len - 8).data.buffer
-                    
-                else
-                    @metadata[field] = decodeURIComponent(escape(@stream.readString(@len))) # UTF-8 decode
-                    
-        else if @type in ['moov', 'trak', 'mdia', 'minf', 'stbl', 'udta', 'ilst']
-            # traverse into these types - they are container atoms
-            @readHeaders = false
-            
-        else if @stream.available(@len)
             switch @type
                 when 'ftyp'
+                    return unless @stream.available(@len)
+                
                     if @stream.readString(4) isnt 'M4A '
                         return @emit 'error', 'Not a valid M4A file.'
                     
                     @stream.advance(@len - 4)
+            
+                when 'moov', 'trak', 'mdia', 'minf', 'stbl', 'udta', 'ilst'
+                    # traverse into these types - they are container atoms
+                    break
+            
+                when 'meta'
+                    @metadata = {}
+                    @metaMaxPos = @stream.offset + @len
                     
+                    @stream.advance(4) # random zeros
+                    
+                when 'data'
+                    return unless @stream.available(@len)
+                    
+                    field = metafields[@metafield]
+                    switch @metafield
+                        when 'disk', 'trkn'
+                            pos = @stream.offset
+                            @stream.advance(10)
+
+                            @metadata[field] = @stream.readUInt16() + ' of ' + @stream.readUInt16()
+                            @stream.advance(@len - (@stream.offset - pos))
+
+                        when 'cpil', 'pgap', 'pcst'
+                            @stream.advance(8)
+                            @metadata[field] = @stream.readUInt8() is 1
+
+                        when 'gnre'
+                            @stream.advance(8)
+                            @metadata[field] = genres[@stream.readUInt16() - 1]
+
+                        when 'rtng'
+                            @stream.advance(8)
+                            rating = @stream.readUInt8()
+                            @metadata[field] = if rating == 2 then 'Clean' else if rating != 0 then 'Explicit' else 'None'
+
+                        when 'tmpo'
+                            @stream.advance(8)
+                            @metadata[field] = @stream.readUInt16()
+
+                        when 'covr'
+                            @stream.advance(8)
+                            @metadata[field] = @stream.readBuffer(@len - 8).data.buffer
+
+                        else
+                            @metadata[field] = decodeURIComponent(escape(@stream.readString(@len))) # UTF-8 decode
+                            
                 when 'mdhd'
+                    return unless @stream.available(@len)
+                    
                     @stream.advance(4) # version and flags
                     @stream.advance(8) # creation and modification dates
                     
@@ -163,6 +150,8 @@ class M4ADemuxer extends Demuxer
                     @stream.advance(4) # language and quality
                     
                 when 'stsd'
+                    return unless @stream.available(@len)
+                    
                     maxpos = @stream.offset + @len
                     @stream.advance(4) # version and flags
                     
@@ -203,13 +192,26 @@ class M4ADemuxer extends Demuxer
                             @emit 'data', @dataSections.shift()
                             clearInterval interval if @dataSections.length is 0
                         , 100
+                        
+                when 'mdat'
+                    buffer = @stream.readSingleBuffer(@len)
+                    @len -= buffer.length
+                    @readHeaders = @len > 0
+
+                    if @sentCookie
+                        @emit 'data', buffer
+                    else
+                        @dataSections ?= []
+                        @dataSections.push buffer
                     
                 else
+                    return unless @stream.available(@len)
                     @stream.advance(@len)
             
-            @readHeaders = false
-        else
-            console.log @len, @readHeaders, @type, @metafield
-            throw 'whoa'
+            # emit the metadata when all of it has been read        
+            if @stream.offset is @metaMaxPos
+                @emit 'metadata', @metadata
+                
+            @readHeaders = false unless @type is 'mdat'
         
-        @readChunk()
+        return

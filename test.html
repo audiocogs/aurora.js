@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
-    <input type="file"><br><br>
+    <input type="file"><br><br><img>
     <script src="http://localhost:8080/"></script>
     <script>
         document.querySelector("input").onchange = function(e) {
@@ -24,9 +24,7 @@
                 blob = blob.getBlob();
                 
                 // Show the album art
-                var img = document.createElement("img");
-                img.src = URL.createObjectURL(blob);
-                document.body.appendChild(img);
+                document.querySelector("img").src = URL.createObjectURL(blob);
             });
             
             player.preload();
