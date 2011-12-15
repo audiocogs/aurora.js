@@ -9,5 +9,5 @@
 #import "player.coffee"
 
 #import "demuxers/caf.coffee"
-##import "demuxers/m4a.coffee"
+#import "demuxers/m4a.coffee"
 #import "decoders/alac.coffee"

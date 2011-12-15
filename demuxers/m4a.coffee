@@ -5,19 +5,33 @@ class M4ADemuxer extends Demuxer
         return buffer.peekString(8, 4) is 'M4A '
         
     readChunk: ->
+        return unless @stream.available(1)
+        
         if not @readHeaders and @stream.available(8)
-            @len = @stream.readUInt32()
+            @len = @stream.readUInt32() - 8
             @type = @stream.readString(4)
-            console.log @type
+            
+            return @readChunk() if @len is 0
             @readHeaders = true
             
-        if @stream.available(@len - 8)
+        if @type is 'mdat'
+            buffer = @stream.readSingleBuffer(@len)
+            @len -= buffer.length
+            @readHeaders = @len > 0
+            
+            if @sentCookie
+                @emit 'data', buffer
+            else
+                @dataSections ?= []
+                @dataSections.push buffer
+            
+        else if @stream.available(@len)
             switch @type
                 when 'ftyp'
                     if @stream.readString(4) isnt 'M4A '
                         return @emit 'error', 'Not a valid M4A file.'
                     
-                    @stream.advance(@len - 12)
+                    @stream.advance(@len - 4)
                 
                 # traverse into these types - they are container atoms    
                 when 'moov', 'trak', 'mdia', 'minf', 'stbl', 'udta', 'ilst'
@@ -32,12 +46,13 @@ class M4ADemuxer extends Demuxer
                     
                     @sampleRate = @stream.readUInt32()
                     @duration = @stream.readUInt32()
+                    @emit 'duration', @duration / @sampleRate * 1000 | 0
                     
                     @stream.advance(4) # language and quality
                     
                 when 'stsd'
                     pos = @stream.offset
-                    maxpos = @stream.offset + @len - 8
+                    maxpos = @stream.offset + @len
                     
                     @stream.advance(4) # version and flags
                     
@@ -54,7 +69,7 @@ class M4ADemuxer extends Demuxer
                     
                     if @stream.readUInt16() isnt 1
                         return @emit 'error', 'Unknown version in stsd atom.'
-                        
+                    
                     @stream.advance(6) # skip revision level and vendor
                     @stream.advance(2) # reserved
                     
@@ -69,48 +84,20 @@ class M4ADemuxer extends Demuxer
                     @emit 'format', @format
                     
                     # read the cookie
-                    @emit 'cookie', @stream.readBuffer(@stream.offset - pos)
+                    @emit 'cookie', @stream.readBuffer(maxpos - @stream.offset)
                     @sentCookie = true
                     
-                    @stream.offset = @stream.localOffset = maxpos
-                    
-                    #console.log @dataPos, @dataLen
-                    @stream.offset = @dataPos
-                    @emit 'data', @stream.readBuffer(@dataLen)
-                    #if not @sentData
-                        #for chunk, i in @dataSections
-                        #    @emit 'data', chunk
-                    
-                when 'mdat'
-                    break if @receivedData
-                    
-                    @receivedData = true
-                    @dataPos = @stream.offset
-                    @dataLen = @len - 8
-                    
-                    @stream.advance(@len - 8)
-                    ###
-                    break if @receivedData
-                    
-                    @dataSections ?= []
-                    buffer = @stream.readSingleBuffer(@len - 8)
-                    @len -= buffer.length
-                    
-                    if @len <= 8
-                        @readHeaders = false
-                        @receivedData = true
-                    
-                    if @sentCookie
-                        @sentData = true
-                        @emit 'data', buffer
-                    else
-                        @dataSections.push buffer
-                    
-                    return @readChunk()
-                    ###
+                    # if the data was already decoded, emit it
+                    if @dataSections
+                        interval = setInterval =>
+                            @emit 'data', @dataSections.shift()
+                            clearInterval interval if @dataSections.length is 0
+                        , 100
                     
                 else
-                    @stream.advance(@len - 8)
+                    console.log @type
+                    @stream.advance(@len)
             
             @readHeaders = false        
-            @readChunk()
+        
+        @readChunk()
