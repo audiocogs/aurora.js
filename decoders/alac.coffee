@@ -15,7 +15,7 @@ class ALACDec extends Decoder
             @once 'available', @readChunk
         
         else
-            out = @decoder.decode(@bitstream, @format.framesPerPacket, @format.channelsPerFrame)
+            out = @decoder.decode(@bitstream)
         
             if out[0] isnt 0
                 return @emit 'error', "Error in ALAC decoder: #{out[0]}"
