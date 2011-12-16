@@ -292,13 +292,18 @@ class Stream
         
         return ((buffer[offset] << 24) >> 24)
     
-    readFloat64: () ->
-        ToFloat64[1] = @readUInt32()
-        ToFloat64[0] = @readUInt32()
+    readFloat64: (littleEndian) ->
+        if littleEndian
+            ToFloat64[0] = @readUInt32(true)
+            ToFloat64[1] = @readUInt32(true)
+        else
+            ToFloat64[1] = @readUInt32()
+            ToFloat64[0] = @readUInt32()
+            
         return FromFloat64[0]
     
-    readFloat32: () ->
-        ToFloat32[0] = @readUInt32()
+    readFloat32: (littleEndian) ->
+        ToFloat32[0] = @readUInt32(littleEndian)
         return FromFloat32[0]
     
     readString: (length) ->

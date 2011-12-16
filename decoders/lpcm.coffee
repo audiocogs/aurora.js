@@ -4,7 +4,7 @@ class LPCMDecoder extends Decoder
     constructor: ->
         super
         
-        flags = @format.formatFlags
+        flags = @format.formatFlags or 0
         @floatingPoint = Boolean(flags & 1)
         @littleEndian = Boolean(flags & 2)
     
@@ -23,12 +23,12 @@ class LPCMDecoder extends Decoder
                     when 32
                         output = new Float32Array(samples)
                         for i in [0...samples] by 1
-                            output[i] = stream.readFloat32()
+                            output[i] = stream.readFloat32(littleEndian)
                             
                     when 64
                         output = new Float64Array(samples)
                         for i in [0...samples] by 1
-                            output[i] = stream.readFloat64()
+                            output[i] = stream.readFloat64(littleEndian)
                             
                     else
                         return @emit 'error', 'Unsupported bit depth.'
