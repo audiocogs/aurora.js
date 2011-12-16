@@ -84,9 +84,10 @@ class Player extends EventEmitter
         @queue = new Queue(@decoder)
         @queue.on 'ready', @startPlaying
         
-    startPlaying: =>        
-        frame = new Int16Array(@queue.read())
+    startPlaying: =>
+        frame = @queue.read()
         frameOffset = 0
+        div = if @decoder.floatingPoint then 1 else Math.pow(2, @decoder.format.bitsPerChannel - 1)
         
         Sink.sinks.moz.prototype.interval = 100
         @sink = Sink (buffer, channelCount) =>
@@ -97,18 +98,14 @@ class Player extends EventEmitter
             while frame and bufferOffset < buffer.length
                 max = Math.min(frame.length - frameOffset, buffer.length - bufferOffset)
                 for i in [0...max] by 1
-                    buffer[bufferOffset + i] = (frame[frameOffset + i] / 0x8000) * vol
+                    buffer[bufferOffset + i] = (frame[frameOffset + i] / div) * vol
                     
                 bufferOffset += i
                 frameOffset += i
                 
                 if frameOffset is frame.length
-                    if f = @queue.read()
-                        frame = new Int16Array(f)
-                        frameOffset = 0
-                    else
-                        frame = null
-                        frameOffset = 0
+                    frame = @queue.read()
+                    frameOffset = 0
                     
             return
             

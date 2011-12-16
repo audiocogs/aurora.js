@@ -16,9 +16,9 @@ class ALACDec extends Decoder
         
         else
             out = @decoder.decode(@bitstream)
-        
+            
             if out[0] isnt 0
                 return @emit 'error', "Error in ALAC decoder: #{out[0]}"
-            
+                        
             if out[1]
-                @emit 'data', out[1]
+                @emit 'data', new Int16Array(out[1])

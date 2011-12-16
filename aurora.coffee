@@ -11,3 +11,4 @@
 #import "demuxers/caf.coffee"
 #import "demuxers/m4a.coffee"
 #import "decoders/alac.coffee"
+#import "decoders/lpcm.coffee"
