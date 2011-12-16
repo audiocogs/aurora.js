@@ -847,6 +847,16 @@ Sink.doInterval		= function (callback, timeout) {
 
 Sink.doInterval.backgroundWork = true;
 
+Sink.singleton = function (channelCount) {
+	var sink = Sink(null, channelCount);
+
+	Sink.singleton = function () {
+		return sink;
+	};
+
+	return sink;
+};
+
 (function(){
 
 /**
