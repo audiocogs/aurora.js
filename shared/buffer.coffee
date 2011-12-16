@@ -154,7 +154,7 @@ class Stream
     readInt32: () ->
         buffer = @list.first.data
         
-        if buffer.length > @localOffset + offset + 3
+        if buffer.length > @localOffset + 3
             a0 = buffer[@localOffset + 0]
             a1 = buffer[@localOffset + 1]
             a2 = buffer[@localOffset + 2]

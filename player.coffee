@@ -17,9 +17,8 @@ class Player extends EventEmitter
             @pause()
             @emit 'error', err
             
-        @source.on 'progress', (percent) =>
-            @buffered = percent
-            @emit 'buffer', percent
+        @source.on 'progress', (@buffered) =>
+            @emit 'buffer', @buffered
         
     @fromURL: (url) ->
         source = new HTTPSource(url)
@@ -34,6 +33,8 @@ class Player extends EventEmitter
         @source.start()
         
     play: ->
+        return if @playing
+        
         @playing = true
         @_timer = setInterval =>
             return unless @sink and @playing
@@ -48,6 +49,8 @@ class Player extends EventEmitter
         , 200
         
     pause: ->
+        return unless @playing
+        
         @playing = false
         clearInterval @_timer
         @_timePaused = @sink?.getPlaybackTime() or 0
@@ -63,6 +66,9 @@ class Player extends EventEmitter
         @demuxer.on 'duration', (@duration) =>
         @demuxer.on 'metadata', (@metadata) =>
             @emit 'metadata', @metadata
+            
+        @demuxer.on 'error', (err) =>
+            @emit 'error', err
         
     findDecoder: (format) =>
         console.log format
@@ -72,6 +78,9 @@ class Player extends EventEmitter
             return @emit 'error', "A decoder for #{format.formatID} was not found."
             
         @decoder = new decoder(@demuxer, format)
+        @decoder.on 'error', (err) =>
+            @emit 'error', err
+            
         @queue = new Queue(@decoder)
         @queue.on 'ready', @startPlaying
         
