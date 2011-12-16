@@ -49,7 +49,6 @@ class WAVEDemuxer extends Demuxer
                     
                 else
                     return unless @stream.available(@len)
-                    console.log @type
                     @stream.advance(@len)
                         
             @readHeaders = false unless @type is 'data'

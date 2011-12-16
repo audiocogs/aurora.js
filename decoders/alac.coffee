@@ -10,6 +10,9 @@ class ALACDec extends Decoder
     setCookie: (buffer) ->
         @decoder = new ALACDecoder(buffer)
         
+        # CAF files don't encode the bitsPerChannel
+        @format.bitsPerChannel ||= @decoder.config.bitDepth
+        
     readChunk: =>
         unless @bitstream.available(4096 << 6)
             @once 'available', @readChunk
