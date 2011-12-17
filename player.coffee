@@ -55,6 +55,11 @@ class Player extends EventEmitter
         clearInterval @_timer
         @_timePaused = @sink?.getPlaybackTime() or 0
         
+    stop: ->
+        @pause()
+        @source.pause()
+        @sink?.off 'audioprocess', @refill
+        
     probe: (chunk) =>
         demuxer = Demuxer.find(chunk)
         
@@ -90,11 +95,16 @@ class Player extends EventEmitter
         div = if @decoder.floatingPoint then 1 else Math.pow(2, @decoder.format.bitsPerChannel - 1)
         
         Sink.sinks.moz.prototype.interval = 100
-        @sink = Sink (buffer, channelCount) =>
+        
+        @sink = Sink.singleton()
+        @_pausedTime = @sink.getPlaybackTime() # since we're reusing the sink, store the start time
+        
+        @refill = (buffer, channelCount) =>
             return unless @playing
+
             bufferOffset = 0
             vol = @volume / 100
-                        
+            
             while frame and bufferOffset < buffer.length
                 max = Math.min(frame.length - frameOffset, buffer.length - bufferOffset)
                 for i in [0...max] by 1
@@ -108,7 +118,6 @@ class Player extends EventEmitter
                     frameOffset = 0
                     
             return
-            
-        , 2, null, 44100
         
+        @sink.on 'audioprocess', @refill    
         @emit 'ready'
