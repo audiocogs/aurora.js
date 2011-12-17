@@ -52,3 +52,5 @@ class AIFFDemuxer extends Demuxer
                     @stream.advance(@len)
                         
             @readHeaders = false unless @type is 'SSND'
+            
+        return

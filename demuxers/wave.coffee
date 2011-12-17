@@ -52,3 +52,5 @@ class WAVEDemuxer extends Demuxer
                     @stream.advance(@len)
                         
             @readHeaders = false unless @type is 'data'
+            
+        return
