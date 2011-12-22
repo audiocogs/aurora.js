@@ -10,7 +10,7 @@ class LPCMDecoder extends Decoder
     
     readChunk: =>
         {stream, littleEndian} = this        
-        chunkSize = 4096 << 6
+        chunkSize = 4096
         samples = chunkSize / (@format.bitsPerChannel / 8) >> 0
         bytes = samples * (@format.bitsPerChannel / 8)
         
