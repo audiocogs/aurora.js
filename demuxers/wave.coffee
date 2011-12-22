@@ -29,8 +29,8 @@ class WAVEDemuxer extends Demuxer
             switch @type
                 when 'fmt '
                     encoding = @stream.readUInt16(true)
-                    #if encoding not in [FORMAT_LPCM, FORMAT_FLOAT]
-                    #    return @emit 'error', 'Unsupported format in WAV file.'
+                    if encoding not in [FORMAT_LPCM, FORMAT_FLOAT, FORMAT_ULAW, FORMAT_ALAW]
+                        return @emit 'error', 'Unsupported format in WAV file.'
                     
                     encoding++ if encoding is FORMAT_LPCM
                     format = 'lpcm'
