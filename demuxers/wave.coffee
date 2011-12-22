@@ -46,10 +46,15 @@ class WAVEDemuxer extends Demuxer
                     @stream.advance(4) # bytes/sec.
                     @stream.advance(2) # block align
                     
-                    @format.bitsPerChannel = @stream.readUInt16(true)
+                    @format.bitsPerChannel = @bitsPerChannel = @stream.readUInt16(true)
                     @emit 'format', @format
                     
                 when 'data'
+                    if not @sentDuration
+                        bytes = @bitsPerChannel / 8
+                        @emit 'duration', @len / bytes / @format.channelsPerFrame / @format.sampleRate * 1000 | 0
+                        @sentDuration = true
+                
                     buffer = @stream.readSingleBuffer(@len)
                     @len -= buffer.length
                     @readHeaders = @len > 0
