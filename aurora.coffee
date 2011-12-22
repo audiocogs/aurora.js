@@ -14,3 +14,4 @@
 #import "demuxers/wave.coffee"
 #import "decoders/alac.coffee"
 #import "decoders/lpcm.coffee"
+#import "decoders/xlaw.coffee"

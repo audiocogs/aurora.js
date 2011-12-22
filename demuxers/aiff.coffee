@@ -11,9 +11,10 @@ class AIFFDemuxer extends Demuxer
                 return @emit 'error', 'Invalid AIFF.'
                 
             @fileSize = @stream.readUInt32()
+            @fileType = @stream.readString(4)
             @readStart = true
             
-            if @stream.readString(4) not in ['AIFF', 'AIFC']
+            if @fileType not in ['AIFF', 'AIFC']
                 return @emit 'error', 'Invalid AIFF.'
         
         while @stream.available(1)
@@ -31,8 +32,16 @@ class AIFFDemuxer extends Demuxer
                         sampleCount: @stream.readUInt32()
                         bitsPerChannel: @stream.readUInt16()
                         sampleRate: @stream.readFloat64() # TODO: wrong... should be 10 bytes?
+                    
+                    @stream.advance(2)
+                    
+                    if @fileType is 'AIFC'
+                        format = @stream.readString(4)
+                        format = 'lpcm' if format in ['twos', 'sowt', 'fl3d', 'fl64', 'NONE']
+                        @format.formatID = format
+                        @len -= 4
                         
-                    @stream.advance(@len - 16)
+                    @stream.advance(@len - 18)
                     @emit 'format', @format
                     
                 when 'SSND'
