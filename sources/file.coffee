@@ -20,7 +20,9 @@ class FileSource extends EventEmitter
             @loop() if @offset < @length
         
         @reader.onloadend = =>
-            @emit 'end' if @offset >= @length
+            if @offset is @length
+                @emit 'end'
+                @reader = null
         
         @reader.onerror = (e) =>
             @emit 'error', e
