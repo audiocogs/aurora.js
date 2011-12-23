@@ -5,10 +5,11 @@ class WAVEDemuxer extends Demuxer
         return buffer.peekString(0, 4) is 'RIFF' && 
                buffer.peekString(8, 4) is 'WAVE'
                
-    FORMAT_LPCM  = 0x0001
-    FORMAT_FLOAT = 0x0003
-    FORMAT_ALAW  = 0x0006
-    FORMAT_ULAW  = 0x0007
+    formats = 
+        0x0001: 'lpcm'
+        0x0003: 'lpcm'
+        0x0006: 'alaw'
+        0x0007: 'ulaw'
                
     readChunk: ->
         if not @readStart and @stream.available(12)
@@ -29,17 +30,16 @@ class WAVEDemuxer extends Demuxer
             switch @type
                 when 'fmt '
                     encoding = @stream.readUInt16(true)
-                    if encoding not in [FORMAT_LPCM, FORMAT_FLOAT, FORMAT_ULAW, FORMAT_ALAW]
+                    if encoding not of formats
                         return @emit 'error', 'Unsupported format in WAV file.'
                     
-                    encoding++ if encoding is FORMAT_LPCM
-                    format = 'lpcm'
-                    format = 'ulaw' if encoding is FORMAT_ULAW
-                    format = 'alaw' if encoding is FORMAT_ALAW
+                    flags = 0
+                    flags |= LPCMDecoder.LITTLE_ENDIAN if formats[encoding] is 'lpcm'
+                    flags |= LPCMDecoder.FLOATING_POINT if encoding is 0x0003
                         
                     @format = 
-                        formatID: format
-                        formatFlags: encoding
+                        formatID: formats[encoding]
+                        formatFlags: flags
                         channelsPerFrame: @stream.readUInt16(true)
                         sampleRate: @stream.readUInt32(true)
                         
