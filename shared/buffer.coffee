@@ -321,7 +321,7 @@ class Stream
             
         if exp is 0x7fff
             if low is 0 and high is 0
-                return if sign * Infinity
+                return sign * Infinity
                 
             return NaN
         
