@@ -311,7 +311,7 @@ class Stream
         a0 = @readUInt8()
         a1 = @readUInt8()
         
-        sign = (a0 >>> 7) * 2 - 1 # -1 or +1
+        sign = -((a0 >>> 7) * 2 - 1) # -1 or +1
         exp = ((a0 & 0x7F) << 8) | a1
         low = @readUInt32()
         high = @readUInt32()
