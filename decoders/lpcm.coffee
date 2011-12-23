@@ -1,12 +1,16 @@
 class LPCMDecoder extends Decoder
     Decoder.register('lpcm', LPCMDecoder)
     
+    @FLOATING_POINT = 1 << 0
+    @LITTLE_ENDIAN  = 1 << 1
+    {FLOATING_POINT, LITTLE_ENDIAN} = LPCMDecoder
+    
     constructor: ->
         super
         
         flags = @format.formatFlags or 0
-        @floatingPoint = Boolean(flags & 1)
-        @littleEndian = Boolean(flags & 2)
+        @floatingPoint = Boolean(flags & FLOATING_POINT)
+        @littleEndian = Boolean(flags & LITTLE_ENDIAN)
     
     readChunk: =>
         {stream, littleEndian} = this        

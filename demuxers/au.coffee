@@ -4,6 +4,9 @@ class AUDemuxer extends Demuxer
     @probe: (buffer) ->
         return buffer.peekString(0, 4) is '.snd'
         
+    bps = [8, 8, 16, 24, 32, 32, 64]
+    bps[26] = 8
+        
     readChunk: ->
         if not @readHeader and @stream.available(24)
             if @stream.readString(4) isnt '.snd'
@@ -11,46 +14,25 @@ class AUDemuxer extends Demuxer
                 
             size = @stream.readUInt32()
             dataSize = @stream.readUInt32()
-            
             encoding = @stream.readUInt32()
-            @format = {}
+            
+            @format = 
+                formatID: 'lpcm'
+                formatFlags: 0
+                bitsPerChannel: bps[encoding - 1]
+                sampleRate: @stream.readUInt32()
+                channelsPerFrame: @stream.readUInt32()
+            
+            if not @format.bitsPerChannel?
+                return @emit 'error', 'Unsupported encoding in AU file.'
             
             switch encoding
                 when 1
                     @format.formatID = 'ulaw'
-                    @format.bitsPerChannel = 8
-                    
-                when 2
-                    @format.formatID = 'lpcm'
-                    @format.bitsPerChannel = 8
-                    
-                when 3
-                    @format.formatID = 'lpcm'
-                    @format.bitsPerChannel = 16
-                    
-                when 4
-                    @format.formatID = 'lpcm'
-                    @format.bitsPerChannel = 24
-                    
-                when 5, 6
-                    @format.formatID = 'lpcm'
-                    @format.bitsPerChannel = 32
-                    @format.formatFlags = 1 if encoding is 6
-                    
-                when 7
-                    @format.formatID = 'lpcm'
-                    @format.bitsPerChannel = 64
-                    @format.formatFlags = 1
-                    
+                when 6, 7
+                    @format.formatFlags |= LPCMDecoder.FLOATING_POINT
                 when 27
                     @format.formatID = 'alaw'
-                    @format.bitsPerChannel = 8
-                    
-                else
-                    return @emit 'error', 'Unsupported encoding in AU file.'
-             
-            @format.sampleRate = @stream.readUInt32()
-            @format.channelsPerFrame = @stream.readUInt32()
             
             if dataSize isnt 0xffffffff
                 bytes = @format.bitsPerChannel / 8
