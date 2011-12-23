@@ -66,14 +66,14 @@ class BufferList
         return this
 
 class Stream
-    Float64 = new ArrayBuffer(8)
     Float32 = new ArrayBuffer(4)
-
-    FromFloat64 = new Float64Array(Float64)
     FromFloat32 = new Float32Array(Float32)
-
-    ToFloat64 = new Uint32Array(Float64)
     ToFloat32 = new Uint32Array(Float32)
+    
+    if Float64Array?
+        Float64 = new ArrayBuffer(8)
+        FromFloat64 = new Float64Array(Float64)
+        ToFloat64 = new Uint32Array(Float64)
     
     constructor: (@list) ->
         @localOffset = 0
@@ -293,14 +293,36 @@ class Stream
         return ((buffer[offset] << 24) >> 24)
     
     readFloat64: (littleEndian) ->
-        if littleEndian
-            ToFloat64[0] = @readUInt32(true)
-            ToFloat64[1] = @readUInt32(true)
-        else
-            ToFloat64[1] = @readUInt32()
-            ToFloat64[0] = @readUInt32()
+        high = @readUInt32(littleEndian)
+        low = @readUInt32(littleEndian)
+        
+        # use Float64Array if available
+        if ToFloat64
+            if littleEndian
+                ToFloat64[0] = high
+                ToFloat64[1] = low
+            else
+                ToFloat64[1] = high
+                ToFloat64[0] = low
             
-        return FromFloat64[0]
+            return FromFloat64[0]
+            
+        else
+            return 0.0 if not high or high is 0x80000000
+            
+            sign = (high >>> 31) * 2 + 1 # +1 or -1
+            exp = (high >>> 20) & 0x7ff
+            frac = high & 0xfffff
+            
+            # NaN or Infinity
+            if exp is 0x7ff
+                return if frac then NaN else sign * Infinity
+            
+            exp -= 1023
+            out = (frac | 0x100000) * Math.pow(2, exp - 20)
+            out += low * Math.pow(2, exp - 52)
+            
+            return sign * out
     
     readFloat32: (littleEndian) ->
         ToFloat32[0] = @readUInt32(littleEndian)
