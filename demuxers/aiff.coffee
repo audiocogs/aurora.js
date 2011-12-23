@@ -31,9 +31,7 @@ class AIFFDemuxer extends Demuxer
                         channelsPerFrame: @stream.readUInt16()
                         sampleCount: @stream.readUInt32()
                         bitsPerChannel: @stream.readUInt16()
-                        sampleRate: @stream.readFloat64() # TODO: wrong... should be 10 bytes?
-                    
-                    @stream.advance(2)
+                        sampleRate: @stream.readFloat80()
                     
                     if @fileType is 'AIFC'
                         format = @stream.readString(4)
@@ -43,6 +41,8 @@ class AIFFDemuxer extends Demuxer
                         
                     @stream.advance(@len - 18)
                     @emit 'format', @format
+                    
+                    @emit 'duration', @format.sampleCount / @format.sampleRate * 1000 | 0
                     
                 when 'SSND'
                     unless @readSSNDHeader and @stream.available(4)

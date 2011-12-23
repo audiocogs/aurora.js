@@ -305,6 +305,31 @@ class Stream
     readFloat32: (littleEndian) ->
         ToFloat32[0] = @readUInt32(littleEndian)
         return FromFloat32[0]
+        
+    # IEEE 80 bit extended float
+    readFloat80: ->
+        a0 = @readUInt8()
+        a1 = @readUInt8()
+        
+        sign = (a0 >>> 7) * 2 - 1 # -1 or +1
+        exp = ((a0 & 0x7F) << 8) | a1
+        low = @readUInt32()
+        high = @readUInt32()
+        
+        if exp is 0 and low is 0 and high is 0
+            return 0
+            
+        if exp is 0x7fff
+            if low is 0 and high is 0
+                return if sign * Infinity
+                
+            return NaN
+        
+        exp -= 16383
+        out = low * Math.pow(2, exp - 31)
+        out += high * Math.pow(2, exp - 63)
+        
+        return sign * out
     
     readString: (length) ->
         result = []
