@@ -66,14 +66,21 @@ class BufferList
         return this
 
 class Stream
-    Float32 = new ArrayBuffer(4)
-    FromFloat32 = new Float32Array(Float32)
-    ToFloat32 = new Uint32Array(Float32)
+    buf = new ArrayBuffer(8)
+    uint8 = new Uint8Array(buf)
+    int8 = new Int8Array(buf)
+    uint16 = new Uint16Array(buf)
+    int16 = new Int16Array(buf)
+    uint32 = new Uint32Array(buf)
+    int32 = new Int32Array(buf)
+    float32 = new Float32Array(buf)
+    float64 = new Float64Array(buf) if Float64Array?
     
-    if Float64Array?
-        Float64 = new ArrayBuffer(8)
-        FromFloat64 = new Float64Array(Float64)
-        ToFloat64 = new Uint32Array(Float64)
+    # detect the native endianness of the machine
+    nativeEndian = do ->
+        a = new Uint8Array([0x12, 0x34])
+        b = new Uint16Array(a.buffer)
+        return b[0].toString(16) is '3412' # 3412 is little endian (1234 for big endian)
     
     constructor: (@list) ->
         @localOffset = 0
@@ -81,7 +88,6 @@ class Stream
     
     copy: ->
         result = new Stream(@list.copy)
-        
         result.localOffset = @localOffset
         result.offset = @offset
         return result
@@ -90,154 +96,65 @@ class Stream
         @list.availableBytes - @localOffset >= bytes
     
     advance: (bytes) ->
-        @localOffset += bytes; @offset += bytes
+        @localOffset += bytes
+        @offset += bytes
         
-        while @list.first && (@localOffset >= @list.first.length)
+        while @list.first and (@localOffset >= @list.first.length)
             @localOffset -= @list.shift().length
         
         return this
+        
+    read: (bytes, littleEndian = false) ->
+        if littleEndian is nativeEndian
+            for i in [0...bytes] by 1
+                uint8[i] = @readUInt8()
+        else
+            for i in [bytes - 1..0] by -1
+                uint8[i] = @readUInt8()
+        
+        return
+        
+    peek: (bytes, offset, littleEndian = false) ->
+        if littleEndian is nativeEndian
+            for i in [0...bytes] by 1
+                uint8[i] = @peekUInt8(offset + i)
+        else
+            for i in [0...bytes] by 1
+                uint8[bytes - i - 1] = @peekUInt8(offset + i)
+                
+        return
     
     readUInt32: (littleEndian) ->
-        buffer = @list.first.data
-        
-        if buffer.length > @localOffset + 3
-            a0 = buffer[@localOffset + 0]
-            a1 = buffer[@localOffset + 1]
-            a2 = buffer[@localOffset + 2]
-            a3 = buffer[@localOffset + 3]
-            
-            @advance(4)
-        else
-            a0 = @readUInt8()
-            a1 = @readUInt8()
-            a2 = @readUInt8()
-            a3 = @readUInt8()
-        
-        if littleEndian
-            return ((a3 << 24) >>> 0) + (a2 << 16) + (a1 << 8) + (a0)
-        else
-            return ((a0 << 24) >>> 0) + (a1 << 16) + (a2 << 8) + (a3)
+        @read(4, littleEndian)
+        return uint32[0]
     
     peekUInt32: (offset = 0, littleEndian) ->
-        buffer = @list.first.data
-        
-        if buffer.length > @localOffset + offset + 3
-            a0 = buffer[@localOffset + offset + 0]
-            a1 = buffer[@localOffset + offset + 1]
-            a2 = buffer[@localOffset + offset + 2]
-            a3 = buffer[@localOffset + offset + 3]
-        else
-            a0 = @peekUInt8(offset + 0)
-            a1 = @peekUInt8(offset + 1)
-            a2 = @peekUInt8(offset + 2)
-            a3 = @peekUInt8(offset + 3)
-        
-        if littleEndian
-            return ((a3 << 24) >>> 0) + (a2 << 16) + (a1 << 8) + (a0)
-        else
-            return ((a0 << 24) >>> 0) + (a1 << 16) + (a2 << 8) + (a3)
+        @peek(4, offset, littleEndian)
+        return uint32[0]
     
     readInt32: (littleEndian) ->
-        buffer = @list.first.data
-        
-        if buffer.length > @localOffset + 3
-            a0 = buffer[@localOffset + 0]
-            a1 = buffer[@localOffset + 1]
-            a2 = buffer[@localOffset + 2]
-            a3 = buffer[@localOffset + 3]
-            
-            @advance(4)
-        else
-            a0 = @readUInt8()
-            a1 = @readUInt8()
-            a2 = @readUInt8()
-            a3 = @readUInt8()
-        
-        if littleEndian
-            return (a3 << 24) + (a2 << 16) + (a1 << 8) + (a0)
-        else
-            return (a0 << 24) + (a1 << 16) + (a2 << 8) + (a3)
+        @read(4, littleEndian)
+        return int32[0]
     
     peekInt32: (offset = 0, littleEndian) ->
-        buffer = @list.first.data
-        
-        if buffer.length > @localOffset + offset + 3
-            a0 = buffer[@localOffset + offset + 0]
-            a1 = buffer[@localOffset + offset + 1]
-            a2 = buffer[@localOffset + offset + 2]
-            a3 = buffer[@localOffset + offset + 3]
-        else
-            a0 = @peekUInt8(offset + 0)
-            a1 = @peekUInt8(offset + 1)
-            a2 = @peekUInt8(offset + 2)
-            a3 = @peekUInt8(offset + 3)
-        
-        if littleEndian
-            return (a3 << 24) + (a2 << 16) + (a1 << 8) + (a0)
-        else
-            return (a0 << 24) + (a1 << 16) + (a2 << 8) + (a3)
+        @peek(4, offset, littleEndian)
+        return int32[0]
     
     readUInt16: (littleEndian) ->
-        buffer = @list.first.data
-        
-        if buffer.length > @localOffset + 1
-            a0 = buffer[@localOffset + 0]
-            a1 = buffer[@localOffset + 1]
-            
-            @advance(2)
-        else
-            a0 = @readUInt8()
-            a1 = @readUInt8()
-        
-        if littleEndian
-            return (a1 << 8) + a0
-        else
-            return (a0 << 8) + (a1)
+        @read(2, littleEndian)
+        return uint16[0]
     
     peekUInt16: (offset = 0, littleEndian) ->
-        buffer = @list.first.data
-        
-        if buffer.length > @localOffset + offset + 1
-            a0 = buffer[@localOffset + offset + 0]
-            a1 = buffer[@localOffset + offset + 1]
-        else
-            a0 = @peekUInt8(offset + 0)
-            a1 = @peekUInt8(offset + 1)
-        
-        if littleEndian
-            return (a1 << 8) + a0
-        else
-            return (a0 << 8) + (a1)
+        @peek(2, offset, littleEndian)
+        return uint16[0]
     
     readInt16: (littleEndian) ->
-        buffer = @list.first.data
-        
-        if buffer.length > @localOffset + 1
-            a0 = buffer[@localOffset + 0]
-            a1 = buffer[@localOffset + 1]
-        else
-            a0 = @readInt8()
-            a1 = @readUInt8()
-        
-        if littleEndian
-            return (a1 << 8) + a0
-        else
-            return (a0 << 8) + (a1)
+        @read(2, littleEndian)
+        return int16[0]
     
     peekInt16: (offset = 0, littleEndian) ->
-        buffer = @list.first.data
-        
-        if buffer.length > @localOffset + offset + 1
-            a0 = buffer[@localOffset + offset + 0]
-            a1 = buffer[@localOffset + offset + 1]
-        else
-            a0 = @peekInt8(offset + 0)
-            a1 = @peekUInt8(offset + 1)
-        
-        if littleEndian
-            return (a1 << 8) + a0
-        else
-            return (a0 << 8) + (a1)
+        @peek(2, offset, littleEndian)
+        return int16[0]
     
     readUInt8: ->
         a0 = @list.first.data[@localOffset]
@@ -253,75 +170,58 @@ class Stream
     
     peekUInt8: (offset = 0) ->
         offset = @localOffset + offset
+        buffer = @list.first.data
         i = 0
-        buffer = @list.buffers[i].data
         
         until buffer.length > offset
             offset -= buffer.length
             buffer = @list.buffers[++i].data
-        
+            
         return buffer[offset]
     
-            
-    
     readInt8: ->
-        a0 = (@list.first.data[@localOffset] << 24) >> 24
-        @advance(1)
-        return a0
+        @read(1, littleEndian)
+        return int8[0]
     
     peekInt8: (offset = 0) ->
-        offset = @localOffset + offset
-        i = 0
-        buffer = @list.buffers[i].data
-        
-        until buffer.length > offset
-            offset -= buffer.length
-            buffer = @list.buffers[++i].data
-        
-        return ((buffer[offset] << 24) >> 24)
+        @peek(1, offset, littleEndian)
+        return int8[0]
     
     readFloat64: (littleEndian) ->
-        high = @readUInt32(littleEndian)
-        low = @readUInt32(littleEndian)
+        @read(8, littleEndian)
         
         # use Float64Array if available
-        if ToFloat64
-            if littleEndian
-                ToFloat64[0] = high
-                ToFloat64[1] = low
-            else
-                ToFloat64[1] = high
-                ToFloat64[0] = low
-            
-            return FromFloat64[0]
-            
+        if float64
+            return float64[0]
         else
+            [low, high] = uint32
             return 0.0 if not high or high is 0x80000000
-            
-            sign = (high >>> 31) * 2 + 1 # +1 or -1
+                   
+            sign = 1 - (high >>> 31) * 2 # +1 or -1
             exp = (high >>> 20) & 0x7ff
             frac = high & 0xfffff
-            
+        
             # NaN or Infinity
             if exp is 0x7ff
-                return if frac then NaN else sign * Infinity
-            
+                return NaN if frac
+                return sign * Infinity
+        
             exp -= 1023
             out = (frac | 0x100000) * Math.pow(2, exp - 20)
             out += low * Math.pow(2, exp - 52)
-            
+        
             return sign * out
     
     readFloat32: (littleEndian) ->
-        ToFloat32[0] = @readUInt32(littleEndian)
-        return FromFloat32[0]
+        @read(4, littleEndian)
+        return float32[0]
         
     # IEEE 80 bit extended float
     readFloat80: ->
         a0 = @readUInt8()
         a1 = @readUInt8()
         
-        sign = -((a0 >>> 7) * 2 - 1) # -1 or +1
+        sign = 1 - (a0 >>> 7) * 2 # -1 or +1
         exp = ((a0 & 0x7F) << 8) | a1
         low = @readUInt32()
         high = @readUInt32()
@@ -344,7 +244,7 @@ class Stream
     readString: (length) ->
         result = []
         
-        for i in [0 ... length]
+        for i in [0...length]
             result.push(String.fromCharCode(@readUInt8()))
         
         return result.join('')
@@ -359,10 +259,9 @@ class Stream
     
     readBuffer: (length) ->
         result = Buffer.allocate(length)
-        
         to = result.data
         
-        for i in [0 ... length]
+        for i in [0...length]
             to[i] = @readUInt8()
         
         return result
@@ -371,7 +270,6 @@ class Stream
         result = @list.first.slice(@localOffset, length)
         @advance(result.length)
         return result
-    
 
 class Bitstream
     constructor: (@stream) ->
