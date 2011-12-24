@@ -16,7 +16,7 @@ class WAVEDemuxer extends Demuxer
             if @stream.readString(4) isnt 'RIFF'
                 return @emit 'error', 'Invalid WAV file.'
                 
-            @fileSize = @stream.readUInt32()
+            @fileSize = @stream.readUInt32(true)
             @readStart = true
             
             if @stream.readString(4) isnt 'WAVE'
