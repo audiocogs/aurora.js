@@ -33,7 +33,7 @@ class FileSource extends EventEmitter
         @loop()
         
     loop: ->
-        slice = if @file.webkitSlice then 'webkitSlice' else 'mozSlice'
+        @file[slice = 'slice'] or @file[slice = 'webkitSlice'] or @file[slice = 'mozSlice']
         endPos = Math.min(@offset + @chunkSize, @length)
         
         blob = @file[slice](@offset, endPos)
