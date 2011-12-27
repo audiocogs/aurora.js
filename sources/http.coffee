@@ -51,7 +51,8 @@ class HTTPSource extends EventEmitter
             buffer = new Buffer(buf)
             @offset += buffer.length
             
-            @emit 'data', buffer, @offset is @length
+            @emit 'data', buffer
+            @emit 'end' if @offset is @length
             @emit 'progress', @offset / @length * 100
 
             @inflight = false
