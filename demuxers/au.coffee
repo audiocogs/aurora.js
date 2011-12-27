@@ -42,4 +42,5 @@ class AUDemuxer extends Demuxer
             @readHeader = true
             
         if @readHeader
-            @emit 'data', @stream.readSingleBuffer(@stream.list.availableBytes - @stream.localOffset)
+            while @stream.available(1)
+                @emit 'data', @stream.readSingleBuffer(@stream.remainingBytes())
