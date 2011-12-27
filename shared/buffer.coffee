@@ -1,27 +1,18 @@
 class Buffer
     constructor: (@data) ->
         @length = @data.length
-        @timestamp = null
-        @duration  = null
-        @final = false
-        @discontinuity = false
     
     @allocate: (size) ->
         return new Buffer(new Uint8Array(size))
     
     copy: ->
-        buffer = new Buffer(new Uint8Array(@data))
-        
-        buffer.timestamp = @timestamp
-        buffer.duration = @duration
-        buffer.final = @final
-        buffer.discontinuity = @discontinuity
+        return new Buffer(new Uint8Array(@data))
     
     slice: (position, length) ->
-        if position == 0 && length >= @length
-            return this
+        if position is 0 and length >= @length
+            return new Buffer(@data)
         else
-            return new Buffer(@data.subarray(position, length))
+            return new Buffer(@data.subarray(position, position + length))
         
 class BufferList
     constructor: ->
@@ -91,7 +82,10 @@ class Stream
         return result
     
     available: (bytes) ->
-        @list.availableBytes - @localOffset >= bytes
+        return bytes <= @list.availableBytes - @localOffset
+        
+    remainingBytes: ->
+        return @list.availableBytes - @localOffset
     
     advance: (bytes) ->
         @localOffset += bytes
