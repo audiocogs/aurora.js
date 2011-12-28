@@ -14,7 +14,7 @@ class ALACDec extends Decoder
         @format.bitsPerChannel ||= @decoder.config.bitDepth
         
     readChunk: =>
-        unless @bitstream.available(4096 << 6) or @receivedFinalBuffer
+        unless @bitstream.available(4096 << 6) or (@receivedFinalBuffer and @bitstream.available(32))
             return @once 'available', @readChunk
         
         out = @decoder.decode(@bitstream)
