@@ -62,7 +62,7 @@ class AIFFDemuxer extends Demuxer
                     buffer = @stream.readSingleBuffer(@len)
                     @len -= buffer.length
                     @readHeaders = @len > 0
-                    @emit 'data', buffer
+                    @emit 'data', buffer, @len is 0
                     
                 else
                     return unless @stream.available(@len)

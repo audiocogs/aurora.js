@@ -43,11 +43,10 @@ class XLAWDecoder extends Decoder
             
     readChunk: =>
         {stream, table} = this
-        chunkSize = 4096
+        chunkSize = Math.min(4096, @stream.remainingBytes())
         samples = chunkSize / (@format.bitsPerChannel / 8) >> 0
-        bytes = samples * (@format.bitsPerChannel / 8)
         
-        unless stream.available(bytes)
+        if chunkSize is 0
             return @once 'available', @readChunk
         
         output = new Int16Array(samples)

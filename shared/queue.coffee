@@ -6,13 +6,14 @@ class Queue extends EventEmitter
         
         @buffers = []
         @decoder.on 'data', @write
+        @decoder.on 'end', @write
         @decoder.readChunk()
         
     write: (buffer) =>
-        @buffers.push buffer
+        @buffers.push buffer if buffer
         
         if @buffering
-            if @buffers.length >= @readyMark
+            if @buffers.length >= @readyMark or @decoder.receivedFinalBuffer
                 @buffering = false
                 @emit 'ready'
             else    
@@ -21,5 +22,5 @@ class Queue extends EventEmitter
     read: ->
         return null if @buffers.length is 0
         
-        @decoder.readChunk()            
+        @decoder.readChunk()    
         return @buffers.shift()

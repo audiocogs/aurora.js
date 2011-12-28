@@ -13,51 +13,49 @@ class LPCMDecoder extends Decoder
         @littleEndian = Boolean(flags & LITTLE_ENDIAN)
     
     readChunk: =>
-        {stream, littleEndian} = this        
-        chunkSize = 4096
+        {stream, littleEndian} = this
+        chunkSize = Math.min(4096, @stream.remainingBytes())
         samples = chunkSize / (@format.bitsPerChannel / 8) >> 0
-        bytes = samples * (@format.bitsPerChannel / 8)
         
-        unless stream.available(bytes)
-            @once 'available', @readChunk
+        if chunkSize is 0
+            return @once 'available', @readChunk
         
+        if @floatingPoint
+            switch @format.bitsPerChannel
+                when 32
+                    output = new Float32Array(samples)
+                    for i in [0...samples] by 1
+                        output[i] = stream.readFloat32(littleEndian)
+                        
+                when 64
+                    output = new Float64Array(samples)
+                    for i in [0...samples] by 1
+                        output[i] = stream.readFloat64(littleEndian)
+                        
+                else
+                    return @emit 'error', 'Unsupported bit depth.'
+            
         else
-            if @floatingPoint
-                switch @format.bitsPerChannel
-                    when 32
-                        output = new Float32Array(samples)
-                        for i in [0...samples] by 1
-                            output[i] = stream.readFloat32(littleEndian)
-                            
-                    when 64
-                        output = new Float64Array(samples)
-                        for i in [0...samples] by 1
-                            output[i] = stream.readFloat64(littleEndian)
-                            
-                    else
-                        return @emit 'error', 'Unsupported bit depth.'
+            switch @format.bitsPerChannel
+                when 8
+                    output = new Int8Array(samples)
+                    for i in [0...samples] by 1
+                        output[i] = stream.readInt8()
                 
-            else
-                switch @format.bitsPerChannel
-                    when 8
-                        output = new Int8Array(samples)
-                        for i in [0...samples] by 1
-                            output[i] = stream.readUInt8()
+                when 16
+                    output = new Int16Array(samples)
+                    for i in [0...samples] by 1
+                        output[i] = stream.readInt16(littleEndian)
                     
-                    when 16
-                        output = new Int16Array(samples)
-                        for i in [0...samples] by 1
-                            output[i] = stream.readUInt16(littleEndian)
                         
                     when 24
                         return @emit 'error', '24 bit is unsupported.'
+                when 32
+                    output = new Int32Array(samples)
+                    for i in [0...samples] by 1
+                        output[i] = stream.readInt32(littleEndian)
                     
-                    when 32
-                        output = new Int32Array(samples)
-                        for i in [0...samples] by 1
-                            output[i] = stream.readUInt32(littleEndian)
-                        
-                    else
-                        return @emit 'error', 'Unsupported bit depth.'
-            
-            @emit 'data', output
+                else
+                    return @emit 'error', 'Unsupported bit depth.'
+        
+        @emit 'data', output

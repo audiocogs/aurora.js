@@ -199,7 +199,7 @@ class M4ADemuxer extends Demuxer
                     @readHeaders = @len > 0
 
                     if @sentCookie
-                        @emit 'data', buffer
+                        @emit 'data', buffer, @len is 0
                     else
                         @dataSections ?= []
                         @dataSections.push buffer

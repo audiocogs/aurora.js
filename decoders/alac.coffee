@@ -14,14 +14,12 @@ class ALACDec extends Decoder
         @format.bitsPerChannel ||= @decoder.config.bitDepth
         
     readChunk: =>
-        unless @bitstream.available(4096 << 6)
-            @once 'available', @readChunk
+        unless @bitstream.available(4096 << 6) or @receivedFinalBuffer
+            return @once 'available', @readChunk
         
-        else
-            out = @decoder.decode(@bitstream)
-            
-            if out[0] isnt 0
-                return @emit 'error', "Error in ALAC decoder: #{out[0]}"
-                        
-            if out[1]
-                @emit 'data', new Int16Array(out[1])
+        out = @decoder.decode(@bitstream)
+        if out[0] isnt 0
+            return @emit 'error', "Error in ALAC decoder: #{out[0]}"
+                    
+        if out[1]
+            @emit 'data', new Int16Array(out[1])

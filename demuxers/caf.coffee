@@ -74,10 +74,10 @@ class CAFDemuxer extends Demuxer
                     buffer = @stream.readSingleBuffer(@headerCache.size)
                     @headerCache.size -= buffer.length
                     
+                    @emit 'data', buffer, @headerCache.size is 0
+                    
                     if @headerCache.size <= 0
                         @headerCache = null
-                    
-                    @emit 'data', buffer
                     
                 else
                     if @stream.available(@headerCache.size)
