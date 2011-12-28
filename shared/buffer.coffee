@@ -26,8 +26,11 @@ class BufferList
         result = new BufferList()
 
         result.buffers = @buffers.slice(0)
+        result.first = result.buffers[0]
         result.availableBytes = @availableBytes
         result.availableBuffers = @availableBuffers
+        
+        return result
     
     shift: ->
         result = @buffers.shift()
@@ -76,7 +79,7 @@ class Stream
         @offset = 0
     
     copy: ->
-        result = new Stream(@list.copy)
+        result = new Stream(@list.copy())
         result.localOffset = @localOffset
         result.offset = @offset
         return result
