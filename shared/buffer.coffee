@@ -189,14 +189,15 @@ class Stream
     
     peekUInt8: (offset = 0) ->
         offset = @localOffset + offset
-        buffer = @list.first.data
-        i = 0
-        
-        until buffer.length > offset
+        list = @list.buffers
+    
+        for buffer in list    
+            if buffer.length > offset
+                return buffer.data[offset]
+                
             offset -= buffer.length
-            buffer = @list.buffers[++i].data
-            
-        return buffer[offset]
+    
+        return 0
     
     readInt8: ->
         @read(1)
