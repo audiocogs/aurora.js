@@ -47,9 +47,11 @@ class LPCMDecoder extends Decoder
                     for i in [0...samples] by 1
                         output[i] = stream.readInt16(littleEndian)
                     
-                        
-                    when 24
-                        return @emit 'error', '24 bit is unsupported.'
+                when 24
+                    output = new Int32Array(samples)
+                    for i in [0...samples] by 1
+                        output[i] = stream.readInt24(littleEndian)
+                
                 when 32
                     output = new Int32Array(samples)
                     for i in [0...samples] by 1

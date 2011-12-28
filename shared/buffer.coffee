@@ -131,6 +131,30 @@ class Stream
     peekInt32: (offset = 0, littleEndian) ->
         @peek(4, offset, littleEndian)
         return int32[0]
+        
+    readUInt24: (littleEndian) ->
+        if littleEndian
+            return @readUInt16(true) + (@readUInt8() << 16)
+        else
+            return (@readUInt16() << 8) + @readUInt8()
+            
+    peekUInt24: (offset = 0, littleEndian) ->
+        if littleEndian
+            return @peekUInt16(offset, true) + (@peekUInt8(offset + 2) << 16)
+        else
+            return (@peekUInt16(offset) << 8) + @peekUInt8(offset + 2)
+            
+    readInt24: (littleEndian) ->
+        if littleEndian
+            return @readUInt16(true) + (@readInt8() << 16)
+        else
+            return (@readInt16() << 8) + @readUInt8()
+            
+    peekInt24: (offset = 0, littleEndian) ->
+        if littleEndian
+            return @peekUInt16(offset, true) + (@peekInt8(offset + 2) << 16)
+        else
+            return (@peekInt16(offset) << 8) + @peekUInt8(offset + 2)
     
     readUInt16: (littleEndian) ->
         @read(2, littleEndian)
@@ -172,11 +196,11 @@ class Stream
         return buffer[offset]
     
     readInt8: ->
-        @read(1, littleEndian)
+        @read(1)
         return int8[0]
     
     peekInt8: (offset = 0) ->
-        @peek(1, offset, littleEndian)
+        @peek(1, offset)
         return int8[0]
     
     readFloat64: (littleEndian) ->
