@@ -1,5 +1,5 @@
 class Stream
-    buf = new ArrayBuffer(8)
+    buf = new ArrayBuffer(16)
     uint8 = new Uint8Array(buf)
     int8 = new Int8Array(buf)
     uint16 = new Uint16Array(buf)
@@ -192,15 +192,17 @@ class Stream
             return float64Fallback()
         
     # IEEE 80 bit extended float
-    # TODO: implement littleEndian
-    readFloat80: (littleEndian = false) ->
-        a0 = @readUInt8()
-        a1 = @readUInt8()
+    readFloat80: (littleEndian) ->
+        @read(10, littleEndian)
+        return float80()
+        
+    float80 = ->
+        [high, low] = uint32
+        a0 = uint8[9]
+        a1 = uint8[8]
         
         sign = 1 - (a0 >>> 7) * 2 # -1 or +1
         exp = ((a0 & 0x7F) << 8) | a1
-        low = @readUInt32()
-        high = @readUInt32()
         
         if exp is 0 and low is 0 and high is 0
             return 0
@@ -217,8 +219,9 @@ class Stream
         
         return sign * out
         
-    peekFloat80: (offset = 0, littleEndian = false) ->
-        # TODO: implement
+    peekFloat80: (offset = 0, littleEndian) ->
+        @peek(10, offset, littleEndian)
+        return float80()
     
     readString: (length) ->
         result = []
