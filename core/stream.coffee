@@ -16,6 +16,11 @@ class Stream
     constructor: (@list) ->
         @localOffset = 0
         @offset = 0
+        
+    @fromBuffer: (buffer) ->
+        list = new BufferList
+        list.push(buffer)
+        return new Stream(list)
     
     copy: ->
         result = new Stream(@list.copy())

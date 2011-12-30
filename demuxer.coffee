@@ -32,10 +32,7 @@ class Demuxer extends EventEmitter
         formats.push demuxer
             
     @find: (buffer) ->
-        list = new BufferList
-        list.push(buffer)
-        stream = new Stream(list)
-        
+        stream = Stream.fromBuffer(buffer)        
         for format in formats when format.probe(stream)
             return format
             
