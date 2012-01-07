@@ -1,123 +1,125 @@
+#
+# The Player class plays back audio data from various sources
+# as decoded by the Asset class.  In addition, it handles
+# common audio filters like panning and volume adjustment,
+# and interfacing with AudioDevices to keep track of the 
+# playback time.
+#
+
 class Player extends EventEmitter
-    constructor: (@source) ->
+    window.Player = Player
+    
+    constructor: (@asset) ->
         @playing = false
         @buffered = 0
         @currentTime = 0
         @duration = 0
         @volume = 100
+        @pan = 0 # -50 for left, 50 for right, 0 for center
         @metadata = {}
         
-        @demuxer = null
-        @decoder = null
-        @queue = null
-        @_pausedTime = @_timePaused = 0
+        @filters = [
+            new VolumeFilter(this, 'volume')
+            new BalanceFilter(this, 'pan')
+        ]
         
-        @source.once 'data', @probe
-        @source.on 'error', (err) =>
-            @pause()
-            @emit 'error', err
+        @asset.on 'decodeStart', =>
+            @queue = new Queue(@asset.decoder)
+            @queue.once 'ready', @startPlaying
             
-        @source.on 'progress', (@buffered) =>
-            @emit 'buffer', @buffered
-        
+        @asset.on 'format', (@format) =>
+            @emit 'format', @format
+            
+        @asset.on 'metadata', (@metadata) =>
+            @emit 'metadata', @metadata
+            
+        @asset.on 'duration', (@duration) =>
+            @emit 'duration', @duration
+                
     @fromURL: (url) ->
-        source = new HTTPSource(url)
-        return new Player(source)
+        asset = Asset.fromURL(url)
+        return new Player(asset)
         
     @fromFile: (file) ->
-        source = new FileSource(file)
-        return new Player(source)
+        asset = Asset.fromFile(file)
+        return new Player(asset)
         
     preload: ->
-        return unless @source
-        @source.start()
+        return unless @asset
+        
+        @startedPreloading = true
+        @asset.start()
         
     play: ->
         return if @playing
         
+        unless @startedPreloading
+            @preload()
+        
         @playing = true
-        @_timer = setInterval =>
-            return unless @sink and @playing
-            
-            time = @sink.getPlaybackTime()
-            if @_timePaused > 0
-                @_pausedTime += time - @_timePaused
-                @_timePaused = 0
-            
-            @currentTime = (time - @_pausedTime) / 44100 * 1000 | 0
-            @emit 'progress', @currentTime if @currentTime > 0
-        , 200
+        @device?.start()
         
     pause: ->
         return unless @playing
         
         @playing = false
-        clearInterval @_timer
-        @_timePaused = @sink?.getPlaybackTime() or 0
+        @device.stop()
+        
+    togglePlayback: ->
+        if @playing
+            @pause()
+        else
+            @play()
         
     stop: ->
         @pause()
-        @source.pause()
-        @sink?.off 'audioprocess', @refill
-        
-    probe: (chunk) =>
-        demuxer = Demuxer.find(chunk)
-        
-        if not demuxer
-            return @emit 'error', 'A demuxer for this container was not found.'
-            
-        @demuxer = new demuxer(@source, chunk)
-        @demuxer.on 'format', @findDecoder
-        @demuxer.on 'duration', (@duration) =>
-        @demuxer.on 'metadata', (@metadata) =>
-            @emit 'metadata', @metadata
-            
-        @demuxer.on 'error', (err) =>
-            @emit 'error', err
-        
-    findDecoder: (format) =>
-        console.log format
-        decoder = Decoder.find(format.formatID)
-        
-        if not decoder
-            return @emit 'error', "A decoder for #{format.formatID} was not found."
-            
-        @decoder = new decoder(@demuxer, format)
-        @decoder.on 'error', (err) =>
-            @emit 'error', err
-            
-        @queue = new Queue(@decoder)
-        @queue.on 'ready', @startPlaying
+        @asset.stop()
+        @device?.destroy()
         
     startPlaying: =>
         frame = @queue.read()
         frameOffset = 0
-        div = if @decoder.floatingPoint then 1 else Math.pow(2, @decoder.format.bitsPerChannel - 1)
+        {format, decoder} = @asset
+        div = if decoder.floatingPoint then 1 else Math.pow(2, format.bitsPerChannel - 1)
         
-        Sink.sinks.moz.prototype.interval = 100
+        @device = new AudioDevice(format.sampleRate, format.channelsPerFrame)
+        @device.on 'timeUpdate', (@currentTime) =>
+            @emit 'progress', @currentTime
         
-        @sink = Sink.singleton()
-        @_pausedTime = @sink.getPlaybackTime() # since we're reusing the sink, store the start time
-        
-        @refill = (buffer, channelCount) =>
+        @refill = (buffer) =>
             return unless @playing
 
-            bufferOffset = 0
-            vol = @volume / 100
-            
+            bufferOffset = 0            
             while frame and bufferOffset < buffer.length
                 max = Math.min(frame.length - frameOffset, buffer.length - bufferOffset)
+                
                 for i in [0...max] by 1
-                    buffer[bufferOffset + i] = (frame[frameOffset + i] / div) * vol
-                    
-                bufferOffset += i
-                frameOffset += i
+                    buffer[bufferOffset++] = (frame[frameOffset++] / div)
                 
                 if frameOffset is frame.length
                     frame = @queue.read()
                     frameOffset = 0
+            
+            # run any applied filters        
+            for filter in @filters
+                filter.process(buffer)
+                
+            # if we've run out of data, pause the player
+            unless frame
+                # if this was the end of the track, make
+                # sure the currentTime reflects that
+                if decoder.receivedFinalBuffer
+                    @currentTime = @duration
+                    @emit 'progress', @currentTime
+                    @pause()
+                else
+                    # if we ran out of data in the middle of 
+                    # the track, stop the timer but don't change
+                    # the playback state
+                    @device.stop()
                     
             return
         
-        @sink.on 'audioprocess', @refill    
+        @device.on 'refill', @refill
+        @device.start() if @playing
         @emit 'ready'

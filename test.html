@@ -4,10 +4,16 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
-    <input type="file"><br><br><img>
+    <input type="file"><input type="range" min=-50 max=50 value=0><br><br><img>
     <script src="http://localhost:8080/"></script>
     <script>
         var player = null;
+        document.querySelector("input[type=range]").oninput = function(e) {
+            if(!player) return;
+            
+            player.pan = +e.target.value;
+        }
+        
         document.querySelector("input").onchange = function(e) {
             if (player) player.stop();
             
@@ -30,7 +36,6 @@
                 document.querySelector("img").src = URL.createObjectURL(blob);
             });
             
-            player.preload();
             player.play();
         }
     </script>
