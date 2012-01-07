@@ -63,7 +63,6 @@ class HTTPSource extends EventEmitter
             @pause()
 
         @xhr.onabort = (event) =>
-            console.log("HTTP Aborted: Paused?")
             @inflight = false
 
         @xhr.open("GET", @url, true)
