@@ -12,12 +12,12 @@ class EventEmitter extends Base
     once: (event, fn) ->
         @on event, cb = =>
             @off event, cb
-            fn arguments...
+            fn.apply(this, arguments)
         
     emit: (event, args...) ->
         return unless @events?[event]
         
         for fn in @events[event]
-            fn args...
+            fn.apply(this, args)
             
         return

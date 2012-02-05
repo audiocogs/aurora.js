@@ -1,7 +1,7 @@
 #
 # The Base class defines an extend method so that
 # CoffeeScript classes can be extended easily by 
-# plain JavaScript.
+# plain JavaScript. Based on http://ejohn.org/blog/simple-javascript-inheritance/.
 #
 
 class Base
