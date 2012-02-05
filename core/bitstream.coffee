@@ -52,6 +52,13 @@ class Bitstream
         
         @advance(bits)
         return a
+        
+    readSigned: (bits) ->
+        a = @stream.peekUInt32(0)
+        a = (a << @bitPosition) >> (32 - bits)
+        
+        @advance(bits)
+        return a
     
     peek: (bits) ->
         a = @stream.peekUInt32(0)
