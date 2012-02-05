@@ -35,6 +35,9 @@ class Player extends EventEmitter
             
         @asset.on 'duration', (@duration) =>
             @emit 'duration', @duration
+            
+        @asset.on 'error', (error) =>
+            @emit 'error', error
                 
     @fromURL: (url) ->
         asset = Asset.fromURL(url)
