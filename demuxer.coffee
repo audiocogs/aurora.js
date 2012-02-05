@@ -1,4 +1,10 @@
 class Demuxer extends EventEmitter
+    @extend: (fn) ->
+        class Class extends Demuxer
+            fn?.call(this, this)
+            
+        return Class
+    
     @probe: (buffer) ->
         return false
     
