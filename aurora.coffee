@@ -1,3 +1,4 @@
+#import "core/base.coffee"
 #import "core/buffer.coffee"
 #import "core/bufferlist.coffee"
 #import "core/stream.coffee"
