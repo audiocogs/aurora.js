@@ -1,4 +1,4 @@
-class EventEmitter
+class EventEmitter extends Base
     on: (event, fn) ->
         @events ?= {}
         @events[event] ?= []
