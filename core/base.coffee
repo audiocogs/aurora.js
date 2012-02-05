@@ -8,7 +8,7 @@ class Base
     @extend: (prop) ->
         class Class extends this
             
-        if (typeof prop is 'function')
+        if typeof prop is 'function'
             keys = Object.keys Class.prototype
             prop.call(Class, Class)
             
