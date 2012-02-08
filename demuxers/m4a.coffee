@@ -135,7 +135,7 @@ class M4ADemuxer extends Demuxer
                             @metadata[field] = @stream.readBuffer(@len - 8).data.buffer
 
                         else
-                            @metadata[field] = decodeURIComponent(escape(@stream.readString(@len))) # UTF-8 decode
+                            @metadata[field] = @stream.readUTF8(@len)
                             
                 when 'mdhd'
                     return unless @stream.available(@len)

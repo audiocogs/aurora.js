@@ -241,6 +241,14 @@ class Stream
             result.push String.fromCharCode @peekUInt8(offset + i)
         
         return result.join ''
+        
+    readUTF8: (length) ->
+        # a little trick taking advantage of some built in functions
+        # to decode UTF-8
+        return decodeURIComponent escape @readString(length)
+        
+    peekUTF8: (offset, length) ->
+        return decodeURIComponent escape @peekString(offset, length)
     
     readBuffer: (length) ->
         result = Buffer.allocate(length)
