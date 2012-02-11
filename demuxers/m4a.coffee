@@ -178,7 +178,7 @@ class M4ADemuxer extends Demuxer
                     @stream.advance(4) # skip compression id and packet size
                     
                     @format.sampleRate = @stream.readUInt16()
-                    @stream.advance(2)
+                    @stream.advance(6)
                     
                     @emit 'format', @format
                     
