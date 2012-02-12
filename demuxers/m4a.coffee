@@ -151,8 +151,6 @@ class M4ADemuxer extends Demuxer
                     
                 when 'stsd'
                     return unless @stream.available(@len)
-                    
-                    maxpos = @stream.offset + @len
                     @stream.advance(4) # version and flags
                     
                     numEntries = @stream.readUInt32()
@@ -178,21 +176,55 @@ class M4ADemuxer extends Demuxer
                     @stream.advance(4) # skip compression id and packet size
                     
                     @format.sampleRate = @stream.readUInt16()
-                    @stream.advance(6)
+                    @stream.advance(2)
                     
                     @emit 'format', @format
                     
-                    # read the cookie
-                    @emit 'cookie', @stream.readBuffer(maxpos - @stream.offset)
+                when 'alac'
+                    @stream.advance(4)
+                    @emit 'cookie', @stream.readBuffer(@len - 4)
                     @sentCookie = true
+                    @sendDataSections() if @dataSections
                     
-                    # if the data was already decoded, emit it
-                    if @dataSections
-                        interval = setInterval =>
-                            @emit 'data', @dataSections.shift()
-                            clearInterval interval if @dataSections.length is 0
-                        , 100
+                when 'esds'
+                    startPos = @stream.offset
+                    @stream.advance(4) # version and flags
+                    [tag, len] = @readDescr()
+                    
+                    if tag is 0x03 # MP4ESDescrTag
+                        @stream.advance(2) # id
+                        flags = @stream.readUInt8()
                         
+                        if flags & 0x80 # streamDependenceFlag
+                            @stream.advance(2)
+                            
+                        if flags & 0x40 # URL_Flag
+                            @stream.advance @stream.readUInt8()
+                            
+                        if flags & 0x20 # OCRstreamFlag
+                            @stream.advance(2)
+                            
+                    else
+                        @stream.advance(2) # id
+                        
+                    [tag, len] = @readDescr()
+                    if tag is 0x04 # MP4DecConfigDescrTag
+                        codec_id = @stream.readUInt8() # might want this... (isom.c:35)
+                        @stream.advance(1) # stream type
+                        @stream.advance(3) # buffer size
+                        @stream.advance(4) # max bitrate
+                        @stream.advance(4) # avg bitrate
+                        
+                        [tag, len] = @readDescr()
+                        if tag is 0x05 # MP4DecSpecificDescrTag
+                            @emit 'cookie', @stream.readBuffer(len)
+                            @sentCookie = true
+                            @sendDataSections() if @dataSections
+                    
+                    # skip garbage at the end        
+                    extra = @len - @stream.offset + startPos
+                    @stream.advance(extra)
+                    
                 when 'mdat'
                     buffer = @stream.readSingleBuffer(@len)
                     @len -= buffer.length
@@ -215,3 +247,21 @@ class M4ADemuxer extends Demuxer
             @readHeaders = false unless @type is 'mdat'
         
         return
+        
+    sendDataSections: ->
+        interval = setInterval =>
+            @emit 'data', @dataSections.shift(), @dataSections.length is 0
+            clearInterval interval if @dataSections.length is 0
+        , 100
+        
+    readDescr: ->
+        tag = @stream.readUInt8();
+        len = 0
+        count = 4
+        
+        while count--
+            c = @stream.readUInt8()
+            len = (len << 7) | (c & 0x7f)
+            break unless c & 0x80
+            
+        return [tag, len]
