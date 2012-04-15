@@ -94,6 +94,15 @@ class M4ADemuxer extends Demuxer
                 when 'moov', 'trak', 'mdia', 'minf', 'stbl', 'udta', 'ilst'
                     # traverse into these types - they are container atoms
                     break
+                    
+                when 'stco' # TODO: 'co64' for 64 bit version...
+                    @stream.advance(4) # version and flags
+                    
+                    entryCount = @stream.readUInt32()
+                    @chunkOffsets = []
+                    
+                    for i in [0...entryCount]
+                        @chunkOffsets[i] = @stream.readUInt32()
             
                 when 'meta'
                     @metadata = {}
@@ -187,45 +196,16 @@ class M4ADemuxer extends Demuxer
                     @sendDataSections() if @dataSections
                     
                 when 'esds'
-                    startPos = @stream.offset
-                    @stream.advance(4) # version and flags
-                    [tag, len] = @readDescr()
-                    
-                    if tag is 0x03 # MP4ESDescrTag
-                        @stream.advance(2) # id
-                        flags = @stream.readUInt8()
-                        
-                        if flags & 0x80 # streamDependenceFlag
-                            @stream.advance(2)
-                            
-                        if flags & 0x40 # URL_Flag
-                            @stream.advance @stream.readUInt8()
-                            
-                        if flags & 0x20 # OCRstreamFlag
-                            @stream.advance(2)
-                            
-                    else
-                        @stream.advance(2) # id
-                        
-                    [tag, len] = @readDescr()
-                    if tag is 0x04 # MP4DecConfigDescrTag
-                        codec_id = @stream.readUInt8() # might want this... (isom.c:35)
-                        @stream.advance(1) # stream type
-                        @stream.advance(3) # buffer size
-                        @stream.advance(4) # max bitrate
-                        @stream.advance(4) # avg bitrate
-                        
-                        [tag, len] = @readDescr()
-                        if tag is 0x05 # MP4DecSpecificDescrTag
-                            @emit 'cookie', @stream.readBuffer(len)
-                            @sentCookie = true
-                            @sendDataSections() if @dataSections
-                    
-                    # skip garbage at the end        
-                    extra = @len - @stream.offset + startPos
-                    @stream.advance(extra)
+                    @readEsds()
+                    @sentCookie = true
+                    @sendDataSections() if @dataSections
                     
                 when 'mdat'
+                    if @chunkOffsets and @stream.offset < @chunkOffsets[0]
+                        diff = @chunkOffsets[0] - @stream.offset
+                        @stream.advance(diff)
+                        @len -= diff
+                                        
                     buffer = @stream.readSingleBuffer(@len)
                     @len -= buffer.length
                     @readHeaders = @len > 0
@@ -254,14 +234,54 @@ class M4ADemuxer extends Demuxer
             clearInterval interval if @dataSections.length is 0
         , 100
         
-    readDescr: ->
-        tag = @stream.readUInt8();
+    @readDescrLen: (stream) ->
         len = 0
         count = 4
         
         while count--
-            c = @stream.readUInt8()
+            c = stream.readUInt8()
             len = (len << 7) | (c & 0x7f)
             break unless c & 0x80
             
-        return [tag, len]
+        return len
+        
+    readDescr = (stream) ->
+        tag = stream.readUInt8();
+        return [tag, M4ADemuxer.readDescrLen(stream)]
+        
+    readEsds: ->
+        startPos = @stream.offset
+        @stream.advance(4) # version and flags
+        [tag, len] = readDescr @stream
+        
+        if tag is 0x03 # MP4ESDescrTag
+            @stream.advance(2) # id
+            flags = @stream.readUInt8()
+            
+            if flags & 0x80 # streamDependenceFlag
+                @stream.advance(2)
+                
+            if flags & 0x40 # URL_Flag
+                @stream.advance @stream.readUInt8()
+                
+            if flags & 0x20 # OCRstreamFlag
+                @stream.advance(2)
+                
+        else
+            @stream.advance(2) # id
+            
+        [tag, len] = readDescr @stream
+        if tag is 0x04 # MP4DecConfigDescrTag
+            codec_id = @stream.readUInt8() # might want this... (isom.c:35)
+            @stream.advance(1) # stream type
+            @stream.advance(3) # buffer size
+            @stream.advance(4) # max bitrate
+            @stream.advance(4) # avg bitrate
+            
+            [tag, len] = readDescr @stream
+            if tag is 0x05 # MP4DecSpecificDescrTag
+                @emit 'cookie', @stream.readBuffer(len)
+        
+        # skip garbage at the end        
+        extra = @len - @stream.offset + startPos
+        @stream.advance(extra)
