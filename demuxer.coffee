@@ -21,6 +21,11 @@ class Demuxer extends EventEmitter
             @readChunk chunk unless received
             @emit 'end'
             
+        @init()
+            
+    init: ->
+        return
+            
     readChunk: (chunk) ->
         return
         

@@ -13,6 +13,11 @@ class Decoder extends EventEmitter
             list.push chunk
             @emit 'available'
             
+        @init()
+            
+    init: ->
+        return
+            
     setCookie: (cookie) ->
         return
     
