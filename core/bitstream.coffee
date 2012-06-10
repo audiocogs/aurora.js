@@ -29,11 +29,13 @@ class Bitstream
         return this
     
     readBig: (bits) ->
+        return 0 if bits is 0
         val = @peekBig(bits)
         @advance(bits)
         return val
     
     peekBig: (bits) ->
+        return 0 if bits is 0
         a0 = @stream.peekUInt8(0) * 0x0100000000
         a1 = @stream.peekUInt8(1) * 0x0001000000
         a2 = @stream.peekUInt8(2) * 0x0000010000
@@ -47,6 +49,7 @@ class Bitstream
         return a << 0
     
     read: (bits) ->
+        return 0 if bits is 0        
         a = @stream.peekUInt32(0)
         a = (a << @bitPosition) >>> (32 - bits)
         
@@ -54,6 +57,7 @@ class Bitstream
         return a
         
     readSigned: (bits) ->
+        return 0 if bits is 0
         a = @stream.peekUInt32(0)
         a = (a << @bitPosition) >> (32 - bits)
         
@@ -61,11 +65,13 @@ class Bitstream
         return a
     
     peek: (bits) ->
+        return 0 if bits is 0
         a = @stream.peekUInt32(0)
         a = (a << @bitPosition) >>> (32 - bits)
         return a
     
     readSmall: (bits) ->
+        return 0 if bits is 0
         a = @stream.peekUInt16(0)
         a = ((a << @bitPosition) & 0xFFFF) >>> (16 - bits)
         
@@ -73,6 +79,7 @@ class Bitstream
         return a
         
     peekSmall: (bits) ->
+        return 0 if bits is 0
         a = @stream.peekUInt16(0)
         a = ((a << @bitPosition) & 0xFFFF) >>> (16 - bits)
         return a
