@@ -29,6 +29,7 @@
 #import "demuxers/wave.coffee"
 #import "demuxers/au.coffee"
 
-#import "decoders/alac.coffee"
 #import "decoders/lpcm.coffee"
 #import "decoders/xlaw.coffee"
+
+#import "../src/decoder.coffee"
