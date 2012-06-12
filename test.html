@@ -5,7 +5,7 @@
 </head>
 <body>
     <input type="file"><input type="range" min=-50 max=50 value=0><br><br><img>
-    <script src="http://localhost:8080/"></script>
+    <script src="http://localhost:3030/"></script>
     <script>
         var player = null;
         document.querySelector("input[type=range]").oninput = function(e) {
@@ -20,20 +20,16 @@
             player = Player.fromFile(e.target.files[0]);
             player.on('error', function(e) { console.log(e) });
             
+            console.log(player)
+            
             player.on('metadata', function(data) {
+                console.log(data);
                 var buf = data['Cover Art'];
                 if (!buf) return;
-                
-                // Use the BlobBuilder API to construct a URL
-                var BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder,
-                    URL = window.URL || window.webkitURL;
-
-                var blob = new BlobBuilder();
-                blob.append(buf);
-                blob = blob.getBlob();
-                
+                                
                 // Show the album art
-                document.querySelector("img").src = URL.createObjectURL(blob);
+                if (buf)
+                    document.querySelector("img").src = buf.toBlobURL();
             });
             
             player.play();
