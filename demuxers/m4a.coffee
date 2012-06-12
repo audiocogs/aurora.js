@@ -141,7 +141,7 @@ class M4ADemuxer extends Demuxer
 
                         when 'covr'
                             @stream.advance(8)
-                            @metadata[field] = @stream.readBuffer(@len - 8).data.buffer
+                            @metadata[field] = @stream.readBuffer(@len - 8)
 
                         else
                             @metadata[field] = @stream.readUTF8(@len)
