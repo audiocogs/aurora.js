@@ -5,6 +5,8 @@
 #
 
 class Base
+    fnTest = /\b_super\b/
+    
     @extend: (prop) ->
         class Class extends this
             
@@ -19,7 +21,8 @@ class Base
         _super = Class.__super__
         
         for key, fn of prop
-            if typeof fn is 'function'
+            # test whether the method actually uses _super() and wrap it if so
+            if typeof fn is 'function' and fnTest.test(fn)
                 do (key, fn) ->
                     Class::[key] = ->
                         tmp = this._super
