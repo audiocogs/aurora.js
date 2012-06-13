@@ -32,4 +32,3 @@
 #import "decoders/lpcm.coffee"
 #import "decoders/xlaw.coffee"
 
-#import "../src/decoder.coffee"
