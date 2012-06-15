@@ -12,7 +12,7 @@ extending Aurora.
 
 ## Demo
 
-We have written several decoders using Aurora.js, whose demos you can find [here](http://labs.official.fm/codecs/flac.js/)
+We have written several decoders using Aurora.js, whose demos you can find [here](http://labs.official.fm/codecs/)
 and whose source code can be found on our [Github](https://github.com/ofmlabs) page.
 
 ## Authors
