@@ -21,7 +21,7 @@ class Decoder extends EventEmitter
     setCookie: (cookie) ->
         return
     
-    readChunk: (chunk) ->
+    readChunk: ->
         return
         
     seek: (position) ->

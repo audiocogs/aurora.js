@@ -23,6 +23,9 @@ class Player extends EventEmitter
             new BalanceFilter(this, 'pan')
         ]
         
+        @asset.on 'buffer', (@buffered) =>
+            @emit 'buffer', @buffered
+        
         @asset.on 'decodeStart', =>
             @queue = new Queue(@asset.decoder)
             @queue.once 'ready', @startPlaying
@@ -92,7 +95,7 @@ class Player extends EventEmitter
         @refill = (buffer) =>
             return unless @playing
 
-            bufferOffset = 0            
+            bufferOffset = 0
             while frame and bufferOffset < buffer.length
                 max = Math.min(frame.length - frameOffset, buffer.length - bufferOffset)
                 
