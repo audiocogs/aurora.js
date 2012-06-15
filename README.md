@@ -1,7 +1,7 @@
 Aurora.js
 =========
 
-Aurora.js is a framework that makes writing audio decoders in JavaScript easier.  In handles common 
+Aurora.js is a framework that makes writing audio decoders in JavaScript easier.  It handles common 
 tasks for you such as dealing with binary data, and the decoding pipeline from source to demuxer to 
 decoder, and finally to the audio hardware itself by abstracting browser audio APIs.  Aurora contains 
 two high level APIs for inspecting and playing back decoded audio, and it is easily extendible to support 
@@ -25,7 +25,7 @@ of [@ofmlabs](https://github.com/ofmlabs).
 Currently, the [import](https://github.com/devongovett/import) module is used to build Aurora.js.  You can run
 the development server by first installing `import` with npm, and then running it like this:
 
-    sudo npm install import
+    sudo npm install import -g
     import src/aurora.coffee
     
 You can also build a static version like this:
