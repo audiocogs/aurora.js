@@ -69,7 +69,7 @@ class Player extends EventEmitter
         return unless @playing
         
         @playing = false
-        @device.stop()
+        @device?.stop()
         
     togglePlayback: ->
         if @playing
