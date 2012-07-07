@@ -11,7 +11,7 @@ class Stream
     
     # detect the native endianness of the machine
     # 0x3412 is little endian, 0x1234 is big endian
-    nativeEndian = new Uint16Array(new Uint8Array([0x12, 0x34]).buffer)[0] is 0x3412;
+    nativeEndian = new Uint16Array(new Uint8Array([0x12, 0x34]).buffer)[0] is 0x3412
     
     constructor: (@list) ->
         @localOffset = 0
