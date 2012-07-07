@@ -11,7 +11,9 @@ class Decoder extends EventEmitter
         demuxer.on 'data', (chunk, final) =>
             @receivedFinalBuffer = !!final
             list.push chunk
-            @emit 'available'
+            setTimeout =>
+                @emit 'available'
+            , 0
             
         @init()
             
