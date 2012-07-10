@@ -18,19 +18,28 @@ class Buffer
     BlobBuilder = window.BlobBuilder or window.MozBlobBuilder or window.WebKitBlobBuilder
     URL = window.URL or window.webkitURL or window.mozURL
     
-    toBlob: ->
+    @makeBlob: (data) ->
         # try the Blob constructor
         try 
-            return new Blob [@data.buffer]
+            return new Blob [data]
         
         # use the old BlobBuilder
         if BlobBuilder?
             bb = new BlobBuilder
-            bb.append @data.buffer
+            bb.append data
             return bb.getBlob()
             
         # oops, no blobs supported :(
         return null
         
+    @makeBlobURL: (data) ->
+        return URL?.createObjectURL @makeBlob(data)
+        
+    @revokeBlobURL: (url) ->
+        URL?.revokeObjectURL url
+    
+    toBlob: ->
+        return Buffer.makeBlob @data.buffer
+        
     toBlobURL: ->
-        return URL.createObjectURL @toBlob()
+        return Buffer.makeBlobURL @data.buffer

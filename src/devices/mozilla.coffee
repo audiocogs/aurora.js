@@ -47,14 +47,9 @@ class MozillaAudioDevice extends EventEmitter
     # Use an inline worker to get setInterval
     # without being clamped in background tabs
     createTimer = (fn, interval) ->
-        BlobBuilder = window.BlobBuilder or window.MozBlobBuilder
-        unless BlobBuilder and URL and Worker
-            return setInterval fn, interval
-            
-        bb = new BlobBuilder
-        bb.append("setInterval(function() { postMessage('ping'); }, #{interval});");
-        url	= URL.createObjectURL bb.getBlob()
-        
+        url = Buffer.makeBlobURL("setInterval(function() { postMessage('ping'); }, #{interval});")
+        return setInterval fn, interval unless url?
+                
         worker = new Worker(url)
         worker.onmessage = fn
         worker.url = url
