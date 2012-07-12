@@ -36,16 +36,12 @@ class CAFDemuxer extends Demuxer
         while @stream.available(1)
             unless @headerCache
                 @headerCache =
-                    type:               @stream.readString(4)
-                    oversize:           @stream.readUInt32() isnt 0
-                    size:               @stream.readUInt32()
+                    type: @stream.readString(4)
+                    oversize: @stream.readUInt32() isnt 0
+                    size: @stream.readUInt32()
                 
-                if @headerCache.type is 'data' # Silly-Hack
-                    @stream.advance(4)
-                    @headerCache.size -= 4
-                
-            if @headerCache.oversize
-                return @emit 'error', "Holy Shit, an oversized file, not supported in JS"
+                if @headerCache.oversize
+                    return @emit 'error', "Holy Shit, an oversized file, not supported in JS"
             
             switch @headerCache.type
                 when 'kuki'
@@ -75,11 +71,24 @@ class CAFDemuxer extends Demuxer
                         @remainderFrames = @stream.readUInt32()
                         
                         @emit 'duration', @numFrames / @format.sampleRate * 1000 | 0
+                        @sentDuration = true
                         
                         @stream.advance(@headerCache.size - 24)
                         @headerCache = null
                     
                 when 'data'
+                    unless @sentFirstDataChunk
+                        # skip edit count
+                        @stream.advance(4)
+                        @headerCache.size -= 4
+
+                        # calculate the duration based on bytes per packet if no packet table
+                        if @format.bytesPerPacket isnt 0 and not @sentDuration
+                            @numFrames = @headerCache.size / @format.bytesPerPacket
+                            @emit 'duration', @numFrames / @format.sampleRate * 1000 | 0
+                            
+                        @sentFirstDataChunk = true
+                
                     buffer = @stream.readSingleBuffer(@headerCache.size)
                     @headerCache.size -= buffer.length
                     
