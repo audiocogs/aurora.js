@@ -75,6 +75,25 @@ class CAFDemuxer extends Demuxer
                         
                         @stream.advance(@headerCache.size - 24)
                         @headerCache = null
+                        
+                when 'info'
+                    entries = @stream.readUInt32()
+                    metadata = {}
+                    
+                    for i in [0...entries]
+                        # read null terminated string
+                        key = ''
+                        while (char = @stream.readUInt8()) isnt 0
+                            key += String.fromCharCode(char)
+                        
+                        value = ''
+                        while (char = @stream.readUInt8()) isnt 0
+                            value += String.fromCharCode(char)
+                        
+                        metadata[key] = value
+                    
+                    @emit 'metadata', metadata
+                    @headerCache = null
                     
                 when 'data'
                     unless @sentFirstDataChunk
