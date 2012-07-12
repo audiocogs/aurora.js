@@ -17,15 +17,19 @@ class CAFDemuxer extends Demuxer
                 
             unless @stream.readUInt32() is 0 and @stream.readUInt32() is 32
                 return @emit 'error', "Invalid 'desc' size, should be 32"
-                                
-            @format =
-                sampleRate:         @stream.readFloat64()
-                formatID:           @stream.readString(4)
-                formatFlags:        @stream.readUInt32()
-                bytesPerPacket:     @stream.readUInt32()
-                framesPerPacket:    @stream.readUInt32()
-                channelsPerFrame:   @stream.readUInt32()
-                bitsPerChannel:     @stream.readUInt32()
+                
+            @format = {}
+            @format.sampleRate = @stream.readFloat64()
+            @format.formatID = @stream.readString(4)
+            
+            flags = @stream.readUInt32()
+            @format.floatingPoint = Boolean(flags & 1)
+            @format.littleEndian = Boolean(flags & 2)
+            
+            @format.bytesPerPacket = @stream.readUInt32()
+            @format.framesPerPacket = @stream.readUInt32()
+            @format.channelsPerFrame = @stream.readUInt32()
+            @format.bitsPerChannel = @stream.readUInt32()
                 
             @emit 'format', @format
             

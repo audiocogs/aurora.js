@@ -1,26 +1,19 @@
 class LPCMDecoder extends Decoder
     Decoder.register('lpcm', LPCMDecoder)
     
-    @FLOATING_POINT = 1 << 0
-    @LITTLE_ENDIAN  = 1 << 1
-    {FLOATING_POINT, LITTLE_ENDIAN} = LPCMDecoder
-    
-    constructor: ->
-        super
-        
-        flags = @format.formatFlags or 0
-        @floatingPoint = Boolean(flags & FLOATING_POINT)
-        @littleEndian = Boolean(flags & LITTLE_ENDIAN)
+    init: ->
+        @floatingPoint = @format.floatingPoint
     
     readChunk: =>
-        {stream, littleEndian} = this
-        chunkSize = Math.min(4096, @stream.remainingBytes())
+        stream = @stream
+        littleEndian = @format.littleEndian
+        chunkSize = Math.min(4096, stream.remainingBytes())
         samples = chunkSize / (@format.bitsPerChannel / 8) >> 0
         
         if chunkSize is 0
             return @once 'available', @readChunk
         
-        if @floatingPoint
+        if @format.floatingPoint
             switch @format.bitsPerChannel
                 when 32
                     output = new Float32Array(samples)

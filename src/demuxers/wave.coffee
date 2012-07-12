@@ -32,14 +32,11 @@ class WAVEDemuxer extends Demuxer
                     encoding = @stream.readUInt16(true)
                     if encoding not of formats
                         return @emit 'error', 'Unsupported format in WAV file.'
-                    
-                    flags = 0
-                    flags |= LPCMDecoder.LITTLE_ENDIAN if formats[encoding] is 'lpcm'
-                    flags |= LPCMDecoder.FLOATING_POINT if encoding is 0x0003
                         
                     @format = 
                         formatID: formats[encoding]
-                        formatFlags: flags
+                        floatingPoint: encoding is 0x0003
+                        littleEndian: formats[encoding] is 'lpcm'
                         channelsPerFrame: @stream.readUInt16(true)
                         sampleRate: @stream.readUInt32(true)
                         

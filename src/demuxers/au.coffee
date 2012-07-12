@@ -6,6 +6,10 @@ class AUDemuxer extends Demuxer
         
     bps = [8, 8, 16, 24, 32, 32, 64]
     bps[26] = 8
+    
+    formats = 
+        1: 'ulaw'
+        27: 'alaw'
         
     readChunk: ->
         if not @readHeader and @stream.available(24)
@@ -17,22 +21,14 @@ class AUDemuxer extends Demuxer
             encoding = @stream.readUInt32()
             
             @format = 
-                formatID: 'lpcm'
-                formatFlags: 0
+                formatID: formats[encoding] or 'lpcm'
+                floatingPoint: encoding in [6, 7]
                 bitsPerChannel: bps[encoding - 1]
                 sampleRate: @stream.readUInt32()
                 channelsPerFrame: @stream.readUInt32()
             
             if not @format.bitsPerChannel?
                 return @emit 'error', 'Unsupported encoding in AU file.'
-            
-            switch encoding
-                when 1
-                    @format.formatID = 'ulaw'
-                when 6, 7
-                    @format.formatFlags |= LPCMDecoder.FLOATING_POINT
-                when 27
-                    @format.formatID = 'alaw'
             
             if dataSize isnt 0xffffffff
                 bytes = @format.bitsPerChannel / 8

@@ -28,7 +28,6 @@ class AIFFDemuxer extends Demuxer
                     
                     @format =
                         formatID: 'lpcm'
-                        formatFlags: 0
                         channelsPerFrame: @stream.readUInt16()
                         sampleCount: @stream.readUInt32()
                         bitsPerChannel: @stream.readUInt16()
@@ -36,15 +35,12 @@ class AIFFDemuxer extends Demuxer
                     
                     if @fileType is 'AIFC'
                         format = @stream.readString(4)
-                        
-                        if format is 'sowt'
-                            @format.formatFlags |= LPCMDecoder.LITTLE_ENDIAN
-                            
-                        if format in ['fl32', 'fl64']
-                            @format.formatFlags |= LPCMDecoder.FLOATING_POINT
-                        
                         format = 'lpcm' if format in ['twos', 'sowt', 'fl32', 'fl64', 'NONE']
+                            
                         @format.formatID = format
+                        @format.littleEndian = format is 'sowt'
+                        @format.floatingPoint = format in ['fl32', 'fl64']
+                        
                         @len -= 4
                         
                     @stream.advance(@len - 18)
