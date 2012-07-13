@@ -117,6 +117,7 @@ class Player extends EventEmitter
                 if decoder.receivedFinalBuffer
                     @currentTime = @duration
                     @emit 'progress', @currentTime
+                    @emit 'end'
                     @pause()
                 else
                     # if we ran out of data in the middle of 
