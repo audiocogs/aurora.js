@@ -19,19 +19,16 @@ end
 
 task :server do
   require 'webrick'
-  require 'ruby-prof'
-  
+
   server = WEBrick::HTTPServer.new(:Port => 3030)
-  
+
   server.mount_proc('/aurora.js') do |req, res|
     res.status = 200
     res['Content-Type'] = 'application/javascript'
-    
-    RubyProf.start
+
     res.body = Aurora.file('aurora.erb.js', :erb)
-    RubyProf::FlatPrinter.new(RubyProf.stop).print(STDOUT)
   end
-  
+
   server.start
 end
 
