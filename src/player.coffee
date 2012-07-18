@@ -6,10 +6,12 @@
 # playback time.
 #
 
-class Player extends EventEmitter
+class Player extends Aurora.EventEmitter
     window.Player = Player
     
     constructor: (@asset) ->
+        super()
+        
         @playing = false
         @buffered = 0
         @currentTime = 0

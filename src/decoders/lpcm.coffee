@@ -1,20 +1,20 @@
-class LPCMDecoder extends Decoder
-    Decoder.register('lpcm', LPCMDecoder)
+class LPCMDecoder extends Aurora.Decoder
+    Aurora.Decoder.register('lpcm', LPCMDecoder)
     
     init: ->
-        @floatingPoint = @format.floatingPoint
+        @floatingPoint = @$.format.floatingPoint
     
     readChunk: =>
-        stream = @stream
-        littleEndian = @format.littleEndian
+        stream = @$.stream
+        littleEndian = @$.format.littleEndian
         chunkSize = Math.min(4096, stream.remainingBytes())
-        samples = chunkSize / (@format.bitsPerChannel / 8) >> 0
+        samples = chunkSize / (@$.format.bitsPerChannel / 8) >> 0
         
         if chunkSize is 0
             return @once 'available', @readChunk
         
-        if @format.floatingPoint
-            switch @format.bitsPerChannel
+        if @$.format.floatingPoint
+            switch @$.format.bitsPerChannel
                 when 32
                     output = new Float32Array(samples)
                     for i in [0...samples] by 1
@@ -29,7 +29,7 @@ class LPCMDecoder extends Decoder
                     return @emit 'error', 'Unsupported bit depth.'
             
         else
-            switch @format.bitsPerChannel
+            switch @$.format.bitsPerChannel
                 when 8
                     output = new Int8Array(samples)
                     for i in [0...samples] by 1

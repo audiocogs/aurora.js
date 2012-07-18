@@ -6,10 +6,12 @@
 # file to linear PCM raw audio data.
 #
 
-class Asset extends EventEmitter
+class Asset extends Aurora.EventEmitter
     window.Asset = Asset
     
     constructor: (@source) ->
+        super()
+        
         @buffered = 0
         @duration = null
         @format = null

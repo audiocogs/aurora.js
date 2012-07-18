@@ -4,8 +4,10 @@
 # based on the device hardware time and the play/pause/seek state
 #
 
-class AudioDevice extends EventEmitter
+class AudioDevice extends Aurora.EventEmitter
     constructor: (@sampleRate, @channels) ->
+        super()
+        
         @playing = false
         @currentTime = 0
         @_lastTime = 0

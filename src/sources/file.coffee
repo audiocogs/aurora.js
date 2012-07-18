@@ -1,4 +1,4 @@
-class FileSource extends EventEmitter
+class FileSource extends Aurora.EventEmitter
     constructor: (@file) ->
         if not window.FileReader
             return @emit 'error', 'This browser does not have FileReader support.'
@@ -11,7 +11,7 @@ class FileSource extends EventEmitter
         @reader = new FileReader
         
         @reader.onload = (e) =>
-            buf = new Buffer(new Uint8Array(e.target.result))
+            buf = new Aurora.Buffer(e.target.result)
             @offset += buf.length
         
             @emit 'data', buf

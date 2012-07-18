@@ -1,5 +1,5 @@
-class AUDemuxer extends Demuxer
-    Demuxer.register(AUDemuxer)
+class AUDemuxer extends Aurora.Demuxer
+    Aurora.Demuxer.register(AUDemuxer)
     
     @probe: (buffer) ->
         return buffer.peekString(0, 4) is '.snd'
@@ -12,32 +12,32 @@ class AUDemuxer extends Demuxer
         27: 'alaw'
         
     readChunk: ->
-        if not @readHeader and @stream.available(24)
-            if @stream.readString(4) isnt '.snd'
+        if not @readHeader and @$.stream.available(24)
+            if @$.stream.readString(4) isnt '.snd'
                 return @emit 'error', 'Invalid AU file.'
                 
-            size = @stream.readUInt32()
-            dataSize = @stream.readUInt32()
-            encoding = @stream.readUInt32()
+            size = @$.stream.readUInt32()
+            dataSize = @$.stream.readUInt32()
+            encoding = @$.stream.readUInt32()
             
-            @format = 
+            @$.format = 
                 formatID: formats[encoding] or 'lpcm'
                 floatingPoint: encoding in [6, 7]
                 bitsPerChannel: bps[encoding - 1]
-                sampleRate: @stream.readUInt32()
-                channelsPerFrame: @stream.readUInt32()
+                sampleRate: @$.stream.readUInt32()
+                channelsPerFrame: @$.stream.readUInt32()
             
-            if not @format.bitsPerChannel?
+            if not @$.format.bitsPerChannel?
                 return @emit 'error', 'Unsupported encoding in AU file.'
             
             if dataSize isnt 0xffffffff
-                bytes = @format.bitsPerChannel / 8
-                @emit 'duration', dataSize / bytes / @format.channelsPerFrame / @format.sampleRate * 1000 | 0
+                bytes = @$.format.bitsPerChannel / 8
+                @emit 'duration', dataSize / bytes / @$.format.channelsPerFrame / @$.format.sampleRate * 1000 | 0
             
-            @emit 'format', @format
+            @emit 'format', @$.format
             @readHeader = true
             
         if @readHeader
-            while @stream.available(1)
-                buf = @stream.readSingleBuffer(@stream.remainingBytes())
-                @emit 'data', buf, @stream.remainingBytes() is 0
+            while @$.stream.available(1)
+                buf = @$.stream.readSingleBuffer(@$.stream.remainingBytes())
+                @emit 'data', buf, @$.stream.remainingBytes() is 0

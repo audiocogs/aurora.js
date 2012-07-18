@@ -1,4 +1,4 @@
-class WebKitAudioDevice extends EventEmitter
+class WebKitAudioDevice extends Aurora.EventEmitter
     AudioDevice.register(WebKitAudioDevice)
     
     # determine whether this device is supported by the browser

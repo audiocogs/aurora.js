@@ -1,4 +1,4 @@
-class MozillaAudioDevice extends EventEmitter
+class MozillaAudioDevice extends Aurora.EventEmitter
     AudioDevice.register(MozillaAudioDevice)
     
     # determine whether this device is supported by the browser

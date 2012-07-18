@@ -1,19 +1,30 @@
 <%= Aurora.file 'LICENSE' %>
 
-<%= Aurora.coffee 'core/base.coffee' %>
-<%= Aurora.coffee 'core/buffer.coffee' %>
-<%= Aurora.coffee 'core/bufferlist.coffee' %>
-<%= Aurora.coffee 'core/stream.coffee' %>
-<%= Aurora.coffee 'core/bitstream.coffee' %>
-<%= Aurora.coffee 'core/events.coffee' %>
+void function (global) {
+	"use strict";
 
-<%= Aurora.coffee 'demuxer.coffee' %>
-<%= Aurora.coffee 'decoder.coffee' %>
-<%= Aurora.coffee 'queue.coffee' %>
-<%= Aurora.coffee 'device.coffee' %>
+	global.Aurora = {}
+}(this)
+
+<%= Aurora.file 'core/object.js' %>
+
+<%= Aurora.file 'core/buffer.js' %>
+<%= Aurora.file 'core/buffer-list.js' %>
+
+<%= Aurora.file 'core/stream.js' %>
+<%= Aurora.file 'core/bit-stream.js' %>
+
+<%= Aurora.file 'core/event-emitter.js' %>
+
+<%= Aurora.file 'demuxer.js' %>
+<%= Aurora.file 'decoder.js' %>
+
+<%= Aurora.file 'queue.js' %>
+
 <%= Aurora.coffee 'asset.coffee' %>
 <%= Aurora.coffee 'player.coffee' %>
 
+<%= Aurora.coffee 'device.coffee' %>
 <%= Aurora.coffee 'devices/webkit.coffee' %>
 <%= Aurora.coffee 'devices/mozilla.coffee' %>
 

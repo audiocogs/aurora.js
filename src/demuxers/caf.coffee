@@ -1,93 +1,93 @@
-class CAFDemuxer extends Demuxer
-    Demuxer.register(CAFDemuxer)
+class CAFDemuxer extends Aurora.Demuxer
+    Aurora.Demuxer.register(CAFDemuxer)
     
     @probe: (buffer) ->
         return buffer.peekString(0, 4) is 'caff'
         
     readChunk: ->
-        if not @format and @stream.available(64) # Number out of my behind
-            if @stream.readString(4) isnt 'caff'
+        if not @$.format and @$.stream.available(64) # Number out of my behind
+            if @$.stream.readString(4) isnt 'caff'
                 return @emit 'error', "Invalid CAF, does not begin with 'caff'"
                 
             # skip version and flags
-            @stream.advance(4)
+            @$.stream.advance(4)
             
-            if @stream.readString(4) isnt 'desc'
+            if @$.stream.readString(4) isnt 'desc'
                 return @emit 'error', "Invalid CAF, 'caff' is not followed by 'desc'"
                 
-            unless @stream.readUInt32() is 0 and @stream.readUInt32() is 32
+            unless @$.stream.readUInt32() is 0 and @$.stream.readUInt32() is 32
                 return @emit 'error', "Invalid 'desc' size, should be 32"
                 
-            @format = {}
-            @format.sampleRate = @stream.readFloat64()
-            @format.formatID = @stream.readString(4)
+            @$.format = {}
+            @$.format.sampleRate = @$.stream.readFloat64()
+            @$.format.formatID = @$.stream.readString(4)
             
-            flags = @stream.readUInt32()
-            @format.floatingPoint = Boolean(flags & 1)
-            @format.littleEndian = Boolean(flags & 2)
+            flags = @$.stream.readUInt32()
+            @$.format.floatingPoint = Boolean(flags & 1)
+            @$.format.littleEndian = Boolean(flags & 2)
             
-            @format.bytesPerPacket = @stream.readUInt32()
-            @format.framesPerPacket = @stream.readUInt32()
-            @format.channelsPerFrame = @stream.readUInt32()
-            @format.bitsPerChannel = @stream.readUInt32()
+            @$.format.bytesPerPacket = @$.stream.readUInt32()
+            @$.format.framesPerPacket = @$.stream.readUInt32()
+            @$.format.channelsPerFrame = @$.stream.readUInt32()
+            @$.format.bitsPerChannel = @$.stream.readUInt32()
                 
-            @emit 'format', @format
+            @emit 'format', @$.format
             
-        while @stream.available(1)
+        while @$.stream.available(1)
             unless @headerCache
                 @headerCache =
-                    type: @stream.readString(4)
-                    oversize: @stream.readUInt32() isnt 0
-                    size: @stream.readUInt32()
+                    type: @$.stream.readString(4)
+                    oversize: @$.stream.readUInt32() isnt 0
+                    size: @$.stream.readUInt32()
                 
                 if @headerCache.oversize
                     return @emit 'error', "Holy Shit, an oversized file, not supported in JS"
             
             switch @headerCache.type
                 when 'kuki'
-                    if @stream.available(@headerCache.size)
-                        if @format.formatID is 'aac ' # variations needed?
+                    if @$.stream.available(@headerCache.size)
+                        if @$.format.formatID is 'aac ' # variations needed?
                             @len = @headerCache.size
                             M4ADemuxer::readEsds.call(this)
                     
                         else
-                            buffer = @stream.readBuffer(@headerCache.size)
+                            buffer = @$.stream.readBuffer(@headerCache.size)
                             @emit 'cookie', buffer
                         
                         @headerCache = null
                         
                 when 'pakt'
-                    if @stream.available(@headerCache.size)
-                        if @stream.readUInt32() isnt 0
+                    if @$.stream.available(@headerCache.size)
+                        if @$.stream.readUInt32() isnt 0
                             return @emit 'error', 'Sizes greater than 32 bits are not supported.'
                             
-                        @numPackets = @stream.readUInt32()
+                        @numPackets = @$.stream.readUInt32()
                         
-                        if @stream.readUInt32() isnt 0
+                        if @$.stream.readUInt32() isnt 0
                             return @emit 'error', 'Sizes greater than 32 bits are not supported.'
                             
-                        @numFrames = @stream.readUInt32()
-                        @primingFrames = @stream.readUInt32()
-                        @remainderFrames = @stream.readUInt32()
+                        @numFrames = @$.stream.readUInt32()
+                        @primingFrames = @$.stream.readUInt32()
+                        @remainderFrames = @$.stream.readUInt32()
                         
-                        @emit 'duration', @numFrames / @format.sampleRate * 1000 | 0
+                        @emit 'duration', @numFrames / @$.format.sampleRate * 1000 | 0
                         @sentDuration = true
                         
-                        @stream.advance(@headerCache.size - 24)
+                        @$.stream.advance(@headerCache.size - 24)
                         @headerCache = null
                         
                 when 'info'
-                    entries = @stream.readUInt32()
+                    entries = @$.stream.readUInt32()
                     metadata = {}
                     
                     for i in [0...entries]
                         # read null terminated string
                         key = ''
-                        while (char = @stream.readUInt8()) isnt 0
+                        while (char = @$.stream.readUInt8()) isnt 0
                             key += String.fromCharCode(char)
                         
                         value = ''
-                        while (char = @stream.readUInt8()) isnt 0
+                        while (char = @$.stream.readUInt8()) isnt 0
                             value += String.fromCharCode(char)
                         
                         metadata[key] = value
@@ -98,17 +98,17 @@ class CAFDemuxer extends Demuxer
                 when 'data'
                     unless @sentFirstDataChunk
                         # skip edit count
-                        @stream.advance(4)
+                        @$.stream.advance(4)
                         @headerCache.size -= 4
 
                         # calculate the duration based on bytes per packet if no packet table
-                        if @format.bytesPerPacket isnt 0 and not @sentDuration
-                            @numFrames = @headerCache.size / @format.bytesPerPacket
-                            @emit 'duration', @numFrames / @format.sampleRate * 1000 | 0
+                        if @$.format.bytesPerPacket isnt 0 and not @sentDuration
+                            @numFrames = @headerCache.size / @$.format.bytesPerPacket
+                            @emit 'duration', @numFrames / @$.format.sampleRate * 1000 | 0
                             
                         @sentFirstDataChunk = true
                 
-                    buffer = @stream.readSingleBuffer(@headerCache.size)
+                    buffer = @$.stream.readSingleBuffer(@headerCache.size)
                     @headerCache.size -= buffer.length
                     
                     @emit 'data', buffer, @headerCache.size is 0
@@ -117,8 +117,8 @@ class CAFDemuxer extends Demuxer
                         @headerCache = null
                     
                 else
-                    if @stream.available(@headerCache.size)
-                        @stream.advance(@headerCache.size)
+                    if @$.stream.available(@headerCache.size)
+                        @$.stream.advance(@headerCache.size)
                         @headerCache = null
                         
         return

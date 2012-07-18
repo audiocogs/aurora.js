@@ -1,6 +1,6 @@
-class XLAWDecoder extends Decoder
-    Decoder.register('ulaw', XLAWDecoder)
-    Decoder.register('alaw', XLAWDecoder)
+class XLAWDecoder extends Aurora.Decoder
+    Aurora.Decoder.register('ulaw', XLAWDecoder)
+    Aurora.Decoder.register('alaw', XLAWDecoder)
     
     SIGN_BIT   = 0x80
     QUANT_MASK = 0xf
@@ -9,12 +9,12 @@ class XLAWDecoder extends Decoder
     BIAS       = 0x84
     
     constructor: ->
-        super
+        super()
         
-        @format.bitsPerChannel = 16
+        @$.format.bitsPerChannel = 16
         @table = table = new Float32Array(256)
         
-        if @format.formatID is 'ulaw'
+        if @$.format.formatID is 'ulaw'
             for i in [0...256]
                 # Complement to obtain normal u-law value.
                 val = ~i
@@ -43,8 +43,8 @@ class XLAWDecoder extends Decoder
             
     readChunk: =>
         {stream, table} = this
-        chunkSize = Math.min(4096, @stream.remainingBytes())
-        samples = chunkSize / (@format.bitsPerChannel / 8) >> 0
+        chunkSize = Math.min(4096, @$.stream.remainingBytes())
+        samples = chunkSize / (@$.format.bitsPerChannel / 8) >> 0
         
         if chunkSize is 0
             return @once 'available', @readChunk

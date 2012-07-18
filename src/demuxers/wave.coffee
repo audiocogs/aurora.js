@@ -1,5 +1,5 @@
-class WAVEDemuxer extends Demuxer
-    Demuxer.register(WAVEDemuxer)
+class WAVEDemuxer extends Aurora.Demuxer
+    Aurora.Demuxer.register(WAVEDemuxer)
     
     @probe: (buffer) ->
         return buffer.peekString(0, 4) is 'RIFF' && 
@@ -12,54 +12,54 @@ class WAVEDemuxer extends Demuxer
         0x0007: 'ulaw'
                
     readChunk: ->
-        if not @readStart and @stream.available(12)
-            if @stream.readString(4) isnt 'RIFF'
+        if not @readStart and @$.stream.available(12)
+            if @$.stream.readString(4) isnt 'RIFF'
                 return @emit 'error', 'Invalid WAV file.'
                 
-            @fileSize = @stream.readUInt32(true)
+            @fileSize = @$.stream.readUInt32(true)
             @readStart = true
             
-            if @stream.readString(4) isnt 'WAVE'
+            if @$.stream.readString(4) isnt 'WAVE'
                 return @emit 'error', 'Invalid WAV file.'
                 
-        while @stream.available(1)
-            if not @readHeaders and @stream.available(8)
-                @type = @stream.readString(4)
-                @len = @stream.readUInt32(true) # little endian
+        while @$.stream.available(1)
+            if not @readHeaders and @$.stream.available(8)
+                @type = @$.stream.readString(4)
+                @len = @$.stream.readUInt32(true) # little endian
                 
             switch @type
                 when 'fmt '
-                    encoding = @stream.readUInt16(true)
+                    encoding = @$.stream.readUInt16(true)
                     if encoding not of formats
                         return @emit 'error', 'Unsupported format in WAV file.'
                         
-                    @format = 
+                    @$.format = 
                         formatID: formats[encoding]
                         floatingPoint: encoding is 0x0003
                         littleEndian: formats[encoding] is 'lpcm'
-                        channelsPerFrame: @stream.readUInt16(true)
-                        sampleRate: @stream.readUInt32(true)
+                        channelsPerFrame: @$.stream.readUInt16(true)
+                        sampleRate: @$.stream.readUInt32(true)
                         
-                    @stream.advance(4) # bytes/sec.
-                    @stream.advance(2) # block align
+                    @$.stream.advance(4) # bytes/sec.
+                    @$.stream.advance(2) # block align
                     
-                    @format.bitsPerChannel = @bitsPerChannel = @stream.readUInt16(true)
-                    @emit 'format', @format
+                    @$.format.bitsPerChannel = @bitsPerChannel = @$.stream.readUInt16(true)
+                    @emit 'format', @$.format
                     
                 when 'data'
                     if not @sentDuration
                         bytes = @bitsPerChannel / 8
-                        @emit 'duration', @len / bytes / @format.channelsPerFrame / @format.sampleRate * 1000 | 0
+                        @emit 'duration', @len / bytes / @$.format.channelsPerFrame / @$.format.sampleRate * 1000 | 0
                         @sentDuration = true
                 
-                    buffer = @stream.readSingleBuffer(@len)
+                    buffer = @$.stream.readSingleBuffer(@len)
                     @len -= buffer.length
                     @readHeaders = @len > 0
                     @emit 'data', buffer, @len is 0
                     
                 else
-                    return unless @stream.available(@len)
-                    @stream.advance(@len)
+                    return unless @$.stream.available(@len)
+                    @$.stream.advance(@len)
                         
             @readHeaders = false unless @type is 'data'
             

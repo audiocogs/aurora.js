@@ -1,9 +1,9 @@
 Test.module 'core/events', ->
-    emitter = new EventEmitter
+    emitter = new Aurora.EventEmitter
     fn = null
     times = 0
     
-    @test 'EventEmitter#on', ->
+    @test 'Aurora.EventEmitter#on', ->
         emitter.on 'hello', fn = (a, b) =>
             times++
             @assert a is 'a'
@@ -14,13 +14,13 @@ Test.module 'core/events', ->
         
         @assert times is 2
         
-    @test 'EventEmitter#off', ->
+    @test 'Aurora.EventEmitter#off', ->
         emitter.off 'hello', fn
         emitter.emit 'hello', 'a', 'b'
         
         @assert times is 2
         
-    @test 'EventEmitter#once', ->
+    @test 'Aurora.EventEmitter#once', ->
         times = 0
         emitter.once 'hello', ->
             times++
@@ -31,7 +31,7 @@ Test.module 'core/events', ->
         
         @assert times is 1
         
-    @test 'EventEmitter#emit', ->
+    @test 'Aurora.EventEmitter#emit', ->
         times = 0
         emitter.on 'foo', ->
             times++
