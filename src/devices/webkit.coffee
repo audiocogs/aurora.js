@@ -14,7 +14,7 @@ class WebKitAudioDevice extends EventEmitter
         @deviceChannels = @context.destination.numberOfChannels
         @deviceSampleRate = @context.sampleRate
         
-        @node = @context.createJavaScriptNode(4096, @deviceChannels, @deviceChannels)
+        @node = @context.createJavaScriptNode(4096, @channels, @channels)
         @node.onaudioprocess = @refill
         @node.connect(@context.destination)
         
