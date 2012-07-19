@@ -63,7 +63,7 @@ class Asset extends Aurora.EventEmitter
     probe: (chunk) =>
         return unless @active
         
-        demuxer = Demuxer.find(chunk)
+        demuxer = Aurora.Demuxer.find(chunk)
         if not demuxer
             return @emit 'error', 'A demuxer for this container was not found.'
             
@@ -86,7 +86,7 @@ class Asset extends Aurora.EventEmitter
         @emit 'format', @format
         console.log @format
         
-        decoder = Decoder.find(@format.formatID)
+        decoder = Aurora.Decoder.find(@format.formatID)
         if not decoder
             return @emit 'error', "A decoder for #{@format.formatID} was not found."
 

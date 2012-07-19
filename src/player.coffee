@@ -29,7 +29,7 @@ class Player extends Aurora.EventEmitter
             @emit 'buffer', @buffered
         
         @asset.on 'decodeStart', =>
-            @queue = new Queue(@asset.decoder)
+            @queue = new Aurora.Queue(@asset.decoder)
             @queue.once 'ready', @startPlaying
             
         @asset.on 'format', (@format) =>
