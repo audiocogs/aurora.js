@@ -74,7 +74,7 @@ void function (global) {
 	}})
 
 	Aurora.extend = function (type, name, privateProperties, properties) {
-		var result = Object.create(Object.getPrototypeOf(type), properties || {})
+		var result = Object.create(Object.getPrototypeOf(type))
 		var keys = Object.getOwnPropertyNames(type), dollar = type.$.__cs_clone(2)
 
 		for (var i = 0; i < keys.length; i++) {
@@ -83,6 +83,7 @@ void function (global) {
 			}
 		}
 
+		Object.defineProperties(result, properties || {})
 		Object.defineProperties(dollar, privateProperties || {})
 
 		Object.defineProperty(result, '$', { value: dollar })
