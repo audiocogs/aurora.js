@@ -90,7 +90,7 @@ class Player extends Aurora.EventEmitter
         {format, decoder} = @asset
         div = if decoder.floatingPoint then 1 else Math.pow(2, format.bitsPerChannel - 1)
         
-        @device = new AudioDevice(format.sampleRate, format.channelsPerFrame)
+        @device = new Aurora.Device(format.sampleRate, format.channelsPerFrame)
         @device.on 'timeUpdate', (@currentTime) =>
             @emit 'progress', @currentTime
         

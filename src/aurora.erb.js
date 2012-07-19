@@ -19,8 +19,7 @@ void function (global) {
 <%= Aurora.file 'demuxer.js' %>
 <%= Aurora.file 'decoder.js' %>
 <%= Aurora.file 'filter.js' %>
-
-<%= Aurora.coffee 'device.coffee' %>
+<%= Aurora.file 'device.js' %>
 
 <%= Aurora.file 'queue.js' %>
 
