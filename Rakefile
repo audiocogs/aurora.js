@@ -21,11 +21,11 @@ task :build do
   Dir.glob("#{AURORA}/elements/**/element.aurora") do |filename|
     json = JSON.load(File.open(filename).read)
 
-    output = File.new("#{LIB}/src/#{json['output']}", 'w+')
+    output = File.new("#{LIB}/#{json['output']}", 'w+')
 
     Thread.current[:path] = ["#{File.dirname(filename)}/src/"]
 
-    output << Aurora.file("#{File.dirname(filename)}/src/#{json['source']}", :type => :erb)
+    output << Aurora.file("#{json['source']}", :type => :erb)
 
     output.close
   end
