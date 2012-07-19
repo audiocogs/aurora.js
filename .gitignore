@@ -10,3 +10,5 @@ node_modules
 elements/
 tmtags
 tmtagsHistory
+lib/
+!lib/aurora.js
