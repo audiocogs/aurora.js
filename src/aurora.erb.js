@@ -22,6 +22,3 @@ void function (global) {
 <%= Aurora.file 'device.js' %>
 
 <%= Aurora.file 'queue.js' %>
-
-<%= Aurora.coffee 'asset.coffee' %>
-<%= Aurora.coffee 'player.coffee' %>

@@ -18,7 +18,7 @@ task :build do
 
   output.close
 
-  Dir.glob("#{AURORA}/elements/**/element.aurora") do |filename|
+  Dir.glob("#{AURORA}/plugins/**/plugin.aurora") do |filename|
     json = JSON.load(File.open(filename).read)
 
     output = File.new("#{LIB}/#{json['output']}", 'w+')
@@ -46,10 +46,10 @@ task :server do
     res.body = Aurora.file('aurora.erb.js', :type => :erb)
   end
 
-  Dir.glob("#{AURORA}/elements/**/element.aurora") do |filename|
+  Dir.glob("#{AURORA}/plugins/**/plugin.aurora") do |filename|
     json = JSON.load(File.open(filename).read)
 
-    server.mount_proc("/elements/#{json['output']}") do |req, res|
+    server.mount_proc("/plugins/#{json['output']}") do |req, res|
       res.status = 200
       res['Content-Type'] = 'application/javascript'
 
