@@ -8,6 +8,7 @@ ehthumbs.db
 Thumbs.db
 node_modules
 plugins/
+!plugins/PLUGINS.md
 tmtags
 tmtagsHistory
 lib/
