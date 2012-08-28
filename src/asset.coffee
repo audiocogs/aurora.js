@@ -91,6 +91,9 @@ class Asset extends EventEmitter
         @decoder = new decoder(@demuxer, @format)
         @decoder.on 'data', (buffer) =>
             @emit 'data', buffer
+			
+        @decoder.on 'end', () =>
+            @emit 'end'
             
         @decoder.on 'error', (err) =>
             @emit 'error', err
