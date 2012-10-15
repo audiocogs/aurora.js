@@ -1,3 +1,5 @@
+AV = {}
+
 #import "core/base.coffee"
 #import "core/buffer.coffee"
 #import "core/bufferlist.coffee"
@@ -21,7 +23,6 @@
 #import "filter.coffee"
 #import "filters/volume.coffee"
 #import "filters/balance.coffee"
-#import "filters/earwax.coffee"
 
 #import "demuxers/caf.coffee"
 #import "demuxers/m4a.coffee"

@@ -1,5 +1,5 @@
-class AIFFDemuxer extends Demuxer
-    Demuxer.register(AIFFDemuxer)
+class AIFFDemuxer extends AV.Demuxer
+    AV.Demuxer.register(AIFFDemuxer)
     
     @probe: (buffer) ->
         return buffer.peekString(0, 4) is 'FORM' && 

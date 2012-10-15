@@ -6,9 +6,7 @@
 # playback time.
 #
 
-class Player extends EventEmitter
-    window.Player = Player
-    
+class AV.Player extends AV.EventEmitter
     constructor: (@asset) ->
         @playing = false
         @buffered = 0
@@ -19,15 +17,15 @@ class Player extends EventEmitter
         @metadata = {}
         
         @filters = [
-            new VolumeFilter(this, 'volume')
-            new BalanceFilter(this, 'pan')
+            new AV.VolumeFilter(this, 'volume')
+            new AV.BalanceFilter(this, 'pan')
         ]
         
         @asset.on 'buffer', (@buffered) =>
             @emit 'buffer', @buffered
         
         @asset.on 'decodeStart', =>
-            @queue = new Queue(@asset.decoder)
+            @queue = new AV.Queue(@asset.decoder)
             @queue.once 'ready', @startPlaying
             
         @asset.on 'format', (@format) =>
@@ -43,12 +41,12 @@ class Player extends EventEmitter
             @emit 'error', error
                 
     @fromURL: (url) ->
-        asset = Asset.fromURL(url)
-        return new Player(asset)
+        asset = AV.Asset.fromURL(url)
+        return new AV.Player(asset)
         
     @fromFile: (file) ->
-        asset = Asset.fromFile(file)
-        return new Player(asset)
+        asset = AV.Asset.fromFile(file)
+        return new AV.Player(asset)
         
     preload: ->
         return unless @asset
@@ -88,7 +86,7 @@ class Player extends EventEmitter
         {format, decoder} = @asset
         div = if decoder.floatingPoint then 1 else Math.pow(2, format.bitsPerChannel - 1)
         
-        @device = new AudioDevice(format.sampleRate, format.channelsPerFrame)
+        @device = new AV.AudioDevice(format.sampleRate, format.channelsPerFrame)
         @device.on 'timeUpdate', (@currentTime) =>
             @emit 'progress', @currentTime
         

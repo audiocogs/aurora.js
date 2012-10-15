@@ -1,8 +1,8 @@
-class Decoder extends EventEmitter
+class AV.Decoder extends AV.EventEmitter
     constructor: (demuxer, @format) ->
-        list = new BufferList
-        @stream = new Stream(list)
-        @bitstream = new Bitstream(@stream)
+        list = new AV.BufferList
+        @stream = new AV.Stream(list)
+        @bitstream = new AV.Bitstream(@stream)
         @receivedFinalBuffer = false
         
         demuxer.on 'cookie', (cookie) =>

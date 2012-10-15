@@ -1,4 +1,4 @@
-class Filter
+class AV.Filter
     constructor: (context, key) ->
         # default constructor takes a single value
         # override to take more parameters

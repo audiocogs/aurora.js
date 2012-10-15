@@ -4,7 +4,7 @@
 # based on the device hardware time and the play/pause/seek state
 #
 
-class AudioDevice extends EventEmitter
+class AV.AudioDevice extends AV.EventEmitter
     constructor: (@sampleRate, @channels) ->
         @playing = false
         @currentTime = 0
@@ -14,7 +14,7 @@ class AudioDevice extends EventEmitter
         return if @playing
         @playing = true
         
-        @device ?= AudioDevice.create(@sampleRate, @channels)
+        @device ?= AV.AudioDevice.create(@sampleRate, @channels)
         @_lastTime = @device.getDeviceTime()
             
         @_timer = setInterval @updateTime, 200

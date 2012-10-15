@@ -1,4 +1,4 @@
-class BufferList
+class AV.BufferList
     constructor: ->
         @buffers = []
         @availableBytes = 0
@@ -6,7 +6,7 @@ class BufferList
         @first = null
     
     copy: ->
-        result = new BufferList
+        result = new AV.BufferList
 
         result.buffers = @buffers.slice(0)
         result.first = result.buffers[0]

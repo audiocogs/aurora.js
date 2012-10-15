@@ -1,10 +1,10 @@
 #import "resampler.js"
 
-class WebKitAudioDevice extends EventEmitter
-    AudioDevice.register(WebKitAudioDevice)
+class WebKitAudioDevice extends AV.EventEmitter
+    AV.AudioDevice.register(WebKitAudioDevice)
     
     # determine whether this device is supported by the browser
-    AudioContext = window.AudioContext or window.webkitAudioContext
+    AudioContext = global.AudioContext or global.webkitAudioContext
     @supported: AudioContext?
     
     # Chrome limits the number of AudioContexts that one can create,
@@ -13,7 +13,6 @@ class WebKitAudioDevice extends EventEmitter
     
     constructor: (@sampleRate, @channels) ->
         @context = sharedContext ?= new AudioContext
-        @deviceChannels = @context.destination.numberOfChannels
         @deviceSampleRate = @context.sampleRate
         
         # calculate the buffer size to read
@@ -56,4 +55,4 @@ class WebKitAudioDevice extends EventEmitter
         @node.disconnect(0)
         
     getDeviceTime: ->
-        return @context.currentTime * @deviceSampleRate
+        return @context.currentTime * @sampleRate

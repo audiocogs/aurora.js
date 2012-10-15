@@ -1,5 +1,5 @@
-class AUDemuxer extends Demuxer
-    Demuxer.register(AUDemuxer)
+class AUDemuxer extends AV.Demuxer
+    AV.Demuxer.register(AUDemuxer)
     
     @probe: (buffer) ->
         return buffer.peekString(0, 4) is '.snd'

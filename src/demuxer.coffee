@@ -1,11 +1,11 @@
-class Demuxer extends EventEmitter
+class AV.Demuxer extends AV.EventEmitter
     @probe: (buffer) ->
         return false
     
     constructor: (source, chunk) ->
-        list = new BufferList
+        list = new AV.BufferList
         list.push(chunk)
-        @stream = new Stream(list)
+        @stream = new AV.Stream(list)
         
         received = false
         source.on 'data', (chunk) =>
@@ -37,7 +37,7 @@ class Demuxer extends EventEmitter
         formats.push demuxer
             
     @find: (buffer) ->
-        stream = Stream.fromBuffer(buffer)        
+        stream = AV.Stream.fromBuffer(buffer)        
         for format in formats when format.probe(stream)
             return format
             

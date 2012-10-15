@@ -1,4 +1,4 @@
-class Queue extends EventEmitter
+class AV.Queue extends AV.EventEmitter
     constructor: (@decoder) ->
         @readyMark = 64
         @finished = false

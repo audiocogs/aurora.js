@@ -1,5 +1,5 @@
-class LPCMDecoder extends Decoder
-    Decoder.register('lpcm', LPCMDecoder)
+class LPCMDecoder extends AV.Decoder
+    AV.Decoder.register('lpcm', LPCMDecoder)
     
     init: ->
         @floatingPoint = @format.floatingPoint

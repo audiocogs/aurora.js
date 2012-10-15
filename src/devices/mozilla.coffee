@@ -1,8 +1,8 @@
-class MozillaAudioDevice extends EventEmitter
-    AudioDevice.register(MozillaAudioDevice)
+class MozillaAudioDevice extends AV.EventEmitter
+    AV.AudioDevice.register(MozillaAudioDevice)
     
     # determine whether this device is supported by the browser
-    @supported: 'mozWriteAudio' of new Audio
+    @supported: Audio? and 'mozWriteAudio' of new Audio
     
     constructor: (@sampleRate, @channels) ->        
         @audio = new Audio
@@ -19,7 +19,7 @@ class MozillaAudioDevice extends EventEmitter
             written = @audio.mozWriteAudio(@tail)
             @writePosition += written
             
-            if @tailPosition < @tail.length
+            if @writePosition < @tail.length
                 @tail = @tail.subarray(written)
             else    
                 @tail = null
@@ -47,7 +47,7 @@ class MozillaAudioDevice extends EventEmitter
     # Use an inline worker to get setInterval
     # without being clamped in background tabs
     createTimer = (fn, interval) ->
-        url = Buffer.makeBlobURL("setInterval(function() { postMessage('ping'); }, #{interval});")
+        url = AV.Buffer.makeBlobURL("setInterval(function() { postMessage('ping'); }, #{interval});")
         return setInterval fn, interval unless url?
                 
         worker = new Worker(url)

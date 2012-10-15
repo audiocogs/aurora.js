@@ -1,4 +1,4 @@
-class HTTPSource extends EventEmitter
+class AV.HTTPSource extends AV.EventEmitter
     constructor: (@url) ->
         @chunkSize = 1 << 20
         @inflight = false
@@ -48,7 +48,7 @@ class HTTPSource extends EventEmitter
                 for i in [0...txt.length]
                     buf[i] = txt.charCodeAt(i) & 0xff
 
-            buffer = new Buffer(buf)
+            buffer = new AV.Buffer(buf)
             @offset += buffer.length
             
             @emit 'data', buffer

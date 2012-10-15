@@ -1,4 +1,4 @@
-class BalanceFilter extends Filter
+class AV.BalanceFilter extends AV.Filter
     process: (buffer) ->
         return if @value is 0
         pan = Math.max(-50, Math.min(50, @value))

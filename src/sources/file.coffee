@@ -1,6 +1,6 @@
-class FileSource extends EventEmitter
+class AV.FileSource extends AV.EventEmitter
     constructor: (@file) ->
-        if not window.FileReader
+        if not FileReader?
             return @emit 'error', 'This browser does not have FileReader support.'
         
         @offset = 0
@@ -11,7 +11,7 @@ class FileSource extends EventEmitter
         @reader = new FileReader
         
         @reader.onload = (e) =>
-            buf = new Buffer(new Uint8Array(e.target.result))
+            buf = new AV.Buffer(new Uint8Array(e.target.result))
             @offset += buf.length
         
             @emit 'data', buf

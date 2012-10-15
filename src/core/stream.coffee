@@ -1,4 +1,4 @@
-class Stream
+class AV.Stream
     buf = new ArrayBuffer(16)
     uint8 = new Uint8Array(buf)
     int8 = new Int8Array(buf)
@@ -18,12 +18,12 @@ class Stream
         @offset = 0
         
     @fromBuffer: (buffer) ->
-        list = new BufferList
+        list = new AV.BufferList
         list.push(buffer)
-        return new Stream(list)
+        return new AV.Stream(list)
     
     copy: ->
-        result = new Stream(@list.copy())
+        result = new AV.Stream(@list.copy())
         result.localOffset = @localOffset
         result.offset = @offset
         return result
@@ -251,7 +251,7 @@ class Stream
         return decodeURIComponent escape @peekString(offset, length)
     
     readBuffer: (length) ->
-        result = Buffer.allocate(length)
+        result = AV.Buffer.allocate(length)
         to = result.data
         
         for i in [0...length] by 1
@@ -260,7 +260,7 @@ class Stream
         return result
         
     peekBuffer: (offset = 0, length) ->
-        result = Buffer.allocate(length)
+        result = AV.Buffer.allocate(length)
         to = result.data
         
         for i in [0...length] by 1

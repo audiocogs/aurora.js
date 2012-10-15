@@ -6,9 +6,7 @@
 # file to linear PCM raw audio data.
 #
 
-class Asset extends EventEmitter
-    window.Asset = Asset
-    
+class AV.Asset extends AV.EventEmitter
     constructor: (@source) ->
         @buffered = 0
         @duration = null
@@ -27,12 +25,12 @@ class Asset extends EventEmitter
             @emit 'buffer', @buffered
             
     @fromURL: (url) ->
-        source = new HTTPSource(url)
-        return new Asset(source)
+        source = new AV.HTTPSource(url)
+        return new AV.Asset(source)
 
     @fromFile: (file) ->
-        source = new FileSource(file)
-        return new Asset(source)
+        source = new AV.FileSource(file)
+        return new AV.Asset(source)
         
     start: ->
         return if @active
@@ -61,7 +59,7 @@ class Asset extends EventEmitter
     probe: (chunk) =>
         return unless @active
         
-        demuxer = Demuxer.find(chunk)
+        demuxer = AV.Demuxer.find(chunk)
         if not demuxer
             return @emit 'error', 'A demuxer for this container was not found.'
             
@@ -82,9 +80,8 @@ class Asset extends EventEmitter
         return unless @active
         
         @emit 'format', @format
-        console.log @format
         
-        decoder = Decoder.find(@format.formatID)
+        decoder = AV.Decoder.find(@format.formatID)
         if not decoder
             return @emit 'error', "A decoder for #{@format.formatID} was not found."
 

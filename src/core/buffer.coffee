@@ -1,22 +1,22 @@
-class Buffer
+class AV.Buffer
     constructor: (@data) ->
         @length = @data.length
     
     @allocate: (size) ->
-        return new Buffer(new Uint8Array(size))
+        return new AV.Buffer(new Uint8Array(size))
     
     copy: ->
-        return new Buffer(new Uint8Array(@data))
+        return new AV.Buffer(new Uint8Array(@data))
     
     slice: (position, length) ->
         if position is 0 and length >= @length
-            return new Buffer(@data)
+            return new AV.Buffer(@data)
         else
-            return new Buffer(@data.subarray(position, position + length))
+            return new AV.Buffer(@data.subarray(position, position + length))
     
     # prefix-free
-    BlobBuilder = window.BlobBuilder or window.MozBlobBuilder or window.WebKitBlobBuilder
-    URL = window.URL or window.webkitURL or window.mozURL
+    BlobBuilder = global.BlobBuilder or global.MozBlobBuilder or global.WebKitBlobBuilder
+    URL = global.URL or global.webkitURL or global.mozURL
     
     @makeBlob: (data) ->
         # try the Blob constructor

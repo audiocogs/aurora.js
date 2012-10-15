@@ -1,4 +1,4 @@
-class EventEmitter extends Base
+class AV.EventEmitter extends AV.Base
     on: (event, fn) ->
         @events ?= {}
         @events[event] ?= []

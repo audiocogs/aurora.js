@@ -4,7 +4,7 @@
 # plain JavaScript. Based on http://ejohn.org/blog/simple-javascript-inheritance/.
 #
 
-class Base
+class AV.Base
     fnTest = /\b_super\b/
     
     @extend: (prop) ->

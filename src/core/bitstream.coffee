@@ -1,9 +1,9 @@
-class Bitstream
+class AV.Bitstream
     constructor: (@stream) ->
         @bitPosition = 0
     
     copy: ->
-        result = new Bitstream(@stream.copy())
+        result = new AV.Bitstream(@stream.copy())
         result.bitPosition = @bitPosition
         return result
     

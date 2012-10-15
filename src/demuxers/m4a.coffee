@@ -1,5 +1,5 @@
-class M4ADemuxer extends Demuxer
-    Demuxer.register(M4ADemuxer)
+class M4ADemuxer extends AV.Demuxer
+    AV.Demuxer.register(M4ADemuxer)
     
     @probe: (buffer) ->
         return buffer.peekString(8, 4) is 'M4A '
