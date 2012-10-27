@@ -19,6 +19,9 @@ class WebKitAudioDevice extends AV.EventEmitter
         @bufferSize = Math.ceil(4096 / (@deviceSampleRate / @sampleRate) * @channels)
         @bufferSize += @bufferSize % @channels
         
+        # create a buffer to be refilled
+        @buffer = new Float32Array(@bufferSize)
+        
         # if the sample rate doesn't match the hardware sample rate, create a resampler
         if @deviceSampleRate isnt @sampleRate
             @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, 4096 * @channels)
@@ -37,7 +40,7 @@ class WebKitAudioDevice extends AV.EventEmitter
             channels[i] = outputBuffer.getChannelData(i)
         
         # get audio data    
-        data = new Float32Array(@bufferSize)
+        data = @buffer
         @emit 'refill', data
         
         # resample if necessary    
