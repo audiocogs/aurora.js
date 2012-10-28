@@ -144,7 +144,8 @@ class M4ADemuxer extends AV.Demuxer
                             @metadata[field] = @stream.readBuffer(@len - 8)
 
                         else
-                            @metadata[field] = @stream.readUTF8(@len)
+                            @stream.advance(8)
+                            @metadata[field] = @stream.readString(@len - 8, 'utf8')
                             
                 when 'mdhd'
                     return unless @stream.available(@len)
