@@ -22,15 +22,15 @@ of [@ofmlabs](https://github.com/ofmlabs).
 
 ## Building
 
-Currently, the [import](https://github.com/devongovett/import) module is used to build Aurora.js.  You can run
-the development server by first installing `import` with npm, and then running it like this:
+Currently, the [importer](https://github.com/devongovett/importer) module is used to build Aurora.js.  You can run
+the development server by first installing `importer` with npm, and then running it like this:
 
-    sudo npm install import -g
-    import src/aurora.coffee
+    sudo npm install importer -g
+    importer src/aurora.coffee
     
 You can also build a static version like this:
 
-    import src/aurora.coffee aurora.js
+    importer src/aurora.coffee aurora.js
     
 By itself, Aurora will play LPCM, uLaw and aLaw files in a number of containers.  Be sure to add additional codec support 
 by including some of our other decoders such as [FLAC.js](https://github.com/ofmlabs/flac.js), 
