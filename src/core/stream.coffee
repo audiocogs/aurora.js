@@ -227,52 +227,118 @@ class AV.Stream
     peekFloat80: (offset = 0, littleEndian) ->
         @peek(10, offset, littleEndian)
         return float80()
-    
-    readString: (length) ->
-        result = []
-        for i in [0...length] by 1
-            result.push String.fromCharCode @readUInt8()
         
-        return result.join ''
-    
-    peekString: (offset, length) ->
-        result = []
-        for i in [0...length] by 1
-            result.push String.fromCharCode @peekUInt8(offset + i)
-        
-        return result.join ''
-        
-    readUTF8: (length) ->
-        # a little trick taking advantage of some built in functions
-        # to decode UTF-8
-        return decodeURIComponent escape @readString(length)
-        
-    peekUTF8: (offset, length) ->
-        return decodeURIComponent escape @peekString(offset, length)
-    
     readBuffer: (length) ->
         result = AV.Buffer.allocate(length)
         to = result.data
-        
+
         for i in [0...length] by 1
             to[i] = @readUInt8()
-        
+
         return result
-        
+
     peekBuffer: (offset = 0, length) ->
         result = AV.Buffer.allocate(length)
         to = result.data
-        
+
         for i in [0...length] by 1
             to[i] = @peekUInt8(offset + i)
-        
+
         return result
-    
+
     readSingleBuffer: (length) ->
         result = @list.first.slice(@localOffset, length)
         @advance(result.length)
         return result
-        
+
     peekSingleBuffer: (length) ->
         result = @list.first.slice(@localOffset, length)
+        return result
+    
+    readString: (length, encoding = 'ascii') ->
+        return decodeString.call this, 0, length, encoding, true
+
+    peekString: (offset = 0, length, encoding = 'ascii') ->
+        return decodeString.call this, offset, length, encoding, false
+
+    decodeString = (offset, length, encoding, advance) ->
+        encoding = encoding.toLowerCase()
+        nullEnd = if length is null then 0 else -1
+
+        length = Infinity if not length?
+        end = offset + length
+        result = ''
+
+        switch encoding
+            when 'ascii', 'latin1'
+                while offset < end and (c = @peekUInt8(offset++)) isnt nullEnd
+                    result += String.fromCharCode(c)
+
+            when 'utf8', 'utf-8'
+                while offset < end and (b1 = @peekUInt8(offset++)) isnt nullEnd
+                    if (b1 & 0x80) is 0
+                        result += String.fromCharCode b1
+
+                    # one continuation (128 to 2047)
+                    else if (b1 & 0xe0) is 0xc0
+                        b2 = @peekUInt8(offset++) & 0x3f
+                        result += String.fromCharCode ((b1 & 0x1f) << 6) | b2
+
+                    # two continuation (2048 to 55295 and 57344 to 65535)
+                    else if (b1 & 0xf0) is 0xe0
+                        b2 = @peekUInt8(offset++) & 0x3f
+                        b3 = @peekUInt8(offset++) & 0x3f
+                        result += String.fromCharCode ((b1 & 0x0f) << 12) | (b2 << 6) | b3
+
+                    # three continuation (65536 to 1114111)
+                    else if (b1 & 0xf8) is 0xf0
+                        b2 = @peekUInt8(offset++) & 0x3f
+                        b3 = @peekUInt8(offset++) & 0x3f
+                        b4 = @peekUInt8(offset++) & 0x3f
+
+                        # split into a surrogate pair
+                        pt = (((b1 & 0x0f) << 18) | (b2 << 12) | (b3 << 6) | b4) - 0x10000
+                        result += String.fromCharCode 0xd800 + (pt >> 10), 0xdc00 + (pt & 0x3ff)
+
+            when 'utf16-be', 'utf16be', 'utf16le', 'utf16-le', 'utf16bom', 'utf16-bom'
+                # find endianness
+                switch encoding
+                    when 'utf16be', 'utf16-be'
+                        littleEndian = false
+
+                    when 'utf16le', 'utf16-le'
+                        littleEndian = true
+
+                    when 'utf16bom', 'utf16-bom'
+                        if length < 2 or (bom = @peekUInt16(offset)) is nullEnd
+                            @advance offset += 2 if advance
+                            return result
+
+                        littleEndian = (bom is 0xfffe)
+                        offset += 2
+
+                while offset < end and (w1 = @peekUInt16(offset, littleEndian)) isnt nullEnd
+                    offset += 2
+
+                    if w1 < 0xd800 or w1 > 0xdfff
+                        result += String.fromCharCode(w1)
+
+                    else
+                        if w1 > 0xdbff
+                            throw new Error "Invalid utf16 sequence."
+
+                        w2 = @peekUInt16(offset, littleEndian)
+                        if w2 < 0xdc00 or w2 > 0xdfff
+                            throw new Error "Invalid utf16 sequence."
+
+                        result += String.fromCharCode(w1, w2)
+                        offset += 2
+
+                if w1 is nullEnd
+                    offset += 2
+
+            else
+                throw new Error "Unknown encoding: #{encoding}"
+
+        @advance offset if advance
         return result
