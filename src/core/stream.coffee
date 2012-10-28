@@ -251,8 +251,8 @@ class AV.Stream
         @advance(result.length)
         return result
 
-    peekSingleBuffer: (length) ->
-        result = @list.first.slice(@localOffset, length)
+    peekSingleBuffer: (offset, length) ->
+        result = @list.first.slice(@localOffset + offset, length)
         return result
     
     readString: (length, encoding = 'ascii') ->
