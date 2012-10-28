@@ -17,7 +17,7 @@
         document.querySelector("input").onchange = function(e) {
             if (player) player.stop();
             
-            player = Player.fromFile(e.target.files[0]);
+            player = AV.Player.fromFile(e.target.files[0]);
             player.on('error', function(e) { console.log(e) });
             
             console.log(player)
