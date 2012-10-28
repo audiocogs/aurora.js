@@ -1,0 +1,25 @@
+{
+  "name": "av",
+  "description": "Audio decoding framework",
+  "version": "0.1.0",
+  "author": {
+      "name": "Official.fm Labs",
+      "url": "http://labs.official.fm/"
+  },
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/ofmlabs/aurora.js.git"
+  },
+  "bugs": "https://github.com/ofmlabs/aurora.js/issues",
+  "devDependencies": {
+      "coffee-script": ">=1.0",
+      "colors": "*",
+      "importer": ">=0.4"
+  },
+  "scripts": {
+      "prepublish": "node_modules/.bin/importer node.coffee node.js",
+      "test": "node_modules/.bin/importer tests/test.coffee"
+  },
+  "engine": [ "node >= v0.6.0" ],
+  "main": "node.js"
+}
