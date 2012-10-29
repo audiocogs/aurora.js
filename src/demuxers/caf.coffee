@@ -81,15 +81,9 @@ class CAFDemuxer extends AV.Demuxer
                     metadata = {}
                     
                     for i in [0...entries]
-                        # read null terminated string
-                        key = ''
-                        while (char = @stream.readUInt8()) isnt 0
-                            key += String.fromCharCode(char)
-                        
-                        value = ''
-                        while (char = @stream.readUInt8()) isnt 0
-                            value += String.fromCharCode(char)
-                        
+                        # null terminated strings
+                        key = @stream.readString(null)
+                        value = @stream.readString(null)                        
                         metadata[key] = value
                     
                     @emit 'metadata', metadata
