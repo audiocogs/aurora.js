@@ -21,6 +21,40 @@ module 'core/stream', ->
         stream.advance(2)
         assert.equal 2, stream.offset
         
+    test 'rewind', ->
+        stream = makeStream [10, 160], [20, 29, 119]
+        
+        stream.advance(4)
+        assert.equal 4, stream.offset
+        assert.equal 2, stream.localOffset
+        
+        stream.rewind(2)
+        assert.equal 2, stream.offset
+        assert.equal 0, stream.localOffset
+        
+        stream.rewind(1)
+        assert.equal 1, stream.offset
+        assert.equal 1, stream.localOffset
+        
+        stream.advance(3)
+        assert.equal 4, stream.offset
+        assert.equal 2, stream.localOffset
+        
+        stream.rewind(4)
+        assert.equal 0, stream.offset
+        assert.equal 0, stream.localOffset
+        
+    test 'seek', ->
+        stream = makeStream [10, 160], [20, 29, 119]
+        
+        stream.seek(3)
+        assert.equal 3, stream.offset
+        assert.equal 1, stream.localOffset
+        
+        stream.seek(1)
+        assert.equal 1, stream.offset
+        assert.equal 1, stream.localOffset
+        
     test 'remainingBytes', ->
         stream = makeStream [10, 160], [20, 29, 119]
         assert.equal 5, stream.remainingBytes()

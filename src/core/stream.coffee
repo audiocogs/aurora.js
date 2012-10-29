@@ -38,11 +38,28 @@ class AV.Stream
         @localOffset += bytes
         @offset += bytes
         
-        while @list.first and (@localOffset >= @list.first.length)
+        while @list.first and @localOffset >= @list.first.length
             @localOffset -= @list.first.length
             @list.advance()
         
         return this
+        
+    rewind: (bytes) ->
+        @localOffset -= bytes
+        @offset -= bytes
+        
+        while @list.first.prev and @localOffset < 0
+            @list.rewind()
+            @localOffset += @list.first.length
+            
+        return this
+        
+    seek: (position) ->
+        if position > @offset
+            @advance position - @offset
+            
+        else if position < @offset
+            @rewind @offset - position
         
     readUInt8: ->
         a = @list.first.data[@localOffset]
