@@ -1,43 +1,36 @@
 class AV.BufferList
     constructor: ->
-        @buffers = []
+        @first = null
+        @last = null
         @availableBytes = 0
         @availableBuffers = 0        
-        @first = null
     
     copy: ->
         result = new AV.BufferList
 
-        result.buffers = @buffers.slice(0)
-        result.first = result.buffers[0]
+        result.first = @first
+        result.last = @last
         result.availableBytes = @availableBytes
         result.availableBuffers = @availableBuffers
         
         return result
-    
-    shift: ->
-        result = @buffers.shift()
         
-        @availableBytes -= result.length
-        @availableBuffers -= 1
-        
-        @first = @buffers[0]
-        return result
-    
-    push: (buffer) ->
-        @buffers.push(buffer)
+    append: (buffer) ->
+        buffer.prev = @last
+        @last?.next = buffer
+        @last = buffer
+        @first ?= buffer
         
         @availableBytes += buffer.length
-        @availableBuffers += 1
+        @availableBuffers++
         
-        @first = buffer unless @first
-        return this
-    
-    unshift: (buffer) ->
-        @buffers.unshift(buffer)
+    advance: ->
+        if @first
+            @availableBytes -= @first.length
+            @availableBuffers--
+            @first = @first.next
         
-        @availableBytes += buffer.length
-        @availableBuffers += 1
-        
-        @first = buffer
-        return this
+    rewind: ->
+        if @first = @first?.prev
+            @availableBytes += @first.length
+            @availableBuffers++

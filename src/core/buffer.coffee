@@ -1,6 +1,10 @@
 class AV.Buffer
     constructor: (@data) ->
         @length = @data.length
+        
+        # used when the buffer is part of a bufferlist
+        @next = null
+        @prev = null
     
     @allocate: (size) ->
         return new AV.Buffer(new Uint8Array(size))

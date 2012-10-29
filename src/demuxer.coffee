@@ -4,13 +4,13 @@ class AV.Demuxer extends AV.EventEmitter
     
     constructor: (source, chunk) ->
         list = new AV.BufferList
-        list.push(chunk)
+        list.append chunk
         @stream = new AV.Stream(list)
         
         received = false
         source.on 'data', (chunk) =>
             received = true
-            list.push chunk
+            list.append chunk
             @readChunk chunk
             
         source.on 'error', (err) =>

@@ -10,7 +10,7 @@ class AV.Decoder extends AV.EventEmitter
             
         demuxer.on 'data', (chunk, final) =>
             @receivedFinalBuffer = !!final
-            list.push chunk
+            list.append chunk
             setTimeout =>
                 @emit 'available'
             , 0

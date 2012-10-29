@@ -19,7 +19,7 @@ class AV.Stream
         
     @fromBuffer: (buffer) ->
         list = new AV.BufferList
-        list.push(buffer)
+        list.append(buffer)
         return new AV.Stream(list)
     
     copy: ->
@@ -39,31 +39,32 @@ class AV.Stream
         @offset += bytes
         
         while @list.first and (@localOffset >= @list.first.length)
-            @localOffset -= @list.shift().length
+            @localOffset -= @list.first.length
+            @list.advance()
         
         return this
         
     readUInt8: ->
         a = @list.first.data[@localOffset]
-
         @localOffset += 1
         @offset += 1
 
         if @localOffset == @list.first.length
             @localOffset = 0
-            @list.shift()
+            @list.advance()
 
         return a
 
     peekUInt8: (offset = 0) ->
         offset = @localOffset + offset
-        list = @list.buffers
+        buffer = @list.first
 
-        for buffer in list    
+        while buffer
             if buffer.length > offset
                 return buffer.data[offset]
 
             offset -= buffer.length
+            buffer = buffer.next
 
         return 0
         

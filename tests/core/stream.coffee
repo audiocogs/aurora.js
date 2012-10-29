@@ -3,7 +3,7 @@ module 'core/stream', ->
         list = new AV.BufferList
     
         for array in arrays
-            list.push new AV.Buffer new Uint8Array(array)
+            list.append new AV.Buffer new Uint8Array(array)
         
         return new AV.Stream(list)
         
