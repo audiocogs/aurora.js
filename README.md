@@ -26,7 +26,7 @@ Currently, the [importer](https://github.com/devongovett/importer) module is use
 the development server by first installing `importer` with npm, and then running it like this:
 
     sudo npm install importer -g
-    importer src/aurora.coffee
+    importer src/aurora.coffee -p 8080
     
 You can also build a static version like this:
 
