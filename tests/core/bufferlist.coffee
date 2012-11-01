@@ -41,11 +41,9 @@ module 'core/bufferlist', ->
         assert.equal buffer2, list.first
         
         list.advance()
+        assert.equal null, list.first
         assert.equal 0, list.availableBuffers
         assert.equal 0, list.availableBytes
-        assert.equal null, list.first
-        
-        assert.equal null, list.advance()
         
     test 'rewind', ->
         list = new AV.BufferList
@@ -59,12 +57,19 @@ module 'core/bufferlist', ->
         
         list.advance()
         assert.equal buffer2, list.first
+        assert.equal 1, list.availableBuffers
+        assert.equal 3, list.availableBytes
         
         list.rewind()
         assert.equal buffer1, list.first
+        assert.equal 2, list.availableBuffers
+        assert.equal 6, list.availableBytes
         
+        # can't rewind anymore so nothing should change
         list.rewind()
-        assert.equal null, list.first
+        assert.equal buffer1, list.first
+        assert.equal 2, list.availableBuffers
+        assert.equal 6, list.availableBytes
         
     test 'copy', ->
         list = new AV.BufferList
