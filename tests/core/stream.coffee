@@ -44,6 +44,11 @@ module 'core/stream', ->
         assert.equal 0, stream.offset
         assert.equal 0, stream.localOffset
         
+        stream.advance(6)
+        stream.rewind(4)
+        assert.equal 2, stream.offset
+        assert.equal 1, stream.localOffset
+        
     test 'seek', ->
         stream = makeStream [10, 160], [20, 29, 119]
         

@@ -45,6 +45,11 @@ class AV.Stream
         return this
         
     rewind: (bytes) ->
+        # if we're at the end of the bufferlist, seek from the end
+        if @list.availableBytes is 0
+            @list.first = @list.last
+            @localOffset = @list.first.length
+            
         @localOffset -= bytes
         @offset -= bytes
         
