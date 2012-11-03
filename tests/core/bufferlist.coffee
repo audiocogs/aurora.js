@@ -39,7 +39,7 @@ module 'core/bufferlist', ->
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
         assert.equal buffer2, list.first
-        
+
         list.advance()
         assert.equal null, list.first
         assert.equal 0, list.availableBuffers
@@ -70,6 +70,18 @@ module 'core/bufferlist', ->
         assert.equal buffer1, list.first
         assert.equal 2, list.availableBuffers
         assert.equal 6, list.availableBytes
+        
+        # advancing past the end of the list and then rewinding should give us the last buffer
+        list.advance()
+        list.advance()
+        assert.equal null, list.first
+        assert.equal 0, list.availableBuffers
+        assert.equal 0, list.availableBytes
+        
+        list.rewind()
+        assert.equal buffer2, list.first
+        assert.equal 1, list.availableBuffers
+        assert.equal 3, list.availableBytes
         
     test 'copy', ->
         list = new AV.BufferList

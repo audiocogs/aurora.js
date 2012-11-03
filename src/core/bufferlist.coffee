@@ -31,7 +31,9 @@ class AV.BufferList
             @first = @first.next
         
     rewind: ->
-        if @first?.prev
-            @first = @first.prev
+        return if @first and not @first.prev
+        
+        @first = @first?.prev or @last
+        if @first
             @availableBytes += @first.length
             @availableBuffers++
