@@ -1,14 +1,14 @@
 class AV.Decoder extends AV.EventEmitter
-    constructor: (demuxer, @format) ->
+    constructor: (@demuxer, @format) ->
         list = new AV.BufferList
         @stream = new AV.Stream(list)
         @bitstream = new AV.Bitstream(@stream)
         @receivedFinalBuffer = false
         
-        demuxer.on 'cookie', (cookie) =>
+        @demuxer.on 'cookie', (cookie) =>
             @setCookie cookie
             
-        demuxer.on 'data', (chunk, final) =>
+        @demuxer.on 'data', (chunk, final) =>
             @receivedFinalBuffer = !!final
             list.append chunk
             setTimeout =>
@@ -26,8 +26,11 @@ class AV.Decoder extends AV.EventEmitter
     readChunk: ->
         return
         
-    seek: (position) ->
-        return 'Not Implemented.'
+    seek: (timestamp) ->
+        # use the demuxer to get a seek point
+        seekPoint = @demuxer.seek(timestamp)
+        @stream.seek(seekPoint.offset)
+        return seekPoint.timestamp
     
     codecs = {}
     @register: (id, decoder) ->

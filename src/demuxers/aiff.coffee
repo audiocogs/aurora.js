@@ -32,6 +32,9 @@ class AIFFDemuxer extends AV.Demuxer
                         sampleCount: @stream.readUInt32()
                         bitsPerChannel: @stream.readUInt16()
                         sampleRate: @stream.readFloat80()
+                        framesPerPacket: 1
+                        
+                    @format.bytesPerPacket = (@format.bitsPerChannel / 8) * @format.channelsPerFrame
                     
                     if @fileType is 'AIFC'
                         format = @stream.readString(4)

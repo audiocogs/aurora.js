@@ -39,16 +39,19 @@ class WAVEDemuxer extends AV.Demuxer
                         littleEndian: formats[encoding] is 'lpcm'
                         channelsPerFrame: @stream.readUInt16(true)
                         sampleRate: @stream.readUInt32(true)
+                        framesPerPacket: 1
                         
                     @stream.advance(4) # bytes/sec.
                     @stream.advance(2) # block align
                     
-                    @format.bitsPerChannel = @bitsPerChannel = @stream.readUInt16(true)
+                    @format.bitsPerChannel = @stream.readUInt16(true)
+                    @format.bytesPerPacket = (@format.bitsPerChannel / 8) * @format.channelsPerFrame
+                    
                     @emit 'format', @format
                     
                 when 'data'
                     if not @sentDuration
-                        bytes = @bitsPerChannel / 8
+                        bytes = @format.bitsPerChannel / 8
                         @emit 'duration', @len / bytes / @format.channelsPerFrame / @format.sampleRate * 1000 | 0
                         @sentDuration = true
                 

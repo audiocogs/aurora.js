@@ -80,6 +80,25 @@ class AV.Player extends AV.EventEmitter
         @asset.stop()
         @device?.destroy()
         
+    seek: (timestamp) ->
+        @device?.stop()
+        @queue.once 'ready', =>
+            @device?.seek @currentTime
+            @device?.start() if @playing
+            
+        # convert timestamp to sample number
+        timestamp = (timestamp / 1000) * @format.sampleRate
+            
+        # the actual timestamp we seeked to may differ 
+        # from the requested timestamp due to optimizations
+        timestamp = @asset.decoder.seek(timestamp)
+        
+        # convert back from samples to milliseconds
+        @currentTime = timestamp / @format.sampleRate * 1000 | 0
+        
+        @queue.reset()
+        return @currentTime
+        
     startPlaying: =>
         frame = @queue.read()
         frameOffset = 0
@@ -91,6 +110,12 @@ class AV.Player extends AV.EventEmitter
         
         @refill = (buffer) =>
             return unless @playing
+            
+            # try reading another frame if one isn't already available
+            # happens when we play to the end and then seek back
+            if not frame
+                frame = @queue.read()
+                frameOffset = 0
 
             bufferOffset = 0
             while frame and bufferOffset < buffer.length

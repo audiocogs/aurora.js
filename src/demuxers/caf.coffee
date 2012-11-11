@@ -73,7 +73,13 @@ class CAFDemuxer extends AV.Demuxer
                         @emit 'duration', @numFrames / @format.sampleRate * 1000 | 0
                         @sentDuration = true
                         
-                        @stream.advance(@headerCache.size - 24)
+                        byteOffset = 0
+                        sampleOffset = 0
+                        for i in [0...@numPackets] by 1
+                            @addSeekPoint byteOffset, sampleOffset
+                            byteOffset += @format.bytesPerPacket or M4ADemuxer.readDescrLen(@stream)
+                            sampleOffset += @format.framesPerPacket or M4ADemuxer.readDescrLen(@stream)
+                        
                         @headerCache = null
                         
                 when 'info'

@@ -33,7 +33,7 @@ class AV.AudioDevice extends AV.EventEmitter
         @device.destroy()
         
     seek: (@currentTime) ->
-        @_lastTime = @device.getDeviceTime()
+        @_lastTime = @device.getDeviceTime() if @playing
         @emit 'timeUpdate', @currentTime
         
     updateTime: =>

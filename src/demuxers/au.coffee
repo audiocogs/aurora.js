@@ -26,9 +26,12 @@ class AUDemuxer extends AV.Demuxer
                 bitsPerChannel: bps[encoding - 1]
                 sampleRate: @stream.readUInt32()
                 channelsPerFrame: @stream.readUInt32()
+                framesPerPacket: 1
             
             if not @format.bitsPerChannel?
                 return @emit 'error', 'Unsupported encoding in AU file.'
+            
+            @format.bytesPerPacket = (@format.bitsPerChannel / 8) * @format.channelsPerFrame
             
             if dataSize isnt 0xffffffff
                 bytes = @format.bitsPerChannel / 8
@@ -41,3 +44,5 @@ class AUDemuxer extends AV.Demuxer
             while @stream.available(1)
                 buf = @stream.readSingleBuffer(@stream.remainingBytes())
                 @emit 'data', buf, @stream.remainingBytes() is 0
+                
+        return

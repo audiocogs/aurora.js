@@ -12,7 +12,7 @@ class AV.Queue extends AV.EventEmitter
         @buffers.push buffer if buffer
         
         if @buffering
-            if @buffers.length >= @readyMark or @decoder.receivedFinalBuffer
+            if @buffers.length >= @readyMark# or @decoder.receivedFinalBuffer
                 @buffering = false
                 @emit 'ready'
             else    
@@ -23,3 +23,8 @@ class AV.Queue extends AV.EventEmitter
         
         @decoder.readChunk()    
         return @buffers.shift()
+        
+    reset: ->
+        @buffers.length = 0
+        @buffering = true
+        @decoder.readChunk()
