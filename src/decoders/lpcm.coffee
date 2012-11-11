@@ -1,9 +1,6 @@
 class LPCMDecoder extends AV.Decoder
     AV.Decoder.register('lpcm', LPCMDecoder)
     
-    init: ->
-        @floatingPoint = @format.floatingPoint
-    
     readChunk: =>
         stream = @stream
         littleEndian = @format.littleEndian

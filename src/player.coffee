@@ -83,10 +83,9 @@ class AV.Player extends AV.EventEmitter
     startPlaying: =>
         frame = @queue.read()
         frameOffset = 0
-        {format, decoder} = @asset
-        div = if decoder.floatingPoint then 1 else Math.pow(2, format.bitsPerChannel - 1)
+        div = if @format.floatingPoint then 1 else Math.pow(2, @format.bitsPerChannel - 1)
         
-        @device = new AV.AudioDevice(format.sampleRate, format.channelsPerFrame)
+        @device = new AV.AudioDevice(@format.sampleRate, @format.channelsPerFrame)
         @device.on 'timeUpdate', (@currentTime) =>
             @emit 'progress', @currentTime
         
@@ -112,7 +111,7 @@ class AV.Player extends AV.EventEmitter
             unless frame
                 # if this was the end of the track, make
                 # sure the currentTime reflects that
-                if decoder.receivedFinalBuffer
+                if @asset.decoder.receivedFinalBuffer
                     @currentTime = @duration
                     @emit 'progress', @currentTime
                     @emit 'end'
