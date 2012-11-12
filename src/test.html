@@ -24,12 +24,10 @@
             
             player.on('metadata', function(data) {
                 console.log(data);
-                var buf = data['Cover Art'];
-                if (!buf) return;
-                                
+                
                 // Show the album art
-                if (buf)
-                    document.querySelector("img").src = buf.toBlobURL();
+                if (data.coverArt)
+                    document.querySelector("img").src = data.coverArt.toBlobURL();
             });
             
             player.play();
