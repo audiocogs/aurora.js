@@ -47,8 +47,11 @@ class CAFDemuxer extends AV.Demuxer
                 when 'kuki'
                     if @stream.available(@headerCache.size)
                         if @format.formatID is 'aac ' # variations needed?
-                            @len = @headerCache.size
-                            M4ADemuxer::readEsds.call(this)
+                            offset = @stream.offset + @headerCache.size
+                            if cookie = M4ADemuxer.readEsds(@stream)
+                                @emit 'cookie', cookie
+                                
+                            @stream.seek offset # skip extra garbage
                     
                         else
                             buffer = @stream.readBuffer(@headerCache.size)
