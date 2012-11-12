@@ -28,11 +28,6 @@ class AV.HTTPSource extends AV.EventEmitter
         if @inflight or not @length
             return @emit 'error', 'Something is wrong in HTTPSource.loop'
             
-        if @offset is @length
-            @inflight = false
-            @emit 'end'
-            return
-            
         @inflight = true
         @xhr = new XMLHttpRequest()
         
@@ -52,11 +47,11 @@ class AV.HTTPSource extends AV.EventEmitter
             @offset += buffer.length
             
             @emit 'data', buffer
-            @emit 'end' if @offset is @length
+            @emit 'end' if @offset >= @length
             @emit 'progress', @offset / @length * 100
 
             @inflight = false
-            @loop()
+            @loop() unless @offset >= @length
 
         @xhr.onerror = (err) =>
             @emit 'error', err
