@@ -17,9 +17,6 @@ AV = {}
 #import "devices/webkit.coffee"
 #import "devices/mozilla.coffee"
 
-#import "sources/http.coffee"
-#import "sources/file.coffee"
-
 #import "filter.coffee"
 #import "filters/volume.coffee"
 #import "filters/balance.coffee"

@@ -9,7 +9,7 @@ class AV.HTTPSource extends AV.EventEmitter
         @xhr = new XMLHttpRequest()
         
         @xhr.onload = (event) =>
-            @length = parseInt @xhr.getResponseHeader("Content-Length")
+            @length = parseInt @xhr.getResponseHeader("Content-Length")                
             @inflight = false
             @loop()
         
@@ -18,7 +18,6 @@ class AV.HTTPSource extends AV.EventEmitter
             @emit 'error', err
             
         @xhr.onabort = (event) =>
-            console.log("HTTP Aborted: Paused?")
             @inflight = false
         
         @xhr.open("HEAD", @url, true)
@@ -31,9 +30,6 @@ class AV.HTTPSource extends AV.EventEmitter
         @inflight = true
         @xhr = new XMLHttpRequest()
         
-        @xhr.onprogress = (event) =>
-            @emit 'progress', (@offset + event.loaded) / @length * 100
-
         @xhr.onload = (event) =>
             if @xhr.response
                 buf = new Uint8Array(@xhr.response)
@@ -47,8 +43,8 @@ class AV.HTTPSource extends AV.EventEmitter
             @offset += buffer.length
             
             @emit 'data', buffer
-            @emit 'end' if @offset >= @length
             @emit 'progress', @offset / @length * 100
+            @emit 'end' if @offset >= @length
 
             @inflight = false
             @loop() unless @offset >= @length
