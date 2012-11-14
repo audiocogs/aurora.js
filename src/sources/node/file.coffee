@@ -7,7 +7,7 @@ class AV.FileSource extends AV.EventEmitter
         
     getSize: ->
         fs.stat @filename, (err, stat) =>
-            return @emit 'err', err if err
+            return @emit 'error', err if err
             
             @size = stat.size
             @start()
