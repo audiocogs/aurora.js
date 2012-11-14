@@ -23,9 +23,10 @@ class CAFDemuxer extends AV.Demuxer
             @format.formatID = @stream.readString(4)
             
             flags = @stream.readUInt32()
-            @format.floatingPoint = Boolean(flags & 1)
-            @format.littleEndian = Boolean(flags & 2)
-            
+            if @format.formatID is 'lpcm'
+                @format.floatingPoint = Boolean(flags & 1)
+                @format.littleEndian = Boolean(flags & 2)
+             
             @format.bytesPerPacket = @stream.readUInt32()
             @format.framesPerPacket = @stream.readUInt32()
             @format.channelsPerFrame = @stream.readUInt32()
