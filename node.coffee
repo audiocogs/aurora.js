@@ -2,6 +2,7 @@
 #import "src/sources/node/http.coffee"
 #import "src/sources/node/file.coffee"
 
+AV.isNode = true
 AV.require = (modules...) ->
     Module = require 'module'
     
