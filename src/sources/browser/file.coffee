@@ -14,9 +14,7 @@ class AV.FileSource extends AV.EventEmitter
             buf = new AV.Buffer(new Uint8Array(e.target.result))
             @offset += buf.length
         
-            @emit 'data', buf
-            @emit 'progress', @offset / @length * 100
-        
+            @emit 'data', buf        
             @loop() if @offset < @length
         
         @reader.onloadend = =>

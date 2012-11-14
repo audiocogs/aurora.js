@@ -43,11 +43,13 @@ class AV.HTTPSource extends AV.EventEmitter
             @offset += buffer.length
             
             @emit 'data', buffer
-            @emit 'progress', @offset / @length * 100
             @emit 'end' if @offset >= @length
 
             @inflight = false
             @loop() unless @offset >= @length
+            
+        @xhr.onprogress = (event) =>
+            @emit 'progress', (@offset + event.loaded) / @length * 100
 
         @xhr.onerror = (err) =>
             @emit 'error', err
