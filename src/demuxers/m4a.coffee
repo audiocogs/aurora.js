@@ -128,6 +128,16 @@ class M4ADemuxer extends AV.Demuxer
         
         @stream.advance(4) # language and quality
         
+    # corrections to bits per channel, base on formatID
+    # (ffmpeg appears to always encode the bitsPerChannel as 16)
+    BITS_PER_CHANNEL = 
+        ulaw: 8
+        alaw: 8
+        in24: 24
+        in32: 32
+        fl32: 32
+        fl64: 64
+        
     atom 'moov.trak.mdia.minf.stbl.stsd', ->
         @stream.advance(4) # version and flags
         
@@ -146,12 +156,10 @@ class M4ADemuxer extends AV.Demuxer
         format.formatID = @stream.readString(4)
         
         @stream.advance(6) # reserved
+        @stream.advance(2) # data reference index
         
-        if @stream.readUInt16() isnt 1
-            return @emit 'error', 'Unknown version in stsd atom.'
-        
+        version = @stream.readUInt16()
         @stream.advance(6) # skip revision level and vendor
-        @stream.advance(2) # reserved
         
         format.channelsPerFrame = @stream.readUInt16()
         format.bitsPerChannel = @stream.readUInt16()
@@ -161,6 +169,24 @@ class M4ADemuxer extends AV.Demuxer
         format.sampleRate = @stream.readUInt16()
         @stream.advance(2)
         
+        if version is 1
+            format.framesPerPacket = @stream.readUInt32()
+            @stream.advance(4) # bytes per packet
+            format.bytesPerFrame = @stream.readUInt32()
+            @stream.advance(4) # bytes per sample
+            
+        else if version isnt 0
+            @emit 'error', 'Unknown version in stsd atom'
+            
+        if BITS_PER_CHANNEL[format.formatID]?
+            format.bitsPerChannel = BITS_PER_CHANNEL[format.formatID]
+            
+        format.floatingPoint = format.formatID in ['fl32', 'fl64']
+        format.littleEndian = format.formatID is 'sowt' and format.bitsPerChannel > 8
+        
+        if format.formatID in ['twos', 'sowt', 'in24', 'in32', 'fl32', 'fl64', 'raw ', 'NONE']
+            format.formatID = 'lpcm'
+        
     atom 'moov.trak.mdia.minf.stbl.stsd.alac', ->
         @stream.advance(4)
         @track.cookie = @stream.readBuffer(@len - 4)
@@ -169,6 +195,9 @@ class M4ADemuxer extends AV.Demuxer
         offset = @stream.offset + @len
         @track.cookie = M4ADemuxer.readEsds @stream
         @stream.seek offset # skip garbage at the end 
+        
+    atom 'moov.trak.mdia.minf.stbl.stsd.wave.enda', ->
+        @track.format.littleEndian = !!@stream.readUInt16()
         
     # reads a variable length integer
     @readDescrLen: (stream) ->
@@ -386,7 +415,7 @@ class M4ADemuxer extends AV.Demuxer
             numSamples = @track.stsc[@stscIndex].count - @tailSamples
             chunkSize = 0
             for sample in [0...numSamples] by 1
-                size = @track.sampleSizes[@sampleIndex]
+                size = @track.sampleSize or @track.sampleSizes[@sampleIndex]
                 
                 # if we don't have enough data to add this sample, jump out
                 break unless @stream.available(length + size)
