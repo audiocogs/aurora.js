@@ -417,9 +417,8 @@ class M4ADemuxer extends AV.Demuxer
         
         # emit some data if we have any, otherwise wait for more
         if length > 0
-            buffer = @stream.readBuffer(length)
+            @emit 'data', @stream.readBuffer(length)
             @break = @chunkIndex is @track.chunkOffsets.length
-            @emit 'data', buffer, @break
         else
             @break = true
             

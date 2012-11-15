@@ -8,12 +8,14 @@ class AV.Decoder extends AV.EventEmitter
         @demuxer.on 'cookie', (cookie) =>
             @setCookie cookie
             
-        @demuxer.on 'data', (chunk, final) =>
-            @receivedFinalBuffer = !!final
+        @demuxer.on 'data', (chunk) =>
             list.append chunk
             setTimeout =>
                 @emit 'available'
             , 0
+            
+        @demuxer.on 'end', =>
+            @receivedFinalBuffer = true
             
         @init()
             

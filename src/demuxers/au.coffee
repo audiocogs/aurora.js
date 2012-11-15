@@ -42,7 +42,6 @@ class AUDemuxer extends AV.Demuxer
             
         if @readHeader
             while @stream.available(1)
-                buf = @stream.readSingleBuffer(@stream.remainingBytes())
-                @emit 'data', buf, @stream.remainingBytes() is 0
+                @emit 'data', @stream.readSingleBuffer(@stream.remainingBytes())
                 
         return
