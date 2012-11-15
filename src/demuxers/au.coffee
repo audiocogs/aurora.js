@@ -22,6 +22,7 @@ class AUDemuxer extends AV.Demuxer
             
             @format = 
                 formatID: formats[encoding] or 'lpcm'
+                littleEndian: false
                 floatingPoint: encoding in [6, 7]
                 bitsPerChannel: bps[encoding - 1]
                 sampleRate: @stream.readUInt32()

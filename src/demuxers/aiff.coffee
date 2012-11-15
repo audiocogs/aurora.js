@@ -33,22 +33,23 @@ class AIFFDemuxer extends AV.Demuxer
                         bitsPerChannel: @stream.readUInt16()
                         sampleRate: @stream.readFloat80()
                         framesPerPacket: 1
+                        littleEndian: false
+                        floatingPoint: false
                         
                     @format.bytesPerPacket = (@format.bitsPerChannel / 8) * @format.channelsPerFrame
                     
                     if @fileType is 'AIFC'
                         format = @stream.readString(4)
-                        format = 'lpcm' if format in ['twos', 'sowt', 'fl32', 'fl64', 'NONE']
-                            
-                        @format.formatID = format
-                        @format.littleEndian = format is 'sowt'
+                        
+                        @format.littleEndian = format is 'sowt' and @format.bitsPerChannel > 8
                         @format.floatingPoint = format in ['fl32', 'fl64']
                         
+                        format = 'lpcm' if format in ['twos', 'sowt', 'fl32', 'fl64', 'NONE']
+                        @format.formatID = format
                         @len -= 4
                         
                     @stream.advance(@len - 18)
                     @emit 'format', @format
-                    
                     @emit 'duration', @format.sampleCount / @format.sampleRate * 1000 | 0
                     
                 when 'SSND'
