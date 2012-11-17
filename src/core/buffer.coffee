@@ -22,22 +22,22 @@ class AV.Buffer
     BlobBuilder = global.BlobBuilder or global.MozBlobBuilder or global.WebKitBlobBuilder
     URL = global.URL or global.webkitURL or global.mozURL
     
-    @makeBlob: (data) ->
+    @makeBlob: (data, type = 'application/octet-stream') ->
         # try the Blob constructor
         try 
-            return new Blob [data]
+            return new Blob [data], type: type
         
         # use the old BlobBuilder
         if BlobBuilder?
             bb = new BlobBuilder
             bb.append data
-            return bb.getBlob()
+            return bb.getBlob(type)
             
         # oops, no blobs supported :(
         return null
         
-    @makeBlobURL: (data) ->
-        return URL?.createObjectURL @makeBlob(data)
+    @makeBlobURL: (data, type) ->
+        return URL?.createObjectURL @makeBlob(data, type)
         
     @revokeBlobURL: (url) ->
         URL?.revokeObjectURL url
