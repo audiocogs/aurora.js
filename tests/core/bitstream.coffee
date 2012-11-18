@@ -4,6 +4,82 @@ module 'core/bitstream', ->
         stream = AV.Stream.fromBuffer(new AV.Buffer(bytes))
         return new AV.Bitstream(stream)
         
+    test 'copy', ->
+        bitstream = makeBitstream [10, 160], [20, 29, 119]
+        copy = bitstream.copy()
+        
+        assert.notEqual copy, bitstream
+        assert.deepEqual copy, bitstream
+        
+    test 'advance', ->
+        bitstream = makeBitstream [10, 160]
+        
+        assert.equal 0, bitstream.bitPosition
+        assert.equal 0, bitstream.offset()
+        
+        bitstream.advance(2)
+        assert.equal 2, bitstream.bitPosition
+        assert.equal 2, bitstream.offset()
+        
+        bitstream.advance(7)
+        assert.equal 1, bitstream.bitPosition
+        assert.equal 9, bitstream.offset()
+        
+    test 'rewind', ->
+        bitstream = makeBitstream [10, 160]
+        
+        assert.equal 0, bitstream.bitPosition
+        assert.equal 0, bitstream.offset()
+        
+        bitstream.advance(2)
+        assert.equal 2, bitstream.bitPosition
+        assert.equal 2, bitstream.offset()
+        
+        bitstream.rewind(2)
+        assert.equal 0, bitstream.bitPosition
+        assert.equal 0, bitstream.offset()
+        
+        bitstream.advance(10)
+        assert.equal 2, bitstream.bitPosition
+        assert.equal 10, bitstream.offset()
+        
+        bitstream.rewind(4)
+        assert.equal 6, bitstream.bitPosition
+        assert.equal 6, bitstream.offset()
+        
+    test 'seek', ->
+        bitstream = makeBitstream [10, 160]
+        
+        assert.equal 0, bitstream.bitPosition
+        assert.equal 0, bitstream.offset()
+        
+        bitstream.seek(3)
+        assert.equal 3, bitstream.bitPosition
+        assert.equal 3, bitstream.offset()
+        
+        bitstream.seek(10)
+        assert.equal 2, bitstream.bitPosition
+        assert.equal 10, bitstream.offset()
+        
+        bitstream.seek(4)
+        assert.equal 4, bitstream.bitPosition
+        assert.equal 4, bitstream.offset()
+        
+    test 'align', ->
+        bitstream = makeBitstream [10, 160]
+        
+        assert.equal 0, bitstream.bitPosition
+        assert.equal 0, bitstream.offset()
+        
+        bitstream.align()
+        assert.equal 0, bitstream.bitPosition
+        assert.equal 0, bitstream.offset()
+        
+        bitstream.seek(2)
+        bitstream.align()
+        assert.equal 0, bitstream.bitPosition
+        assert.equal 8, bitstream.offset()
+        
     test 'read/peek unsigned', ->
         # 0101 1101 0110 1111 1010 1110 1100 1000 -> 0x5d6faec8
         # 0111 0000 1001 1010 0010 0101 1111 0011 -> 0x709a25f3

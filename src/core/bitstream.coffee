@@ -14,9 +14,23 @@ class AV.Bitstream
         return @stream.available((bits + 8 - @bitPosition) / 8)
 
     advance: (bits) ->
-        @bitPosition += bits
-        @stream.advance(@bitPosition >> 3)
-        @bitPosition = @bitPosition & 7
+        pos = @bitPosition + bits
+        @stream.advance(pos >> 3)
+        @bitPosition = pos & 7
+        
+    rewind: (bits) ->
+        pos = @bitPosition - bits
+        @stream.rewind(Math.abs(pos >> 3))
+        @bitPosition = pos & 7
+        
+    seek: (offset) ->
+        curOffset = @offset()
+        
+        if offset > curOffset
+            @advance offset - curOffset 
+            
+        else if offset < curOffset 
+            @rewind curOffset - offset
 
     align: ->
         unless @bitPosition is 0
