@@ -21,6 +21,10 @@ module 'core/stream', ->
         stream.advance(2)
         assert.equal 2, stream.offset
         
+        assert.throws ->
+            stream.advance(10)
+        , AV.UnderflowError
+        
     test 'rewind', ->
         stream = makeStream [10, 160], [20, 29, 119]
         
@@ -44,10 +48,14 @@ module 'core/stream', ->
         assert.equal 0, stream.offset
         assert.equal 0, stream.localOffset
         
-        stream.advance(6)
+        stream.advance(5)
         stream.rewind(4)
-        assert.equal 2, stream.offset
+        assert.equal 1, stream.offset
         assert.equal 1, stream.localOffset
+        
+        assert.throws ->
+            stream.rewind(10)
+        , AV.UnderflowError
         
     test 'seek', ->
         stream = makeStream [10, 160], [20, 29, 119]
@@ -59,6 +67,14 @@ module 'core/stream', ->
         stream.seek(1)
         assert.equal 1, stream.offset
         assert.equal 1, stream.localOffset
+        
+        assert.throws ->
+            stream.seek(100)
+        , AV.UnderflowError
+        
+        assert.throws ->
+            stream.seek(-10)
+        , AV.UnderflowError
         
     test 'remainingBytes', ->
         stream = makeStream [10, 160], [20, 29, 119]
@@ -80,15 +96,23 @@ module 'core/stream', ->
 
     test 'uint8', ->
         stream = makeStream [10, 160], [20, 29, 119]
-        values = [10, 160, 20, 29]
+        values = [10, 160, 20, 29, 119]
 
         # check peek with correct offsets across buffers
         for value, i in values
             assert.equal value, stream.peekUInt8(i)
+            
+        assert.throws ->
+            stream.peekUInt8(10)
+        , AV.UnderflowError
 
         # check reading across buffers
         for value in values
             assert.equal value, stream.readUInt8()
+            
+        assert.throws ->
+            stream.readUInt8()
+        , AV.UnderflowError
 
         # if it were a signed int, would be -1
         stream = makeStream([255, 23])

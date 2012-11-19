@@ -25,6 +25,10 @@ module 'core/bitstream', ->
         assert.equal 1, bitstream.bitPosition
         assert.equal 9, bitstream.offset()
         
+        assert.throws ->
+            bitstream.advance(40)
+        , AV.UnderflowError
+        
     test 'rewind', ->
         bitstream = makeBitstream [10, 160]
         
@@ -47,6 +51,10 @@ module 'core/bitstream', ->
         assert.equal 6, bitstream.bitPosition
         assert.equal 6, bitstream.offset()
         
+        assert.throws ->
+            bitstream.rewind(10)
+        , AV.UnderflowError
+        
     test 'seek', ->
         bitstream = makeBitstream [10, 160]
         
@@ -64,6 +72,14 @@ module 'core/bitstream', ->
         bitstream.seek(4)
         assert.equal 4, bitstream.bitPosition
         assert.equal 4, bitstream.offset()
+        
+        assert.throws ->
+            bitstream.seek(100)
+        , AV.UnderflowError
+        
+        assert.throws ->
+            bitstream.seek(-10)
+        , AV.UnderflowError
         
     test 'align', ->
         bitstream = makeBitstream [10, 160]

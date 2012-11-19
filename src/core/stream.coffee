@@ -13,6 +13,11 @@ class AV.Stream
     # 0x3412 is little endian, 0x1234 is big endian
     nativeEndian = new Uint16Array(new Uint8Array([0x12, 0x34]).buffer)[0] is 0x3412
     
+    # define an error class to be thrown if an underflow occurs
+    class AV.UnderflowError extends Error
+        constructor: ->
+            @name = 'AV.UnderflowError'
+    
     constructor: (@list) ->
         @localOffset = 0
         @offset = 0
@@ -35,6 +40,9 @@ class AV.Stream
         return @list.availableBytes - @localOffset
     
     advance: (bytes) ->
+        if not @available bytes
+            throw new AV.UnderflowError()
+        
         @localOffset += bytes
         @offset += bytes
         
@@ -45,6 +53,9 @@ class AV.Stream
         return this
         
     rewind: (bytes) ->
+        if bytes > @offset
+            throw new AV.UnderflowError()
+        
         # if we're at the end of the bufferlist, seek from the end
         if not @list.first
             @list.rewind()
@@ -67,6 +78,9 @@ class AV.Stream
             @rewind @offset - position
         
     readUInt8: ->
+        if not @available(1)
+            throw new AV.UnderflowError()
+        
         a = @list.first.data[@localOffset]
         @localOffset += 1
         @offset += 1
@@ -78,6 +92,9 @@ class AV.Stream
         return a
 
     peekUInt8: (offset = 0) ->
+        if not @available(offset + 1)
+            throw new AV.UnderflowError()
+        
         offset = @localOffset + offset
         buffer = @list.first
 
