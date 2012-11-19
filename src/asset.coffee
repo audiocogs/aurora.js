@@ -93,4 +93,7 @@ class AV.Asset extends AV.EventEmitter
             @emit 'error', err
             @stop()
             
+        @decoder.on 'end', =>
+            @emit 'end'
+            
         @emit 'decodeStart'
