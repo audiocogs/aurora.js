@@ -8,11 +8,9 @@ class XLAWDecoder extends AV.Decoder
     SEG_MASK   = 0x70
     BIAS       = 0x84
     
-    constructor: ->
-        super
-        
+    init: ->
         @format.bitsPerChannel = 16
-        @table = table = new Float32Array(256)
+        @table = table = new Int16Array(256)
         
         if @format.formatID is 'ulaw'
             for i in [0...256]
@@ -25,7 +23,7 @@ class XLAWDecoder extends AV.Decoder
                 t <<= (val & SEG_MASK) >>> SEG_SHIFT
             
                 table[i] = if val & SIGN_BIT then BIAS - t else t - BIAS
-                
+                                
         else
             for i in [0...256]
                 val = i ^ 0x55
@@ -43,14 +41,12 @@ class XLAWDecoder extends AV.Decoder
             
     readChunk: =>
         {stream, table} = this
-        chunkSize = Math.min(4096, @stream.remainingBytes())
-        samples = chunkSize / (@format.bitsPerChannel / 8)
         
-        if chunkSize is 0
-            return @once 'available', @readChunk
+        samples = Math.min(4096, @stream.remainingBytes())
+        return if samples is 0
         
         output = new Int16Array(samples)
         for i in [0...samples] by 1
             output[i] = table[stream.readUInt8()]
             
-        @emit 'data', output
+        return output

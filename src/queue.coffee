@@ -6,7 +6,7 @@ class AV.Queue extends AV.EventEmitter
         
         @buffers = []
         @decoder.on 'data', @write
-        @decoder.readChunk()
+        @decoder.decode()
         
     write: (buffer) =>
         @buffers.push buffer if buffer
@@ -16,15 +16,15 @@ class AV.Queue extends AV.EventEmitter
                 @buffering = false
                 @emit 'ready'
             else    
-                @decoder.readChunk()
+                @decoder.decode()
             
     read: ->
         return null if @buffers.length is 0
         
-        @decoder.readChunk()    
+        @decoder.decode()    
         return @buffers.shift()
         
     reset: ->
         @buffers.length = 0
         @buffering = true
-        @decoder.readChunk()
+        @decoder.decode()

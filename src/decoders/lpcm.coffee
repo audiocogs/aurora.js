@@ -5,10 +5,10 @@ class LPCMDecoder extends AV.Decoder
         stream = @stream
         littleEndian = @format.littleEndian
         chunkSize = Math.min(4096, stream.remainingBytes())
-        samples = chunkSize / (@format.bitsPerChannel / 8) >> 0
+        samples = chunkSize / (@format.bitsPerChannel / 8) | 0
         
-        if chunkSize is 0
-            return @once 'available', @readChunk
+        if chunkSize < @format.bitsPerChannel / 8
+            return null
         
         if @format.floatingPoint
             switch @format.bitsPerChannel
@@ -23,7 +23,7 @@ class LPCMDecoder extends AV.Decoder
                         output[i] = stream.readFloat64(littleEndian)
                         
                 else
-                    return @emit 'error', 'Unsupported bit depth.'
+                    throw new Error 'Unsupported bit depth.'
             
         else
             switch @format.bitsPerChannel
@@ -48,6 +48,6 @@ class LPCMDecoder extends AV.Decoder
                         output[i] = stream.readInt32(littleEndian)
                     
                 else
-                    return @emit 'error', 'Unsupported bit depth.'
+                    throw new Error 'Unsupported bit depth.'
         
-        @emit 'data', output
+        return output

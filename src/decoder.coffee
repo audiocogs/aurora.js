@@ -3,19 +3,23 @@ class AV.Decoder extends AV.EventEmitter
         list = new AV.BufferList
         @stream = new AV.Stream(list)
         @bitstream = new AV.Bitstream(@stream)
+        
         @receivedFinalBuffer = false
+        @waiting = false
         
         @demuxer.on 'cookie', (cookie) =>
-            @setCookie cookie
+            try
+                @setCookie cookie
+            catch error
+                @emit 'error', error
             
         @demuxer.on 'data', (chunk) =>
             list.append chunk
-            setTimeout =>
-                @emit 'available'
-            , 0
+            @decode() if @waiting
             
         @demuxer.on 'end', =>
             @receivedFinalBuffer = true
+            @decode() if @waiting
             
         @init()
             
@@ -27,6 +31,33 @@ class AV.Decoder extends AV.EventEmitter
     
     readChunk: ->
         return
+        
+    decode: ->
+        @waiting = false
+        offset = @bitstream.offset()
+        
+        try
+            packet = @readChunk()
+        catch error
+            if error not instanceof AV.UnderflowError
+                @emit 'error', error
+                return false
+            
+        # if a packet was successfully read, emit it
+        if packet
+            @emit 'data', packet
+            return true
+            
+        # if we haven't reached the end, jump back and try again when we have more data
+        else if not @receivedFinalBuffer
+            @bitstream.seek offset
+            @waiting = true
+            
+        # otherwise we've reached the end
+        else
+            @emit 'end'
+            
+        return false
         
     seek: (timestamp) ->
         # use the demuxer to get a seek point
