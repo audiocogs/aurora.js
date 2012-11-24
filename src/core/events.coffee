@@ -10,14 +10,16 @@ class AV.EventEmitter extends AV.Base
         @events[event].splice(index, 1) if ~index
         
     once: (event, fn) ->
-        @on event, cb = =>
+        @on event, cb = ->
             @off event, cb
             fn.apply(this, arguments)
         
     emit: (event, args...) ->
         return unless @events?[event]
         
-        for fn in @events[event]
+        # shallow clone with .slice() so that removing a handler
+        # while event is firing (as in once) doesn't cause errors
+        for fn in @events[event].slice()
             fn.apply(this, args)
             
         return
