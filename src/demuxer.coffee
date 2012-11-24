@@ -31,8 +31,8 @@ class AV.Demuxer extends AV.EventEmitter
         return
         
     addSeekPoint: (offset, timestamp) ->
-        index = @searchTimestamp timestamp        
-        @seekPoints.splice index + 1, 0, 
+        index = @searchTimestamp timestamp
+        @seekPoints.splice index, 0, 
             offset: offset
             timestamp: timestamp
         
@@ -54,9 +54,9 @@ class AV.Demuxer extends AV.EventEmitter
             else if time >= timestamp
                 high = mid
                 
-        if high >= @seekPoints.length
-            return -1
-                
+        if high > @seekPoints.length
+            high = @seekPoints.length
+            
         return high
         
     seek: (timestamp) ->
