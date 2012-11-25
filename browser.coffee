@@ -1,5 +1,5 @@
 do ->
-    global = window
+    global = this
     
     #import "src/aurora.coffee"
     #import "src/sources/browser/http.coffee"
