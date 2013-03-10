@@ -23,6 +23,7 @@ class WebKitAudioDevice extends EventEmitter
         # if the sample rate doesn't match the hardware sample rate, create a resampler
         if @deviceSampleRate isnt @sampleRate
             @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, 4096 * @channels)
+            @sampleRate = @deviceSampleRate
         
         @node = @context.createJavaScriptNode(4096, @channels, @channels)
         @node.onaudioprocess = @refill
