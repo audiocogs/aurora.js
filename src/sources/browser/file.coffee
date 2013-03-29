@@ -8,13 +8,18 @@ class AV.FileSource extends AV.EventEmitter
         @chunkSize = 1 << 20
             
     start: ->
+        if @reader
+            return @loop() unless @active
+        
         @reader = new FileReader
+        @active = true
         
         @reader.onload = (e) =>
             buf = new AV.Buffer(new Uint8Array(e.target.result))
             @offset += buf.length
         
-            @emit 'data', buf        
+            @emit 'data', buf   
+            @active = false     
             @loop() if @offset < @length
         
         @reader.onloadend = =>
@@ -31,6 +36,7 @@ class AV.FileSource extends AV.EventEmitter
         @loop()
         
     loop: ->
+        @active = true
         @file[slice = 'slice'] or @file[slice = 'webkitSlice'] or @file[slice = 'mozSlice']
         endPos = Math.min(@offset + @chunkSize, @length)
         
@@ -38,6 +44,7 @@ class AV.FileSource extends AV.EventEmitter
         @reader.readAsArrayBuffer(blob)
         
     pause: ->
+        @active = false
         @reader?.abort()
         
     reset: ->

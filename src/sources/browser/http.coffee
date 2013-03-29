@@ -5,6 +5,9 @@ class AV.HTTPSource extends AV.EventEmitter
         @reset()
         
     start: ->
+        if @length
+            return @loop() unless @inflight
+        
         @inflight = true
         @xhr = new XMLHttpRequest()
         
