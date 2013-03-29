@@ -13,7 +13,7 @@
   "bugs": "https://github.com/ofmlabs/aurora.js/issues",
   "devDependencies": {
       "coffee-script": ">=1.0",
-      "colors": "*",
+      "qunit-cli": "*",
       "importer": ">=0.4"
   },
   "scripts": {
