@@ -18,7 +18,7 @@
             if (player) player.stop();
             
             player = AV.Player.fromFile(e.target.files[0]);
-            player.on('error', function(e) { console.log(e) });
+            player.on('error', function(e) { throw e });
             
             console.log(player)
             
