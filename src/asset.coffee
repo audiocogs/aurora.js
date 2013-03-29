@@ -32,11 +32,17 @@ class AV.Asset extends AV.EventEmitter
         source = new AV.FileSource(file)
         return new AV.Asset(source)
         
-    start: ->
+    start: (decode) ->
         return if @active
+        
+        @shouldDecode = decode if decode?
+        @shouldDecode ?= true
         
         @active = true
         @source.start()
+        
+        if @decoder and @shouldDecode
+            @_decode()
         
     stop: ->
         return unless @active
@@ -55,6 +61,9 @@ class AV.Asset extends AV.EventEmitter
                 callback(value)
             
             @start()
+            
+    decodePacket: ->
+        @decoder.decode()
     
     probe: (chunk) =>
         return unless @active
@@ -97,3 +106,8 @@ class AV.Asset extends AV.EventEmitter
             @emit 'end'
             
         @emit 'decodeStart'
+        @_decode() if @shouldDecode
+        
+    _decode: =>
+        continue while @decoder.decode() and @active
+        @decoder.once 'data', @_decode if @active

@@ -1,30 +1,34 @@
 class AV.Queue extends AV.EventEmitter
-    constructor: (@decoder) ->
+    constructor: (@asset) ->
         @readyMark = 64
         @finished = false
         @buffering = true
+        @ended = false
         
         @buffers = []
-        @decoder.on 'data', @write
-        @decoder.decode()
+        @asset.on 'data', @write
+        @asset.on 'end', =>
+            @ended = true
+            
+        @asset.decodePacket()
         
     write: (buffer) =>
         @buffers.push buffer if buffer
         
         if @buffering
-            if @buffers.length >= @readyMark# or @decoder.receivedFinalBuffer
+            if @buffers.length >= @readyMark or @ended
                 @buffering = false
                 @emit 'ready'
             else    
-                @decoder.decode()
+                @asset.decodePacket()
             
     read: ->
         return null if @buffers.length is 0
         
-        @decoder.decode()    
+        @asset.decodePacket()
         return @buffers.shift()
         
     reset: ->
         @buffers.length = 0
         @buffering = true
-        @decoder.decode()
+        @asset.decodePacket()

@@ -25,7 +25,7 @@ class AV.Player extends AV.EventEmitter
             @emit 'buffer', @buffered
         
         @asset.on 'decodeStart', =>
-            @queue = new AV.Queue(@asset.decoder)
+            @queue = new AV.Queue(@asset)
             @queue.once 'ready', @startPlaying
             
         @asset.on 'format', (@format) =>
@@ -52,7 +52,7 @@ class AV.Player extends AV.EventEmitter
         return unless @asset
         
         @startedPreloading = true
-        @asset.start()
+        @asset.start(false)
         
     play: ->
         return if @playing
@@ -136,11 +136,11 @@ class AV.Player extends AV.EventEmitter
             unless frame
                 # if this was the end of the track, make
                 # sure the currentTime reflects that
-                if @asset.decoder.receivedFinalBuffer
+                if @asset.ended
                     @currentTime = @duration
                     @emit 'progress', @currentTime
                     @emit 'end'
-                    @pause()
+                    @stop()
                 else
                     # if we ran out of data in the middle of 
                     # the track, stop the timer but don't change
