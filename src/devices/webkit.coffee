@@ -5,7 +5,7 @@ class WebKitAudioDevice extends AV.EventEmitter
     
     # determine whether this device is supported by the browser
     AudioContext = global.AudioContext or global.webkitAudioContext
-    @supported: AudioContext?
+    @supported: typeof AudioContext?::createJavaScriptNode is 'function'
     
     # Chrome limits the number of AudioContexts that one can create,
     # so use a lazily created shared context for all playback
