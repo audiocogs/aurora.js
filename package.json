@@ -3,14 +3,14 @@
   "description": "Audio decoding framework",
   "version": "0.1.0",
   "author": {
-      "name": "Official.fm Labs",
-      "url": "http://labs.official.fm/"
+      "name": "Audiocogs",
+      "url": "http://audiocogs.org/"
   },
   "repository": {
       "type": "git",
-      "url": "https://github.com/ofmlabs/aurora.js.git"
+      "url": "https://github.com/audiocogs/aurora.js.git"
   },
-  "bugs": "https://github.com/ofmlabs/aurora.js/issues",
+  "bugs": "https://github.com/audiocogs/aurora.js/issues",
   "devDependencies": {
       "coffee-script": ">=1.0",
       "qunit-cli": "*",
