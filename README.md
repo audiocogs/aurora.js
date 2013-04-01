@@ -25,7 +25,7 @@ of [Audiocogs](https://github.com/audiocogs/).
 Currently, the [importer](https://github.com/devongovett/importer) module is used to build Aurora.js.  You can run
 the development server by first installing `importer` with npm, and then running it like this:
 
-    sudo npm install importer -g
+    npm install importer -g
     importer browser.coffee -p 8080
     
 You can also build a static version like this:
