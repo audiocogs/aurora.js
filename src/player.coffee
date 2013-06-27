@@ -136,7 +136,7 @@ class AV.Player extends AV.EventEmitter
             unless frame
                 # if this was the end of the track, make
                 # sure the currentTime reflects that
-                if @asset.ended
+                if @queue.ended
                     @currentTime = @duration
                     @emit 'progress', @currentTime
                     @emit 'end'
