@@ -7,8 +7,8 @@ class WebKitAudioDevice extends AV.EventEmitter
     AudioContext = global.AudioContext or global.webkitAudioContext
     @supported = false
     if AudioContext
-      AudioContext::createScriptProcessor ?= AudioContext::createJavaScriptNode
-      @supported = typeof AudioContext::createScriptProcessor is 'function'
+      @supported = typeof AudioContext::createScriptProcessor is 'function' or
+        typeof AudioContext::createJavaScriptNode is 'function'
     
     # Chrome limits the number of AudioContexts that one can create,
     # so use a lazily created shared context for all playback
@@ -25,8 +25,9 @@ class WebKitAudioDevice extends AV.EventEmitter
         # if the sample rate doesn't match the hardware sample rate, create a resampler
         if @deviceSampleRate isnt @sampleRate
             @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, 4096 * @channels)
-        
-        @node = @context.createScriptProcessor(4096, @channels, @channels)
+
+        @context[processor = 'createScriptProcessor'] or @context[processor = 'createJavaScriptNode']
+        @node = @context[processor](4096, @channels, @channels)
         @node.onaudioprocess = @refill
         @node.connect(@context.destination)
         
