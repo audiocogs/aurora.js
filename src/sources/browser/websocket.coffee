@@ -52,7 +52,7 @@ class AV.WebSocketSource extends AV.EventEmitter
       if e.wasClean
         @emit 'end'
       else
-        @emit 'error', 'WebSocket closed uncleanly with code ' + e.reason + '.'
+        @emit 'error', 'WebSocket closed uncleanly with code ' + e.code + '.'
 
     @socket.onerror = (err) =>
       @emit 'error', err
