@@ -32,8 +32,8 @@ class AV.Asset extends AV.EventEmitter
         source = new AV.FileSource(file)
         return new AV.Asset(source)
 
-    @fromWebSocket: (serverUrl) ->
-        source = new AV.WebSocketSource(serverUrl)
+    @fromWebSocket: (serverUrl, fileName) ->
+        source = new AV.WebSocketSource(serverUrl, fileName)
         return new AV.Asset(source)
         
     start: (decode) ->

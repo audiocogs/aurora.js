@@ -1,0 +1,58 @@
+class AV.WebSocketSource extends AV.EventEmitter
+  constructor: (@serverUrl, @fileName) ->
+    if not WebSocket?
+      return @emit 'error', 'This browser does not have WebSocket support.'
+
+    @socket = new WebSocket(@serverUrl)
+
+    if not @socket.binaryType?
+      @socket.close()
+      return @emit 'error', 'This browser does not have binary WebSocket support.'
+
+    @_setupSocket()
+
+  start: ->
+    @_send 'resume'
+
+  pause: ->
+    @_send 'pause'
+
+  reset: ->
+    @_send 'reset'
+
+  _send: (msg) ->
+    if not @open
+      # only the latest message is relevant
+      # so an array is not used
+      @_bufferMessage = msg
+    else
+      @socket.send msg
+
+  _setupSocket: ->
+    @socket.binaryType = 'arraybuffer'
+
+    @socket.onopen = =>
+      @open = true
+      @socket.send JSON.stringify { @fileName }
+      if @_bufferMessage
+        @socket.send @_bufferMessage
+        @_bufferMessage = null
+
+    @socket.onmessage = (e) =>
+      data = e.data
+      if typeof data is 'string'
+        if data is 'end'
+          @socket.close()
+      else
+        buf = new AV.Buffer(new Uint8Array(data))
+        @emit 'data', buf
+
+    @socket.onclose = (e) =>
+      @open = false
+      if e.wasClean
+        @emit 'end'
+      else
+        @emit 'error', 'WebSocket closed uncleanly with code ' + e.reason + '.'
+
+    @socket.onerror = (err) =>
+      @emit 'error', err
