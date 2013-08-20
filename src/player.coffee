@@ -47,6 +47,10 @@ class AV.Player extends AV.EventEmitter
     @fromFile: (file) ->
         asset = AV.Asset.fromFile(file)
         return new AV.Player(asset)
+
+    @fromWebSocket: (serverUrl, fileName) ->
+        asset = AV.Asset.fromWebSocket(serverUrl, fileName)
+        return new AV.Player(asset)
         
     preload: ->
         return unless @asset

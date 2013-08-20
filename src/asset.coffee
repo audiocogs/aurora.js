@@ -31,12 +31,15 @@ class AV.Asset extends AV.EventEmitter
     @fromFile: (file) ->
         source = new AV.FileSource(file)
         return new AV.Asset(source)
+
+    @fromWebSocket: (serverUrl) ->
+        source = new AV.WebSocketSource(serverUrl)
+        return new AV.Asset(source)
         
     start: (decode) ->
         return if @active
         
-        @shouldDecode = decode if decode?
-        @shouldDecode ?= true
+        @shouldDecode = decode ?= true
         
         @active = true
         @source.start()
