@@ -9,6 +9,8 @@ class AV.WebSocketSource extends AV.EventEmitter
       @socket.close()
       return @emit 'error', 'This browser does not have binary WebSocket support.'
 
+    @bytesLoaded = 0
+
     @_setupSocket()
 
   start: ->
@@ -40,15 +42,24 @@ class AV.WebSocketSource extends AV.EventEmitter
 
     @socket.onmessage = (e) =>
       data = e.data
+
       if typeof data is 'string'
-        if data is 'end'
+        if /fileSize/.test data
+          data = JSON.parse data
+          @length = data.fileSize
+        else if data is 'end'
           @socket.close()
+
       else
         buf = new AV.Buffer(new Uint8Array(data))
+        @bytesLoaded += buf.length
+        if @length
+          @emit 'progress', @bytesLoaded / @length * 100
         @emit 'data', buf
 
     @socket.onclose = (e) =>
       @open = false
+
       if e.wasClean
         @emit 'end'
       else
