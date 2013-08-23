@@ -44,7 +44,7 @@ class AV.WebSocketSource extends AV.EventEmitter
       data = e.data
 
       if typeof data is 'string'
-        if /fileSize/.test data
+        if data.indexOf 'fileSize' isnt -1
           data = JSON.parse data
           @length = data.fileSize
         else if data is 'end'
