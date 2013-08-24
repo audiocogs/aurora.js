@@ -44,12 +44,13 @@ class AV.WebSocketSource extends AV.EventEmitter
       data = e.data
 
       if typeof data is 'string'
-        if data.indexOf 'fileSize' isnt -1
-          data = JSON.parse data
+        data = JSON.parse data
+        if data.fileSize?
           @length = data.fileSize
-        else if data is 'end'
+        else if data.error?
+          @emit 'error', data.error
+        else if data.end
           @socket.close()
-
       else
         buf = new AV.Buffer(new Uint8Array(data))
         @bytesLoaded += buf.length
