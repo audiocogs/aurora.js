@@ -14,13 +14,13 @@ class AV.WebSocketSource extends AV.EventEmitter
     @_setupSocket()
 
   start: ->
-    @_send 'resume'
+    @_send JSON.stringify { resume: true }
 
   pause: ->
-    @_send 'pause'
+    @_send JSON.stringify { pause: true }
 
   reset: ->
-    @_send 'reset'
+    @_send JSON.stringify { reset: true }
 
   _send: (msg) ->
     if not @open
@@ -36,6 +36,7 @@ class AV.WebSocketSource extends AV.EventEmitter
     @socket.onopen = =>
       @open = true
       @socket.send JSON.stringify { @fileName }
+      # send any buffered message
       if @_bufferMessage
         @socket.send @_bufferMessage
         @_bufferMessage = null
