@@ -102,7 +102,6 @@ class AV.Player extends AV.EventEmitter
     startPlaying: =>
         frame = @queue.read()
         frameOffset = 0
-        div = if @format.floatingPoint then 1 else Math.pow(2, @format.bitsPerChannel - 1)
         
         @device = new AV.AudioDevice(@format.sampleRate, @format.channelsPerFrame)
         @device.on 'timeUpdate', (@currentTime) =>
@@ -120,15 +119,14 @@ class AV.Player extends AV.EventEmitter
             bufferOffset = 0
             while frame and bufferOffset < buffer.length
                 max = Math.min(frame.length - frameOffset, buffer.length - bufferOffset)
-                
                 for i in [0...max] by 1
-                    buffer[bufferOffset++] = (frame[frameOffset++] / div)
+                    buffer[bufferOffset++] = frame[frameOffset++]
                 
                 if frameOffset is frame.length
                     frame = @queue.read()
                     frameOffset = 0
             
-            # run any applied filters        
+            # run any applied filters
             for filter in @filters
                 filter.process(buffer)
                 

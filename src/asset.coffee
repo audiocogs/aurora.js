@@ -95,8 +95,18 @@ class AV.Asset extends AV.EventEmitter
             return @emit 'error', "A decoder for #{@format.formatID} was not found."
 
         @decoder = new decoder(@demuxer, @format)
-        @decoder.on 'data', (buffer) =>
-            @emit 'data', buffer
+        
+        if @format.floatingPoint
+            @decoder.on 'data', (buffer) =>
+                @emit 'data', buffer
+        else
+            div = Math.pow(2, @format.bitsPerChannel - 1)
+            @decoder.on 'data', (buffer) =>
+                buf = new Float32Array(buffer.length)
+                for sample, i in buffer
+                    buf[i] = sample / div
+                    
+                @emit 'data', buf
             
         @decoder.on 'error', (err) =>
             @emit 'error', err
