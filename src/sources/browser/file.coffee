@@ -6,6 +6,7 @@ class AV.FileSource extends AV.EventEmitter
         @offset = 0
         @length = @file.size
         @chunkSize = 1 << 20
+        @file[@slice = 'slice'] or @file[@slice = 'webkitSlice'] or @file[@slice = 'mozSlice']
             
     start: ->
         if @reader
@@ -37,10 +38,9 @@ class AV.FileSource extends AV.EventEmitter
         
     loop: ->
         @active = true
-        @file[slice = 'slice'] or @file[slice = 'webkitSlice'] or @file[slice = 'mozSlice']
         endPos = Math.min(@offset + @chunkSize, @length)
         
-        blob = @file[slice](@offset, endPos)
+        blob = @file[@slice](@offset, endPos)
         @reader.readAsArrayBuffer(blob)
         
     pause: ->
