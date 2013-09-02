@@ -1,7 +1,7 @@
 #import "resampler.js"
 
-class WebKitAudioDevice extends AV.EventEmitter
-    AV.AudioDevice.register(WebKitAudioDevice)
+class WebAudioDevice extends AV.EventEmitter
+    AV.AudioDevice.register(WebAudioDevice)
     
     # determine whether this device is supported by the browser
     AudioContext = global.AudioContext or global.webkitAudioContext

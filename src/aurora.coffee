@@ -14,7 +14,7 @@ AV = {}
 #import "asset.coffee"
 #import "player.coffee"
 
-#import "devices/webkit.coffee"
+#import "devices/webaudio.coffee"
 #import "devices/mozilla.coffee"
 
 #import "filter.coffee"
