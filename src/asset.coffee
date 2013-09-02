@@ -64,6 +64,26 @@ class AV.Asset extends AV.EventEmitter
             
     decodePacket: ->
         @decoder.decode()
+        
+    decodeToBuffer: (callback) ->
+        length = 0
+        chunks = []
+        @on 'data', dataHandler = (chunk) ->
+            length += chunk.length
+            chunks.push chunk
+            
+        @once 'end', ->
+            buf = new Float32Array(length)
+            offset = 0
+            
+            for chunk in chunks
+                buf.set(chunk, offset)
+                offset += chunk.length
+                
+            @off 'data', dataHandler
+            callback(buf)
+            
+        @start()
     
     probe: (chunk) =>
         return unless @active
