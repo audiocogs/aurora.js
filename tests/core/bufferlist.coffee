@@ -94,6 +94,38 @@ module 'core/bufferlist', ->
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
         
+    test 'reset', ->
+        list = new AV.BufferList
+        buffer1 = AV.Buffer.allocate(3)
+        buffer2 = AV.Buffer.allocate(3)
+        buffer3 = AV.Buffer.allocate(3)
+        list.append buffer1
+        list.append buffer2
+        list.append buffer3
+        
+        assert.equal buffer1, list.first
+        assert.equal 3, list.numBuffers
+        assert.equal 3, list.availableBuffers
+        assert.equal 9, list.availableBytes
+        
+        assert.equal true, list.advance()
+        assert.equal buffer2, list.first
+        assert.equal 3, list.numBuffers
+        assert.equal 2, list.availableBuffers
+        assert.equal 6, list.availableBytes
+        
+        assert.equal true, list.advance()
+        assert.equal buffer3, list.first
+        assert.equal 3, list.numBuffers
+        assert.equal 1, list.availableBuffers
+        assert.equal 3, list.availableBytes
+        
+        list.reset()
+        assert.equal buffer1, list.first
+        assert.equal 3, list.numBuffers
+        assert.equal 3, list.availableBuffers
+        assert.equal 9, list.availableBytes
+        
     test 'copy', ->
         list = new AV.BufferList
         buffer = AV.Buffer.allocate(3)

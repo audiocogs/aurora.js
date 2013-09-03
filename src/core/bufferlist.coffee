@@ -46,3 +46,6 @@ class AV.BufferList
             @availableBuffers++
             
         return @first?
+        
+    reset: ->
+        continue while @rewind()
