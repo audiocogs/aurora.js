@@ -2,6 +2,7 @@ class AV.BufferList
     constructor: ->
         @first = null
         @last = null
+        @numBuffers = 0
         @availableBytes = 0
         @availableBuffers = 0        
     
@@ -10,6 +11,7 @@ class AV.BufferList
 
         result.first = @first
         result.last = @last
+        result.numBuffers = @numBuffers
         result.availableBytes = @availableBytes
         result.availableBuffers = @availableBuffers
         
@@ -23,6 +25,7 @@ class AV.BufferList
         
         @availableBytes += buffer.length
         @availableBuffers++
+        @numBuffers++
         
     advance: ->
         if @first

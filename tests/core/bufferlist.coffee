@@ -4,6 +4,7 @@ module 'core/bufferlist', ->
         buffer = new AV.Buffer(new Uint8Array([1, 2, 3]))
         list.append buffer
         
+        assert.equal 1, list.numBuffers
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
         assert.equal buffer, list.first
@@ -14,6 +15,7 @@ module 'core/bufferlist', ->
         buffer2 = new AV.Buffer(new Uint8Array([4, 5, 6]))
         list.append buffer2
         
+        assert.equal 2, list.numBuffers
         assert.equal 2, list.availableBuffers
         assert.equal 6, list.availableBytes
         assert.equal buffer, list.first
@@ -31,17 +33,20 @@ module 'core/bufferlist', ->
         list.append buffer1
         list.append buffer2
         
+        assert.equal 2, list.numBuffers
         assert.equal 2, list.availableBuffers
         assert.equal 6, list.availableBytes
         assert.equal buffer1, list.first
         
         assert.equal true, list.advance()
+        assert.equal 2, list.numBuffers
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
         assert.equal buffer2, list.first
 
         assert.equal false, list.advance()
         assert.equal null, list.first
+        assert.equal 2, list.numBuffers
         assert.equal 0, list.availableBuffers
         assert.equal 0, list.availableBytes
         
@@ -52,22 +57,26 @@ module 'core/bufferlist', ->
         list.append buffer1
         list.append buffer2
         
+        assert.equal 2, list.numBuffers
         assert.equal 2, list.availableBuffers
         assert.equal 6, list.availableBytes
         
         assert.equal true, list.advance()
         assert.equal buffer2, list.first
+        assert.equal 2, list.numBuffers
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
         
         assert.equal true, list.rewind()
         assert.equal buffer1, list.first
+        assert.equal 2, list.numBuffers
         assert.equal 2, list.availableBuffers
         assert.equal 6, list.availableBytes
         
         # can't rewind anymore so nothing should change
         assert.equal false, list.rewind()
         assert.equal buffer1, list.first
+        assert.equal 2, list.numBuffers
         assert.equal 2, list.availableBuffers
         assert.equal 6, list.availableBytes
         
@@ -75,11 +84,13 @@ module 'core/bufferlist', ->
         assert.equal true, list.advance()
         assert.equal false, list.advance()
         assert.equal null, list.first
+        assert.equal 2, list.numBuffers
         assert.equal 0, list.availableBuffers
         assert.equal 0, list.availableBytes
         
         assert.equal true, list.rewind()
         assert.equal buffer2, list.first
+        assert.equal 2, list.numBuffers
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
         
@@ -90,6 +101,7 @@ module 'core/bufferlist', ->
 
         copy = list.copy()
 
+        assert.equal 1, list.numBuffers, copy.numBuffers
         assert.equal list.availableBuffers, copy.availableBuffers
         assert.equal list.availableBytes, copy.availableBytes
         assert.equal list.first, copy.first
