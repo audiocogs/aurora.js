@@ -16,9 +16,6 @@ AV = {}
 #import "asset.coffee"
 #import "player.coffee"
 
-#import "devices/webaudio.coffee"
-#import "devices/mozilla.coffee"
-
 #import "filter.coffee"
 #import "filters/volume.coffee"
 #import "filters/balance.coffee"
