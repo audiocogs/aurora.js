@@ -32,7 +32,7 @@ class AV.BufferSource extends AV.EventEmitter
         @_timer = setImmediate @loop
         
     loop: =>
-        @emit 'progress', (@list.numBuffers - @list.availableBuffers) / @list.numBuffers * 100
+        @emit 'progress', (@list.numBuffers - @list.availableBuffers + 1) / @list.numBuffers * 100 | 0
         @emit 'data', @list.first
         if @list.advance()
             setImmediate @loop

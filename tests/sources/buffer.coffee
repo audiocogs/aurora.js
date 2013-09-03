@@ -5,6 +5,8 @@ module 'sources/buffer', ->
     buffer = null
     
     getData = (fn) ->
+        return fn() if buffer
+        
         # if we're in Node, we can read any file we like, otherwise simulate by reading 
         # a blob from an XHR and loading it using a FileSource
         if AV.isNode
@@ -27,6 +29,9 @@ module 'sources/buffer', ->
             
             source.on 'data', (chunk) ->
                 crc.update chunk
+                
+            source.on 'progress', (progress) ->
+                assert.equal progress, 100
             
             source.on 'end', ->
                 assert.equal crc.toHex(), '84d9f967'
@@ -35,49 +40,64 @@ module 'sources/buffer', ->
             source.start()
         
     asyncTest 'single Uint8Array', ->
-        crc = new CRC32
-        source = new AV.BufferSource buffer
+        getData ->
+            crc = new CRC32
+            source = new AV.BufferSource buffer
         
-        source.on 'data', (chunk) ->
-            crc.update chunk
+            source.on 'data', (chunk) ->
+                crc.update chunk
+            
+            source.on 'progress', (progress) ->
+                assert.equal progress, 100
         
-        source.on 'end', ->
-            assert.equal crc.toHex(), '84d9f967'
-            assert.start()
+            source.on 'end', ->
+                assert.equal crc.toHex(), '84d9f967'
+                assert.start()
         
-        source.start()
+            source.start()
         
     asyncTest 'single ArrayBuffer', ->
-        crc = new CRC32
-        source = new AV.BufferSource buffer.buffer
+        getData ->
+            crc = new CRC32
+            source = new AV.BufferSource buffer.buffer
         
-        source.on 'data', (chunk) ->
-            crc.update chunk
+            source.on 'data', (chunk) ->
+                crc.update chunk
+            
+            source.on 'progress', (progress) ->
+                assert.equal progress, 100
         
-        source.on 'end', ->
-            assert.equal crc.toHex(), '84d9f967'
-            assert.start()
+            source.on 'end', ->
+                assert.equal crc.toHex(), '84d9f967'
+                assert.start()
         
-        source.start()
+            source.start()
         
     asyncTest 'AV.BufferList', ->
-        list = new AV.BufferList
-        buffers = [
-            new AV.Buffer(buffer)
-            new AV.Buffer(buffer)
-        ]
+        getData ->
+            list = new AV.BufferList
+            buffers = [
+                new AV.Buffer(buffer)
+                new AV.Buffer(buffer)
+                new AV.Buffer(buffer)
+            ]
         
-        list.append buffers[0]
-        list.append buffers[1]
+            list.append buffers[0]
+            list.append buffers[1]
+            list.append buffers[2]
         
-        source = new AV.BufferSource list
+            source = new AV.BufferSource list
         
-        count = 0
-        source.on 'data', (chunk) ->
-            assert.equal chunk, buffers[count++]
+            count = 0
+            source.on 'data', (chunk) ->
+                assert.equal chunk, buffers[count++]
         
-        source.on 'end', ->
-            assert.equal count, 2
-            assert.start()
+            pcount = 0
+            source.on 'progress', (progress) ->
+                assert.equal progress, ++pcount / 3 * 100 | 0
         
-        source.start()
+            source.on 'end', ->
+                assert.equal count, 3
+                assert.start()
+        
+            source.start()
