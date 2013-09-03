@@ -35,12 +35,12 @@ module 'core/bufferlist', ->
         assert.equal 6, list.availableBytes
         assert.equal buffer1, list.first
         
-        list.advance()
+        assert.equal true, list.advance()
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
         assert.equal buffer2, list.first
 
-        list.advance()
+        assert.equal false, list.advance()
         assert.equal null, list.first
         assert.equal 0, list.availableBuffers
         assert.equal 0, list.availableBytes
@@ -55,30 +55,30 @@ module 'core/bufferlist', ->
         assert.equal 2, list.availableBuffers
         assert.equal 6, list.availableBytes
         
-        list.advance()
+        assert.equal true, list.advance()
         assert.equal buffer2, list.first
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
         
-        list.rewind()
+        assert.equal true, list.rewind()
         assert.equal buffer1, list.first
         assert.equal 2, list.availableBuffers
         assert.equal 6, list.availableBytes
         
         # can't rewind anymore so nothing should change
-        list.rewind()
+        assert.equal false, list.rewind()
         assert.equal buffer1, list.first
         assert.equal 2, list.availableBuffers
         assert.equal 6, list.availableBytes
         
         # advancing past the end of the list and then rewinding should give us the last buffer
-        list.advance()
-        list.advance()
+        assert.equal true, list.advance()
+        assert.equal false, list.advance()
         assert.equal null, list.first
         assert.equal 0, list.availableBuffers
         assert.equal 0, list.availableBytes
         
-        list.rewind()
+        assert.equal true, list.rewind()
         assert.equal buffer2, list.first
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
