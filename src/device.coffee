@@ -15,6 +15,9 @@ class AV.AudioDevice extends AV.EventEmitter
         @playing = true
         
         @device ?= AV.AudioDevice.create(@sampleRate, @channels)
+        unless @device
+            throw new Error "No supported audio device found."
+            
         @_lastTime = @device.getDeviceTime()
             
         @_timer = setInterval @updateTime, 200
