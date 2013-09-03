@@ -11,6 +11,9 @@
       "url": "https://github.com/audiocogs/aurora.js.git"
   },
   "bugs": "https://github.com/audiocogs/aurora.js/issues",
+  "dependencies": {
+    "speaker": "~0.0.10"
+  },
   "devDependencies": {
       "coffee-script": ">=1.0",
       "qunit-cli": "*",

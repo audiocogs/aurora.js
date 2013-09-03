@@ -1,6 +1,7 @@
 #import "src/aurora.coffee"
 #import "src/sources/node/http.coffee"
 #import "src/sources/node/file.coffee"
+#import "src/devices/node-speaker.coffee"
 
 AV.isNode = true
 AV.require = (modules...) ->
