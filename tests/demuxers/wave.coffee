@@ -55,3 +55,4 @@ module 'demuxers/wave', ->
             littleEndian: true
             floatingPoint: false
         duration: 8916
+        data: '82d0f0ea'
