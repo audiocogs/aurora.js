@@ -1,23 +1,12 @@
 class AV.BufferSource extends AV.EventEmitter    
     constructor: (input) ->
-        # convert ArrayBuffer and typed array input to AV.Buffer
-        arrayBuffer = input.buffer or input
-        if arrayBuffer instanceof ArrayBuffer
-            input = new AV.Buffer new Uint8Array(arrayBuffer)
-            
-        else if AV.isNode and Buffer.isBuffer(input)
-            input = new AV.Buffer new Uint8Array(input)
-            
         # Now make an AV.BufferList
         if input instanceof AV.BufferList
             @list = input
             
-        else if input instanceof AV.Buffer
-            @list = new AV.BufferList
-            @list.append input
-        
         else
-            @emit 'error', 'Input must be a buffer or buffer list'
+            @list = new AV.BufferList
+            @list.append new AV.Buffer(input)
             
         @paused = true
         
