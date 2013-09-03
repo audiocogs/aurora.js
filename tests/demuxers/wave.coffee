@@ -42,3 +42,16 @@ module 'demuxers/wave', ->
             floatingPoint: false
         duration: 8916
         data: '1af5b4fe'
+
+    demuxerTest 'read the full fmt chunk', 
+        file: 'wave/issue35.wav'
+        format:
+            formatID: 'lpcm'
+            sampleRate: 44100
+            bitsPerChannel: 16
+            channelsPerFrame: 2
+            bytesPerPacket: 4
+            framesPerPacket: 1
+            littleEndian: true
+            floatingPoint: false
+        duration: 8916

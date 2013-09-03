@@ -21,11 +21,11 @@ class AV.BufferSource extends AV.EventEmitter
             
         @paused = true
         
-    setImmediate = window.setImmediate or (fn) ->
-        window.setTimeout fn, 0
+    setImmediate = (window? and window.setImmediate) or (fn) ->
+        setTimeout fn, 0
         
-    clearImmediate = window.clearImmediate or (timer) ->
-        window.clearTimeout timer
+    clearImmediate = (window? and window.clearImmediate) or (timer) ->
+        clearTimeout timer
             
     start: ->
         @paused = false
