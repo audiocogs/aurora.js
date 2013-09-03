@@ -48,6 +48,9 @@ class WAVEDemuxer extends AV.Demuxer
                     @format.bytesPerPacket = (@format.bitsPerChannel / 8) * @format.channelsPerFrame
                     
                     @emit 'format', @format
+
+                    # Advance to the next chunk
+                    @stream.advance(@len - 16)
                     
                 when 'data'
                     if not @sentDuration
