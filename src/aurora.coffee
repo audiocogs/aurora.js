@@ -7,6 +7,8 @@ AV = {}
 #import "core/bitstream.coffee"
 #import "core/events.coffee"
 
+#import "sources/buffer.coffee"
+
 #import "demuxer.coffee"
 #import "decoder.coffee"
 #import "queue.coffee"

@@ -25,12 +25,13 @@ class AV.Asset extends AV.EventEmitter
             @emit 'buffer', @buffered
             
     @fromURL: (url) ->
-        source = new AV.HTTPSource(url)
-        return new AV.Asset(source)
+        return new AV.Asset new AV.HTTPSource(url)
 
     @fromFile: (file) ->
-        source = new AV.FileSource(file)
-        return new AV.Asset(source)
+        return new AV.Asset new AV.FileSource(file)
+        
+    @fromBuffer: (buffer) ->
+        return new AV.Asset new AV.BufferSource(buffer)
         
     start: (decode) ->
         return if @active

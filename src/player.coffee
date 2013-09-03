@@ -41,12 +41,13 @@ class AV.Player extends AV.EventEmitter
             @emit 'error', error
                 
     @fromURL: (url) ->
-        asset = AV.Asset.fromURL(url)
-        return new AV.Player(asset)
+        return new AV.Player AV.Asset.fromURL(url)
         
     @fromFile: (file) ->
-        asset = AV.Asset.fromFile(file)
-        return new AV.Player(asset)
+        return new AV.Player AV.Asset.fromFile(file)
+        
+    @fromBuffer: (buffer) ->
+        return new AV.Player AV.Asset.fromBuffer(buffer)
         
     preload: ->
         return unless @asset

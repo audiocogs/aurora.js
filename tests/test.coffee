@@ -9,6 +9,7 @@
 
 #import "sources/http"
 #import "sources/file"
+#import "sources/buffer"
 
 #import "demuxers/m4a"
 #import "demuxers/caf"
