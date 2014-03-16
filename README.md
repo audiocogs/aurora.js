@@ -36,6 +36,12 @@ By itself, Aurora will play LPCM, uLaw and aLaw files in a number of containers.
 by including some of our other decoders such as [FLAC.js](https://github.com/audiocogs/flac.js), 
 [ALAC.js](https://github.com/audiocogs/alac.js), and [MP3.js](https://github.com/devongovett/mp3.js).
 
+If you want to build Aurora without the default codecs, you can use the "browser_slim.coffee" profile:
+
+    importer browser_slim.coffee aurora.js
+
+This can help shave off approx. 30 KB from the joined file, or 20 KB when minified.
+    
 ## License
 
 Aurora.js is released under the MIT license.
