@@ -45,7 +45,9 @@ class AV.FileSource extends AV.EventEmitter
         
     pause: ->
         @active = false
-        @reader?.abort()
+        try
+          @reader?.abort()
+        catch error
         
     reset: ->
         @pause()
