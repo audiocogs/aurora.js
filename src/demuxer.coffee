@@ -68,6 +68,9 @@ class AV.Demuxer extends AV.EventEmitter
             return seekPoint
         else
             index = @searchTimestamp timestamp
+            while ((((@duration*(@buffered/100))-(@seekPoints[index].timestamp / @format.sampleRate * 1000))<((@buffered==100)?6000:10000)) && (index>0))
+                if index>0 
+                    index=index-1
             return @seekPoints[index]
         
     formats = []
