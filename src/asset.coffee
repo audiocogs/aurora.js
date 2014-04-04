@@ -22,6 +22,8 @@ class AV.Asset extends AV.EventEmitter
             @stop()
             
         @source.on 'progress', (@buffered) =>
+            if @demuxer!=null 
+                @demuxer.buffered=@buffered
             @emit 'buffer', @buffered
             
     @fromURL: (url) ->
@@ -97,6 +99,7 @@ class AV.Asset extends AV.EventEmitter
         @demuxer.on 'format', @findDecoder
         
         @demuxer.on 'duration', (@duration) =>
+            @demuxer.duration = @duration
             @emit 'duration', @duration
             
         @demuxer.on 'metadata', (@metadata) =>
