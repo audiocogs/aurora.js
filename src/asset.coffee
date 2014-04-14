@@ -106,7 +106,10 @@ class AV.Asset extends AV.EventEmitter
             @emit 'error', err
             @stop()
 
-    findDecoder: (@format) =>
+    findDecoder: (format) =>
+        # NOTE: only for backwards compatibility. Make obsolete soon.
+        @format = new AV.Format(format)
+
         return unless @active
         
         @emit 'format', @format
