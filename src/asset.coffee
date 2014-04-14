@@ -63,7 +63,7 @@ class AV.Asset extends AV.EventEmitter
             
             @start()
             
-    decodePacket: ->
+    decodePacket: =>
         @decoder.decode()
         
     decodeToBuffer: (callback) ->
