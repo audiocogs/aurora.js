@@ -15,6 +15,7 @@ class AV.Player extends AV.EventEmitter
         @volume = 100
         @pan = 0 # -50 for left, 50 for right, 0 for center
         @metadata = {}
+        pipe = @pipe = new AV.BufferedPipe
         
         @filters = [
             new AV.VolumeFilter(this, 'volume')
@@ -23,10 +24,15 @@ class AV.Player extends AV.EventEmitter
         
         @asset.on 'buffer', (@buffered) =>
             @emit 'buffer', @buffered
-        
-        @asset.on 'decodeStart', =>
-            @queue = new AV.Queue(@asset)
-            @queue.once 'ready', @startPlaying
+
+        @asset.on 'decodeStart', setupPipe = =>
+            pipe.more = asset.decodePacket
+            pipe.more()
+
+            asset.on 'data', pipe.write
+            asset.on 'end', ->
+                pipe.ended = true
+            pipe.once 'ready', @startPlaying
             
         @asset.on 'format', (@format) =>
             @emit 'format', @format
@@ -83,7 +89,7 @@ class AV.Player extends AV.EventEmitter
         
     seek: (timestamp) ->
         @device?.stop()
-        @queue.once 'ready', =>
+        @pipe.once 'ready', =>
             @device?.seek @currentTime
             @device?.start() if @playing
             
@@ -97,11 +103,11 @@ class AV.Player extends AV.EventEmitter
         # convert back from samples to milliseconds
         @currentTime = timestamp / @format.sampleRate * 1000 | 0
         
-        @queue.reset()
+        @pipe.reset()
         return @currentTime
         
     startPlaying: =>
-        frame = @queue.read()
+        frame = @pipe.read()
         frameOffset = 0
         
         @device = new AV.AudioDevice(@format.sampleRate, @format.channelsPerFrame)
@@ -114,7 +120,7 @@ class AV.Player extends AV.EventEmitter
             # try reading another frame if one isn't already available
             # happens when we play to the end and then seek back
             if not frame
-                frame = @queue.read()
+                frame = @pipe.read()
                 frameOffset = 0
 
             bufferOffset = 0
@@ -124,7 +130,7 @@ class AV.Player extends AV.EventEmitter
                     buffer[bufferOffset++] = frame[frameOffset++]
                 
                 if frameOffset is frame.length
-                    frame = @queue.read()
+                    frame = @pipe.read()
                     frameOffset = 0
             
             # run any applied filters
@@ -135,7 +141,7 @@ class AV.Player extends AV.EventEmitter
             unless frame
                 # if this was the end of the track, make
                 # sure the currentTime reflects that
-                if @queue.ended
+                if @pipe.ended
                     @currentTime = @duration
                     @emit 'progress', @currentTime
                     @emit 'end'

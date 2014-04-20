@@ -9,9 +9,10 @@ AV = {}
 
 #import "sources/buffer.coffee"
 
+#import "format.coffee"
 #import "demuxer.coffee"
 #import "decoder.coffee"
-#import "queue.coffee"
+#import "buffered_pipe.coffee"
 #import "device.coffee"
 #import "asset.coffee"
 #import "player.coffee"
