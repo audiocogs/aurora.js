@@ -3,26 +3,35 @@
   "description": "Audio decoding framework",
   "version": "0.3.1",
   "author": {
-      "name": "Audiocogs",
-      "url": "http://audiocogs.org/"
+    "name": "Audiocogs",
+    "url": "http://audiocogs.org/"
   },
   "repository": {
-      "type": "git",
-      "url": "https://github.com/audiocogs/aurora.js.git"
+    "type": "git",
+    "url": "https://github.com/audiocogs/aurora.js.git"
   },
   "bugs": "https://github.com/audiocogs/aurora.js/issues",
   "dependencies": {
     "speaker": "~0.0.10"
   },
   "devDependencies": {
-      "coffee-script": ">=1.0",
-      "qunit-cli": "*",
-      "importer": ">=0.4"
+    "coffee-script": ">=1.0",
+    "qunit-cli": "*",
+    "importer": ">=0.4",
+    "grunt": "~0.4.4",
+    "grunt-importer": "~1.0.1",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-connect": "~0.7.1",
+    "grunt-open": "~0.2.3",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-clean": "~0.5.0"
   },
   "scripts": {
-      "prepublish": "node_modules/.bin/importer node.coffee node.js",
-      "test": "node_modules/.bin/importer node.coffee node.js; node_modules/.bin/importer tests/test.coffee"
+    "prepublish": "node_modules/.bin/importer node.coffee node.js",
+    "test": "node_modules/.bin/importer node.coffee node.js; node_modules/.bin/importer tests/test.coffee"
   },
-  "engine": [ "node >= v0.6.0" ],
+  "engine": [
+    "node >= v0.6.0"
+  ],
   "main": "node.js"
 }

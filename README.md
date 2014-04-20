@@ -22,23 +22,15 @@ of [Audiocogs](https://github.com/audiocogs/).
 
 ## Building
 
-Currently, the [importer](https://github.com/devongovett/importer) module is used to build Aurora.js.  You can run
-the development server by first installing `importer` with npm, and then running it like this:
+[Grunt](gruntjs.com) is used to build Aurora.js.  You can build a static version like this:
 
-    npm install importer -g
-    importer browser.coffee -p 8080
-    
-You can also build a static version like this:
-
-    importer browser.coffee aurora.js
+    grunt build
     
 By itself, Aurora will play LPCM, uLaw and aLaw files in a number of containers.  Be sure to add additional codec support 
 by including some of our other decoders such as [FLAC.js](https://github.com/audiocogs/flac.js), 
 [ALAC.js](https://github.com/audiocogs/alac.js), and [MP3.js](https://github.com/devongovett/mp3.js).
 
-If you want to build Aurora without the default codecs, you can use the "browser_slim.coffee" profile:
-
-    importer browser_slim.coffee aurora.js
+If you want to build Aurora without the default codecs, you can use "browser_slim.js"
 
 This can help shave off approx. 30 KB from the joined file, or 20 KB when minified.
     
