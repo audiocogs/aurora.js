@@ -12,7 +12,7 @@ class AV.HTTPSource extends AV.EventEmitter
         @xhr = new XMLHttpRequest()
         
         @xhr.onload = (event) =>
-            @length = parseInt @xhr.getResponseHeader("Content-Length")                
+            @length = parseInt @xhr.getResponseHeader("Content-Length") - 1               
             @inflight = false
             @loop()
         
