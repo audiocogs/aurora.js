@@ -1,11 +1,15 @@
-class AV.Demuxer extends AV.EventEmitter
+EventEmitter = require './core/events'
+BufferList = require './core/bufferlist'
+Stream = require './core/stream'
+
+class Demuxer extends EventEmitter
     @probe: (buffer) ->
         return false
     
     constructor: (source, chunk) ->
-        list = new AV.BufferList
+        list = new BufferList
         list.append chunk
-        @stream = new AV.Stream(list)
+        @stream = new Stream(list)
         
         received = false
         source.on 'data', (chunk) =>
@@ -75,8 +79,10 @@ class AV.Demuxer extends AV.EventEmitter
         formats.push demuxer
             
     @find: (buffer) ->
-        stream = AV.Stream.fromBuffer(buffer)        
+        stream = Stream.fromBuffer(buffer)        
         for format in formats when format.probe(stream)
             return format
             
         return null
+        
+module.exports = Demuxer

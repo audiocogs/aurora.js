@@ -6,7 +6,14 @@
 # file to linear PCM raw audio data.
 #
 
-class AV.Asset extends AV.EventEmitter
+EventEmitter = require './core/events'
+HTTPSource   = require './sources/node/http'
+FileSource   = require './sources/node/file'
+BufferSource = require './sources/buffer'
+Demuxer      = require './demuxer'
+Decoder      = require './decoder'
+
+class Asset extends EventEmitter
     constructor: (@source) ->
         @buffered = 0
         @duration = null
@@ -25,13 +32,13 @@ class AV.Asset extends AV.EventEmitter
             @emit 'buffer', @buffered
             
     @fromURL: (url) ->
-        return new AV.Asset new AV.HTTPSource(url)
+        return new Asset new HTTPSource(url)
 
     @fromFile: (file) ->
-        return new AV.Asset new AV.FileSource(file)
+        return new Asset new FileSource(file)
         
     @fromBuffer: (buffer) ->
-        return new AV.Asset new AV.BufferSource(buffer)
+        return new Asset new BufferSource(buffer)
         
     start: (decode) ->
         return if @active
@@ -89,7 +96,7 @@ class AV.Asset extends AV.EventEmitter
     probe: (chunk) =>
         return unless @active
         
-        demuxer = AV.Demuxer.find(chunk)
+        demuxer = Demuxer.find(chunk)
         if not demuxer
             return @emit 'error', 'A demuxer for this container was not found.'
             
@@ -111,7 +118,7 @@ class AV.Asset extends AV.EventEmitter
         
         @emit 'format', @format
         
-        decoder = AV.Decoder.find(@format.formatID)
+        decoder = Decoder.find(@format.formatID)
         if not decoder
             return @emit 'error', "A decoder for #{@format.formatID} was not found."
 
@@ -142,3 +149,5 @@ class AV.Asset extends AV.EventEmitter
     _decode: =>
         continue while @decoder.decode() and @active
         @decoder.once 'data', @_decode if @active
+        
+module.exports = Asset

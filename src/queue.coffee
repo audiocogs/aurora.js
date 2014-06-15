@@ -1,4 +1,6 @@
-class AV.Queue extends AV.EventEmitter
+EventEmitter = require './core/events'
+
+class Queue extends EventEmitter
     constructor: (@asset) ->
         @readyMark = 64
         @finished = false
@@ -32,3 +34,5 @@ class AV.Queue extends AV.EventEmitter
         @buffers.length = 0
         @buffering = true
         @asset.decodePacket()
+        
+module.exports = Queue

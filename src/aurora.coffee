@@ -1,10 +1,11 @@
-#import "aurora_base.coffee"
+for key, val of require './aurora_base'
+    exports[key] = val
 
-#import "demuxers/caf.coffee"
-#import "demuxers/m4a.coffee"
-#import "demuxers/aiff.coffee"
-#import "demuxers/wave.coffee"
-#import "demuxers/au.coffee"
+require './demuxers/caf'
+require './demuxers/m4a'
+require './demuxers/aiff'
+require './demuxers/wave'
+require './demuxers/au'
 
-#import "decoders/lpcm.coffee"
-#import "decoders/xlaw.coffee"
+require './decoders/lpcm'
+require './decoders/xlaw'

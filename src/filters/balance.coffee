@@ -1,4 +1,6 @@
-class AV.BalanceFilter extends AV.Filter
+Filter = require '../filter'
+
+class BalanceFilter extends Filter
     process: (buffer) ->
         return if @value is 0
         pan = Math.max(-50, Math.min(50, @value))
@@ -8,3 +10,5 @@ class AV.BalanceFilter extends AV.Filter
             buffer[i + 1] *= Math.min(1, (50 + pan) / 50)
             
         return
+        
+module.exports = BalanceFilter

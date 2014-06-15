@@ -1,12 +1,16 @@
-class AV.BufferSource extends AV.EventEmitter    
+EventEmitter = require '../core/events'
+BufferList = require '../core/bufferlist'
+AVBuffer = require '../core/buffer'
+
+class BufferSource extends EventEmitter    
     constructor: (input) ->
         # Now make an AV.BufferList
         if input instanceof AV.BufferList
             @list = input
             
         else
-            @list = new AV.BufferList
-            @list.append new AV.Buffer(input)
+            @list = new BufferList
+            @list.append new AVBuffer(input)
             
         @paused = true
         

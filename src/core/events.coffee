@@ -1,4 +1,6 @@
-class AV.EventEmitter extends AV.Base
+Base = require './base'
+
+class EventEmitter extends Base
     on: (event, fn) ->
         @events ?= {}
         @events[event] ?= []
@@ -23,3 +25,5 @@ class AV.EventEmitter extends AV.Base
             fn.apply(this, args)
             
         return
+        
+module.exports = EventEmitter

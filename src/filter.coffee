@@ -1,4 +1,4 @@
-class AV.Filter
+class Filter
     constructor: (context, key) ->
         # default constructor takes a single value
         # override to take more parameters
@@ -9,3 +9,5 @@ class AV.Filter
     process: (buffer) ->
         # override this method
         return
+        
+module.exports = Filter

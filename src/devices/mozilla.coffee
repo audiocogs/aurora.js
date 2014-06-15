@@ -1,5 +1,9 @@
-class MozillaAudioDevice extends AV.EventEmitter
-    AV.AudioDevice.register(MozillaAudioDevice)
+EventEmitter = require '../core/events'
+AudioDevice = require '../device'
+AVBuffer = require '../core/buffer'
+
+class MozillaAudioDevice extends EventEmitter
+    AudioDevice.register(MozillaAudioDevice)
     
     # determine whether this device is supported by the browser
     @supported: Audio? and 'mozWriteAudio' of new Audio
@@ -47,7 +51,7 @@ class MozillaAudioDevice extends AV.EventEmitter
     # Use an inline worker to get setInterval
     # without being clamped in background tabs
     createTimer = (fn, interval) ->
-        url = AV.Buffer.makeBlobURL("setInterval(function() { postMessage('ping'); }, #{interval});")
+        url = AVBuffer.makeBlobURL("setInterval(function() { postMessage('ping'); }, #{interval});")
         return setInterval fn, interval unless url?
                 
         worker = new Worker(url)

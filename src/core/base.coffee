@@ -4,7 +4,7 @@
 # plain JavaScript. Based on http://ejohn.org/blog/simple-javascript-inheritance/.
 #
 
-class AV.Base
+class Base
     fnTest = /\b_super\b/
     
     @extend: (prop) ->
@@ -37,3 +37,5 @@ class AV.Base
                 Class::[key] = fn
                 
         return Class
+        
+module.exports = Base

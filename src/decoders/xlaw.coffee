@@ -1,6 +1,8 @@
-class XLAWDecoder extends AV.Decoder
-    AV.Decoder.register('ulaw', XLAWDecoder)
-    AV.Decoder.register('alaw', XLAWDecoder)
+Decoder = require '../decoder'
+
+class XLAWDecoder extends Decoder
+    Decoder.register('ulaw', XLAWDecoder)
+    Decoder.register('alaw', XLAWDecoder)
     
     SIGN_BIT   = 0x80
     QUANT_MASK = 0xf

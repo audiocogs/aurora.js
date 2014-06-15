@@ -1,21 +1,18 @@
-AV = {}
+exports.Base = require './core/base'
+exports.Buffer = require './core/buffer'
+exports.BufferList = require './core/bufferlist'
+exports.Stream = require './core/stream'
+exports.Bitstream = require './core/bitstream'
+exports.EventEmitter = require './core/events'
 
-#import "core/base.coffee"
-#import "core/buffer.coffee"
-#import "core/bufferlist.coffee"
-#import "core/stream.coffee"
-#import "core/bitstream.coffee"
-#import "core/events.coffee"
+exports.BufferSource = require './sources/buffer'
 
-#import "sources/buffer.coffee"
+exports.Demuxer = require './demuxer'
+exports.Decoder = require './decoder'
+exports.AudioDevice = require './device'
+exports.Asset = require './asset'
+exports.Player = require './player'
 
-#import "demuxer.coffee"
-#import "decoder.coffee"
-#import "queue.coffee"
-#import "device.coffee"
-#import "asset.coffee"
-#import "player.coffee"
-
-#import "filter.coffee"
-#import "filters/volume.coffee"
-#import "filters/balance.coffee"
+exports.Filter = require './filter'
+exports.VolumeFilter = require './filters/volume'
+exports.BalanceFilter = require './filters/balance'

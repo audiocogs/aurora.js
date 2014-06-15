@@ -1,5 +1,8 @@
-class AV.HTTPSource extends AV.EventEmitter
-    http = require 'http'
+EventEmitter = require '../../core/events'
+AVBuffer = require '../../core/buffer'
+http = require 'http'
+
+class HTTPSource extends EventEmitter
     constructor: (@url) ->
         @request = null
         @response = null
@@ -22,7 +25,7 @@ class AV.HTTPSource extends AV.EventEmitter
             @response.on 'data', (chunk) =>
                 @loaded += chunk.length
                 @emit 'progress', @loaded / @size * 100
-                @emit 'data', new AV.Buffer(new Uint8Array(chunk))
+                @emit 'data', new AVBuffer(new Uint8Array(chunk))
                 
             @response.on 'end', =>
                 @emit 'end'
@@ -43,3 +46,5 @@ class AV.HTTPSource extends AV.EventEmitter
     errorHandler: (err) =>
         @reset()
         @emit 'error', err
+        
+module.exports = HTTPSource

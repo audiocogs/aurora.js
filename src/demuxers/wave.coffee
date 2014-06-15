@@ -1,5 +1,7 @@
-class WAVEDemuxer extends AV.Demuxer
-    AV.Demuxer.register(WAVEDemuxer)
+Demuxer = require '../demuxer'
+
+class WAVEDemuxer extends Demuxer
+    Demuxer.register(WAVEDemuxer)
     
     @probe: (buffer) ->
         return buffer.peekString(0, 4) is 'RIFF' && 

@@ -1,4 +1,4 @@
-class AV.BufferList
+class BufferList
     constructor: ->
         @first = null
         @last = null
@@ -7,7 +7,7 @@ class AV.BufferList
         @availableBuffers = 0        
     
     copy: ->
-        result = new AV.BufferList
+        result = new BufferList
 
         result.first = @first
         result.last = @last
@@ -49,3 +49,5 @@ class AV.BufferList
         
     reset: ->
         continue while @rewind()
+        
+module.exports = BufferList

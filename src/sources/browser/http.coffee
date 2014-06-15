@@ -1,4 +1,7 @@
-class AV.HTTPSource extends AV.EventEmitter
+EventEmitter = require '../../core/events'
+AVBuffer = require '../../core/buffer'
+
+class HTTPSource extends EventEmitter
     constructor: (@url) ->
         @chunkSize = 1 << 20
         @inflight = false
@@ -42,7 +45,7 @@ class AV.HTTPSource extends AV.EventEmitter
                 for i in [0...txt.length]
                     buf[i] = txt.charCodeAt(i) & 0xff
 
-            buffer = new AV.Buffer(buf)
+            buffer = new AVBuffer(buf)
             @offset += buffer.length
             
             @emit 'data', buffer
@@ -76,3 +79,5 @@ class AV.HTTPSource extends AV.EventEmitter
     reset: ->
         @pause()
         @offset = 0
+        
+module.exports = HTTPSource

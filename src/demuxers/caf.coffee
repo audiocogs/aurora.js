@@ -1,5 +1,7 @@
-class CAFDemuxer extends AV.Demuxer
-    AV.Demuxer.register(CAFDemuxer)
+Demuxer = require '../demuxer'
+
+class CAFDemuxer extends Demuxer
+    Demuxer.register(CAFDemuxer)
     
     @probe: (buffer) ->
         return buffer.peekString(0, 4) is 'caff'

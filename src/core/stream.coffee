@@ -1,4 +1,7 @@
-class AV.Stream
+BufferList = require './bufferlist'
+AVBuffer = require './buffer'
+
+class Stream
     buf = new ArrayBuffer(16)
     uint8 = new Uint8Array(buf)
     int8 = new Int8Array(buf)
@@ -14,21 +17,21 @@ class AV.Stream
     nativeEndian = new Uint16Array(new Uint8Array([0x12, 0x34]).buffer)[0] is 0x3412
     
     # define an error class to be thrown if an underflow occurs
-    class AV.UnderflowError extends Error
+    class Stream.UnderflowError extends Error
         constructor: ->
-            @name = 'AV.UnderflowError'
+            @name = 'UnderflowError'
     
     constructor: (@list) ->
         @localOffset = 0
         @offset = 0
         
     @fromBuffer: (buffer) ->
-        list = new AV.BufferList
+        list = new BufferList
         list.append(buffer)
-        return new AV.Stream(list)
+        return new Stream(list)
     
     copy: ->
-        result = new AV.Stream(@list.copy())
+        result = new Stream(@list.copy())
         result.localOffset = @localOffset
         result.offset = @offset
         return result
@@ -41,7 +44,7 @@ class AV.Stream
     
     advance: (bytes) ->
         if not @available bytes
-            throw new AV.UnderflowError()
+            throw new Stream.UnderflowError()
         
         @localOffset += bytes
         @offset += bytes
@@ -54,7 +57,7 @@ class AV.Stream
         
     rewind: (bytes) ->
         if bytes > @offset
-            throw new AV.UnderflowError()
+            throw new Stream.UnderflowError()
         
         # if we're at the end of the bufferlist, seek from the end
         if not @list.first
@@ -79,7 +82,7 @@ class AV.Stream
         
     readUInt8: ->
         if not @available(1)
-            throw new AV.UnderflowError()
+            throw new Stream.UnderflowError()
         
         a = @list.first.data[@localOffset]
         @localOffset += 1
@@ -93,7 +96,7 @@ class AV.Stream
 
     peekUInt8: (offset = 0) ->
         if not @available(offset + 1)
-            throw new AV.UnderflowError()
+            throw new Stream.UnderflowError()
         
         offset = @localOffset + offset
         buffer = @list.first
@@ -269,7 +272,7 @@ class AV.Stream
         return float80()
         
     readBuffer: (length) ->
-        result = AV.Buffer.allocate(length)
+        result = AVBuffer.allocate(length)
         to = result.data
 
         for i in [0...length] by 1
@@ -278,7 +281,7 @@ class AV.Stream
         return result
 
     peekBuffer: (offset = 0, length) ->
-        result = AV.Buffer.allocate(length)
+        result = AVBuffer.allocate(length)
         to = result.data
 
         for i in [0...length] by 1
@@ -382,3 +385,5 @@ class AV.Stream
 
         @advance offset if advance
         return result
+        
+module.exports = Stream

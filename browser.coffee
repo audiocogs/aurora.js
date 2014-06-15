@@ -1,10 +1,7 @@
-do ->
-    global = this
+for key, val of require './src/aurora'
+  exports[key] = val
     
-    #import "src/aurora.coffee"
-    #import "src/sources/browser/http.coffee"
-    #import "src/sources/browser/file.coffee"
-    #import "src/devices/webaudio.coffee"
-    #import "src/devices/mozilla.coffee"
-    
-    global.AV = AV
+require './src/sources/browser/http'
+require './src/sources/browser/file'
+require './src/devices/webaudio'
+require './src/devices/mozilla'
