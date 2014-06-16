@@ -5,6 +5,9 @@ exports.Stream = require './core/stream'
 exports.Bitstream = require './core/bitstream'
 exports.EventEmitter = require './core/events'
 
+# browserify will replace these with the browser versions
+exports.HTTPSource = require './sources/node/http'
+exports.FileSource = require './sources/node/file'
 exports.BufferSource = require './sources/buffer'
 
 exports.Demuxer = require './demuxer'
