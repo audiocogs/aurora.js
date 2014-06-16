@@ -1,6 +1,6 @@
-#import "shared.coffee"
+demuxerTest = require './shared'
 
-module 'demuxers/wave', ->
+describe 'demuxers/wave', ->
     demuxerTest 'lei16', 
         file: 'wave/lei16.wav'
         format:

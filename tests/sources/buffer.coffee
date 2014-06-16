@@ -1,6 +1,6 @@
-#import "../crc32.coffee"
+CRC32 = require '../crc32'
 
-module 'sources/buffer', ->
+describe 'sources/buffer', ->
     asyncTest = assert.asyncTest
     buffer = null
     
@@ -9,8 +9,8 @@ module 'sources/buffer', ->
         
         # if we're in Node, we can read any file we like, otherwise simulate by reading 
         # a blob from an XHR and loading it using a FileSource
-        if AV.isNode
-            require('fs').readFile "#{__dirname}/data/m4a/base.m4a", (err, data) ->
+        if global.Buffer?
+            require('fs').readFile "#{__dirname}/../data/m4a/base.m4a", (err, data) ->
                 buffer = new Uint8Array(data)
                 fn()
         else

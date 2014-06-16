@@ -1,13 +1,13 @@
-#import "../crc32.coffee"
+CRC32 = require '../crc32'
 
-module 'sources/file', ->
+describe 'sources/file', ->
     asyncTest = assert.asyncTest
         
     getSource = (fn) ->
         # if we're in Node, we can read any file we like, otherwise simulate by reading 
         # a blob from an XHR and loading it using a FileSource
-        if AV.isNode
-            fn new AV.FileSource "#{__dirname}/data/m4a/base.m4a"
+        if global.Buffer?
+            fn new AV.FileSource "#{__dirname}/../data/m4a/base.m4a"
         else
             xhr = new XMLHttpRequest
             xhr.open 'GET', "#{HTTP_BASE}/data/m4a/base.m4a"

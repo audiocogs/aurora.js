@@ -1,6 +1,6 @@
-#import "shared.coffee"
+decoderTest = require "./shared"
 
-module 'decoders/xlaw', ->
+describe 'decoders/xlaw', ->
     decoderTest 'alaw',
         file: 'au/alaw.au'
         data: '1543ac89'

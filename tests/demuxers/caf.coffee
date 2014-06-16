@@ -1,6 +1,6 @@
-#import "shared.coffee"
+demuxerTest = require './shared'
 
-module 'demuxers/caf', ->
+describe 'demuxers/caf', ->
     demuxerTest 'base', 
         file: 'caf/aac.caf'
         format:

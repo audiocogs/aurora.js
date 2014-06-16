@@ -1,6 +1,6 @@
-#import "shared.coffee"
+decoderTest = require "./shared"
 
-module 'decoders/lpcm', ->
+describe 'decoders/lpcm', ->
     decoderTest 'i8',
         file: 'm4a/i8.mov'
         data: 'f12b56ad'
