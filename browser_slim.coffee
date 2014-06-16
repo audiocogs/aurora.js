@@ -1,10 +1,5 @@
-do ->
-    global = this
-    
-    #import "src/aurora_base.coffee"
-    #import "src/sources/browser/http.coffee"
-    #import "src/sources/browser/file.coffee"
-    #import "src/devices/webaudio.coffee"
-    #import "src/devices/mozilla.coffee"
-    
-    global.AV = AV
+for key, val of require './src/aurora_base'
+  exports[key] = val
+  
+require './src/devices/webaudio'
+require './src/devices/mozilla'

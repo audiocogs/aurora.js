@@ -9,3 +9,4 @@ Thumbs.db
 node_modules
 node.js
 aurora.js
+/build/
