@@ -17,20 +17,23 @@
   "devDependencies": {
     "coffee-script": ">=1.0",
     "qunit-cli": "*",
-    "importer": ">=0.4",
     "browserify": "^4.1.10",
-    "coffeeify": "^0.6.0"
+    "coffeeify": "^0.6.0",
+    "exorcist": "^0.1.6"
   },
   "scripts": {
-    "prepublish": "node_modules/.bin/importer node.coffee node.js",
-    "test": "node_modules/.bin/importer node.coffee node.js; node_modules/.bin/importer tests/test.coffee"
+    "prepublish": "make js",
+    "postpublish": "make clean",
+    "test": "coffee tests/test.coffee"
   },
   "engine": [
     "node >= v0.6.0"
   ],
   "main": "./node",
   "browserify": {
-    "transform": ["coffeeify"]
+    "transform": [
+      "coffeeify"
+    ]
   },
   "browser": {
     "./node": "./browser.coffee",
