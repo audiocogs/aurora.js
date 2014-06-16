@@ -39,3 +39,5 @@ class BufferSource extends EventEmitter
     reset: ->
         @pause()
         @list.rewind()
+        
+module.exports = BufferSource

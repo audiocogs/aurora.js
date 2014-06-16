@@ -1,4 +1,5 @@
 Demuxer = require '../demuxer'
+M4ADemuxer = require './m4a'
 
 class CAFDemuxer extends Demuxer
     Demuxer.register(CAFDemuxer)

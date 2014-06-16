@@ -603,3 +603,5 @@ class M4ADemuxer extends Demuxer
     meta 'cpil', 'compilation', bool
     meta 'pcst', 'podcast', bool
     meta 'pgap', 'gapless', bool
+    
+module.exports = M4ADemuxer
