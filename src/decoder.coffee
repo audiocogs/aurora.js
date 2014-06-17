@@ -2,6 +2,7 @@ EventEmitter = require './core/events'
 BufferList = require './core/bufferlist'
 Stream = require './core/stream'
 Bitstream = require './core/bitstream'
+UnderflowError = require './core/underflow'
 
 class Decoder extends EventEmitter
     constructor: (@demuxer, @format) ->
@@ -44,7 +45,7 @@ class Decoder extends EventEmitter
         try
             packet = @readChunk()
         catch error
-            if error not instanceof Stream.UnderflowError
+            if error not instanceof UnderflowError
                 @emit 'error', error
                 return false
             

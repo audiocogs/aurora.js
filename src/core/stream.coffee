@@ -1,5 +1,6 @@
 BufferList = require './bufferlist'
 AVBuffer = require './buffer'
+UnderflowError = require './underflow'
 
 class Stream
     buf = new ArrayBuffer(16)
@@ -15,12 +16,7 @@ class Stream
     # detect the native endianness of the machine
     # 0x3412 is little endian, 0x1234 is big endian
     nativeEndian = new Uint16Array(new Uint8Array([0x12, 0x34]).buffer)[0] is 0x3412
-    
-    # define an error class to be thrown if an underflow occurs
-    class Stream.UnderflowError extends Error
-        constructor: ->
-            @name = 'UnderflowError'
-    
+        
     constructor: (@list) ->
         @localOffset = 0
         @offset = 0
@@ -44,7 +40,7 @@ class Stream
     
     advance: (bytes) ->
         if not @available bytes
-            throw new Stream.UnderflowError()
+            throw new UnderflowError()
         
         @localOffset += bytes
         @offset += bytes
@@ -57,7 +53,7 @@ class Stream
         
     rewind: (bytes) ->
         if bytes > @offset
-            throw new Stream.UnderflowError()
+            throw new UnderflowError()
         
         # if we're at the end of the bufferlist, seek from the end
         if not @list.first
@@ -82,7 +78,7 @@ class Stream
         
     readUInt8: ->
         if not @available(1)
-            throw new Stream.UnderflowError()
+            throw new UnderflowError()
         
         a = @list.first.data[@localOffset]
         @localOffset += 1
@@ -96,7 +92,7 @@ class Stream
 
     peekUInt8: (offset = 0) ->
         if not @available(offset + 1)
-            throw new Stream.UnderflowError()
+            throw new UnderflowError()
         
         offset = @localOffset + offset
         buffer = @list.first
