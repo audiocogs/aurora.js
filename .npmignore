@@ -3,5 +3,4 @@ tests/
 experiments/
 .git*
 .DS_Store
-*.coffee
 *.html
