@@ -1,5 +1,5 @@
 js: src/**/*.coffee
-	./node_modules/.bin/coffee -c node.coffee src/**/*.coffee
+	./node_modules/.bin/coffee -c node.coffee src/*.coffee src/**/*.coffee src/**/**/*.coffee
 
 browser: src/**/*.coffee
 	mkdir -p build/
@@ -24,5 +24,5 @@ browser_test:
 		
 clean:
 	mv src/devices/resampler.js resampler.js.tmp
-	rm -rf build/ node.js src/**/*.js tests/test.js
+	rm -rf build/ node.js src/*.js src/**/*.js src/**/**/*.js tests/test.js
 	mv resampler.js.tmp src/devices/resampler.js
