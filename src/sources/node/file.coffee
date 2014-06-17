@@ -24,10 +24,22 @@ class FileSource extends EventEmitter
             
         @stream = fs.createReadStream @filename
         
+        b = new Buffer(1 << 20)
+        blen = 0
         @stream.on 'data', (buf) =>
             @loaded += buf.length
+            buf.copy(b, blen)
+            blen = blen + buf.length
+            
             @emit 'progress', @loaded / @size * 100
-            @emit 'data', new AVBuffer(new Uint8Array(buf))
+            
+            if blen >= b.length or @loaded >= @size
+              if blen < b.length
+                b = b.slice(0, blen)
+                
+              @emit 'data', new AVBuffer(new Uint8Array(b))
+              blen -= b.length
+              buf.copy(b, 0, blen)
     
         @stream.on 'end', =>
             @emit 'end'
