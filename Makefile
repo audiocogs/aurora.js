@@ -10,6 +10,15 @@ browser: src/**/*.coffee
 		. \
 		| ./node_modules/.bin/exorcist build/aurora.js.map > build/aurora.js
 		
+browser_slim: src/**/*.coffee
+	mkdir -p build/
+	./node_modules/.bin/browserify \
+		--standalone AV \
+		--extension .coffee \
+		--debug \
+		browser_slim.coffee \
+		| ./node_modules/.bin/exorcist build/aurora_slim.js.map > build/aurora_slim.js
+		
 browser_test:
 	./node_modules/.bin/browserify tests/test.coffee --extension .coffee -o tests/test.js
 		
