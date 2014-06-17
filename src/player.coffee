@@ -6,7 +6,14 @@
 # playback time.
 #
 
-class AV.Player extends AV.EventEmitter
+EventEmitter = require './core/events'
+Asset = require './asset'
+VolumeFilter = require './filters/volume'
+BalanceFilter = require './filters/balance'
+Queue = require './queue'
+AudioDevice = require './device'
+
+class Player extends EventEmitter
     constructor: (@asset) ->
         @playing = false
         @buffered = 0
@@ -17,15 +24,15 @@ class AV.Player extends AV.EventEmitter
         @metadata = {}
         
         @filters = [
-            new AV.VolumeFilter(this, 'volume')
-            new AV.BalanceFilter(this, 'pan')
+            new VolumeFilter(this, 'volume')
+            new BalanceFilter(this, 'pan')
         ]
         
         @asset.on 'buffer', (@buffered) =>
             @emit 'buffer', @buffered
         
         @asset.on 'decodeStart', =>
-            @queue = new AV.Queue(@asset)
+            @queue = new Queue(@asset)
             @queue.once 'ready', @startPlaying
             
         @asset.on 'format', (@format) =>
@@ -41,13 +48,13 @@ class AV.Player extends AV.EventEmitter
             @emit 'error', error
                 
     @fromURL: (url) ->
-        return new AV.Player AV.Asset.fromURL(url)
+        return new Player Asset.fromURL(url)
         
     @fromFile: (file) ->
-        return new AV.Player AV.Asset.fromFile(file)
+        return new Player Asset.fromFile(file)
         
     @fromBuffer: (buffer) ->
-        return new AV.Player AV.Asset.fromBuffer(buffer)
+        return new Player Asset.fromBuffer(buffer)
         
     preload: ->
         return unless @asset
@@ -104,7 +111,7 @@ class AV.Player extends AV.EventEmitter
         frame = @queue.read()
         frameOffset = 0
         
-        @device = new AV.AudioDevice(@format.sampleRate, @format.channelsPerFrame)
+        @device = new AudioDevice(@format.sampleRate, @format.channelsPerFrame)
         @device.on 'timeUpdate', (@currentTime) =>
             @emit 'progress', @currentTime
         
@@ -151,3 +158,5 @@ class AV.Player extends AV.EventEmitter
         @device.on 'refill', @refill
         @device.start() if @playing
         @emit 'ready'
+        
+module.exports = Player

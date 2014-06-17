@@ -217,3 +217,5 @@ Resampler.prototype.initializeBuffers = function () {
 		this.lastOutput = [];
 	}
 };
+
+module.exports = Resampler;

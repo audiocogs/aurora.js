@@ -1,4 +1,4 @@
-module 'core/events', ->    
+describe 'core/events', ->    
     test 'on', ->
         emitter = new AV.EventEmitter
         times = 0

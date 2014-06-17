@@ -1,6 +1,6 @@
-#import "shared.coffee"
+demuxerTest = require './shared'
 
-module 'demuxers/aiff', ->
+describe 'demuxers/aiff', ->
     demuxerTest 'bei16', 
         file: 'aiff/bei16.aiff'
         format:

@@ -1,8 +1,14 @@
-class AV.Decoder extends AV.EventEmitter
+EventEmitter = require './core/events'
+BufferList = require './core/bufferlist'
+Stream = require './core/stream'
+Bitstream = require './core/bitstream'
+UnderflowError = require './core/underflow'
+
+class Decoder extends EventEmitter
     constructor: (@demuxer, @format) ->
-        list = new AV.BufferList
-        @stream = new AV.Stream(list)
-        @bitstream = new AV.Bitstream(@stream)
+        list = new BufferList
+        @stream = new Stream(list)
+        @bitstream = new Bitstream(@stream)
         
         @receivedFinalBuffer = false
         @waiting = false
@@ -39,7 +45,7 @@ class AV.Decoder extends AV.EventEmitter
         try
             packet = @readChunk()
         catch error
-            if error not instanceof AV.UnderflowError
+            if error not instanceof UnderflowError
                 @emit 'error', error
                 return false
             
@@ -71,3 +77,5 @@ class AV.Decoder extends AV.EventEmitter
         
     @find: (id) ->
         return codecs[id] or null
+        
+module.exports = Decoder

@@ -1,21 +1,21 @@
-#import "config"
-#import "helpers"
-    
-#import "core/events"
-#import "core/buffer"
-#import "core/bufferlist"
-#import "core/stream"
-#import "core/bitstream"
+require './config'
+require './helpers'
 
-#import "sources/http"
-#import "sources/file"
-#import "sources/buffer"
+require "./core/events"
+require "./core/buffer"
+require "./core/bufferlist"
+require "./core/stream"
+require "./core/bitstream"
 
-#import "demuxers/m4a"
-#import "demuxers/caf"
-#import "demuxers/aiff"
-#import "demuxers/wave"
-#import "demuxers/au"
+require "./sources/http"
+require "./sources/file"
+require "./sources/buffer"
 
-#import "decoders/lpcm"
-#import "decoders/xlaw"
+require "./demuxers/m4a"
+require "./demuxers/caf"
+require "./demuxers/aiff"
+require "./demuxers/wave"
+require "./demuxers/au"
+
+require "./decoders/lpcm"
+require "./decoders/xlaw"

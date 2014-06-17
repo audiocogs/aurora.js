@@ -1,11 +1,12 @@
-#import "../crc32.coffee"
+CRC32 = require '../crc32'
 
-module 'sources/http', ->
+describe 'sources/http', ->
     asyncTest = assert.asyncTest
     
     # check that the data returned by the source is correct, using a CRC32 checksum
     asyncTest 'data', ->
         crc = new CRC32
+        console.log AV.HTTPSource.toString()
         source = new AV.HTTPSource "#{HTTP_BASE}/data/m4a/base.m4a"
         
         source.on 'data', (chunk) ->

@@ -45,3 +45,5 @@ class CRC32
         
     toHex: ->
         return (~@crc >>> 0).toString(16)
+        
+module.exports = CRC32

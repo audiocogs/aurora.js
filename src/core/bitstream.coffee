@@ -1,9 +1,9 @@
-class AV.Bitstream
+class Bitstream
     constructor: (@stream) ->
         @bitPosition = 0
 
     copy: ->
-        result = new AV.Bitstream @stream.copy()
+        result = new Bitstream @stream.copy()
         result.bitPosition = @bitPosition
         return result
 
@@ -180,3 +180,5 @@ class AV.Bitstream
                     a = (Math.pow(2, bits) - a) * -1
 
         return a
+        
+module.exports = Bitstream

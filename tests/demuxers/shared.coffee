@@ -1,9 +1,9 @@
-#import "../crc32.coffee"
+CRC32 = require '../crc32'
 
-demuxerTest = (name, config) ->
+module.exports = (name, config) ->
     assert.asyncTest name, ->
-        if AV.isNode
-            source = new AV.FileSource "#{__dirname}/data/#{config.file}"
+        if global.Buffer?
+            source = new AV.FileSource "#{__dirname}/../data/#{config.file}"
         else
             source = new AV.HTTPSource "#{HTTP_BASE}/data/#{config.file}"
             

@@ -1,5 +1,8 @@
-class AV.FileSource extends AV.EventEmitter
-    fs = require 'fs'
+EventEmitter = require '../../core/events'
+AVBuffer = require '../../core/buffer'
+fs = require 'fs'
+
+class FileSource extends EventEmitter
     constructor: (@filename) ->
         @stream = null
         @loaded = 0
@@ -21,10 +24,22 @@ class AV.FileSource extends AV.EventEmitter
             
         @stream = fs.createReadStream @filename
         
+        b = new Buffer(1 << 20)
+        blen = 0
         @stream.on 'data', (buf) =>
             @loaded += buf.length
+            buf.copy(b, blen)
+            blen = blen + buf.length
+            
             @emit 'progress', @loaded / @size * 100
-            @emit 'data', new AV.Buffer(new Uint8Array(buf))
+            
+            if blen >= b.length or @loaded >= @size
+              if blen < b.length
+                b = b.slice(0, blen)
+                
+              @emit 'data', new AVBuffer(new Uint8Array(b))
+              blen -= b.length
+              buf.copy(b, 0, blen)
     
         @stream.on 'end', =>
             @emit 'end'
@@ -35,3 +50,5 @@ class AV.FileSource extends AV.EventEmitter
     
     pause: ->
         @stream.pause()
+        
+module.exports = FileSource

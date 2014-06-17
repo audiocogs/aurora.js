@@ -20,28 +20,58 @@ and whose source code can be found on our [Github](https://github.com/audiocogs/
 Aurora.js was written by [@jensnockert](https://github.com/jensnockert) and [@devongovett](https://github.com/devongovett) 
 of [Audiocogs](https://github.com/audiocogs/).
 
+## Usage
+
+You can use Aurora.js both in the browser, as well as in Node.js.  In the browser,
+you can either download a prebuilt [release](https://github.com/audiocogs/aurora.js/releases)
+or use [browserify](https://github.com/substack/node-browserify) to build it into your own 
+app bundle (see below for Node.js usage - it's the same for browserify).
+
+```html
+<script src="aurora.js"></script>
+<script src="mp3.js"></script>
+<!-- more codecs here -->
+```
+
+To use Aurora.js in Node.js or a browserify build, you can install it from `npm`:
+
+    npm install av
+    
+Then, require the module and codecs you need:
+
+```javascript
+var AV = require('av');
+require('mp3');
+// more codecs here...
+```
+
+For much more detailed information on how to use Aurora.js, check out the 
+[documentation](https://github.com/audiocogs/aurora.js/wiki).
+
 ## Building
 
-Currently, the [importer](https://github.com/devongovett/importer) module is used to build Aurora.js.  You can run
-the development server by first installing `importer` with npm, and then running it like this:
+We use [browserify](https://github.com/substack/node-browserify) to build Aurora.js.  To build Aurora.js 
+for the browser yourself, use the following commands:
 
-    npm install importer -g
-    importer browser.coffee -p 8080
+    npm install
+    make browser
     
-You can also build a static version like this:
+This will place a built `aurora.js` file, as well as a source map in the `build/` directory.
 
-    importer browser.coffee aurora.js
-    
-By itself, Aurora will play LPCM, uLaw and aLaw files in a number of containers.  Be sure to add additional codec support 
-by including some of our other decoders such as [FLAC.js](https://github.com/audiocogs/flac.js), 
-[ALAC.js](https://github.com/audiocogs/alac.js), and [MP3.js](https://github.com/devongovett/mp3.js).
+By itself, Aurora will play LPCM, uLaw and aLaw files in a number of containers.
+Be sure to add additional codec support by including some of our other decoders:
 
-If you want to build Aurora without the default codecs, you can use the "browser_slim.coffee" profile:
+* [FLAC.js](https://github.com/audiocogs/flac.js) 
+* [ALAC.js](https://github.com/audiocogs/alac.js)
+* [MP3.js](https://github.com/audiocogs/mp3.js)
+* [AAC.js](https://github.com/audiocogs/aac.js)
 
-    importer browser_slim.coffee aurora.js
+If you want to build Aurora without the default codecs, you can use the "browser_slim" profile:
+
+    make browser_slim
 
 This can help shave off approx. 30 KB from the joined file, or 20 KB when minified.
-    
+
 ## License
 
 Aurora.js is released under the MIT license.

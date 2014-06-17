@@ -1,5 +1,7 @@
-class M4ADemuxer extends AV.Demuxer
-    AV.Demuxer.register(M4ADemuxer)
+Demuxer = require '../demuxer'
+
+class M4ADemuxer extends Demuxer
+    Demuxer.register(M4ADemuxer)
     
     # common file type identifiers
     # see http://mp4ra.org/filetype.html for a complete list
@@ -601,3 +603,5 @@ class M4ADemuxer extends AV.Demuxer
     meta 'cpil', 'compilation', bool
     meta 'pcst', 'podcast', bool
     meta 'pgap', 'gapless', bool
+    
+module.exports = M4ADemuxer

@@ -1,11 +1,12 @@
+global.AV = require '../'
+
 # make QUnit print test results to the console in Node
 if not QUnit? and require?
-    AV = require '../node.js'
-    QUnit = require 'qunit-cli'
+    global.QUnit = require 'qunit-cli'
             
 # setup testing environment
-assert = QUnit
-test = QUnit.test
-module = (name, fn) ->
+global.assert = QUnit
+global.test = QUnit.test
+global.describe = (name, fn) ->
     QUnit.module name
     fn()

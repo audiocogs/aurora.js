@@ -1,4 +1,7 @@
-class AV.FileSource extends AV.EventEmitter
+EventEmitter = require '../../core/events'
+AVBuffer = require '../../core/buffer'
+
+class FileSource extends EventEmitter
     constructor: (@file) ->
         if not FileReader?
             return @emit 'error', 'This browser does not have FileReader support.'
@@ -16,7 +19,7 @@ class AV.FileSource extends AV.EventEmitter
         @active = true
         
         @reader.onload = (e) =>
-            buf = new AV.Buffer(new Uint8Array(e.target.result))
+            buf = new AVBuffer(new Uint8Array(e.target.result))
             @offset += buf.length
         
             @emit 'data', buf   
@@ -51,3 +54,5 @@ class AV.FileSource extends AV.EventEmitter
     reset: ->
         @pause()
         @offset = 0
+
+module.exports = FileSource

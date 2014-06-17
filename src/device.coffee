@@ -4,7 +4,9 @@
 # based on the device hardware time and the play/pause/seek state
 #
 
-class AV.AudioDevice extends AV.EventEmitter
+EventEmitter = require './core/events'
+
+class AudioDevice extends EventEmitter
     constructor: (@sampleRate, @channels) ->
         @playing = false
         @currentTime = 0
@@ -14,7 +16,7 @@ class AV.AudioDevice extends AV.EventEmitter
         return if @playing
         @playing = true
         
-        @device ?= AV.AudioDevice.create(@sampleRate, @channels)
+        @device ?= AudioDevice.create(@sampleRate, @channels)
         unless @device
             throw new Error "No supported audio device found."
             
@@ -54,3 +56,5 @@ class AV.AudioDevice extends AV.EventEmitter
             return new device(sampleRate, channels)
 
         return null
+        
+module.exports = AudioDevice

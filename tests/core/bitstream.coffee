@@ -1,4 +1,4 @@
-module 'core/bitstream', ->
+describe 'core/bitstream', ->
     makeBitstream = (bytes) ->
         bytes = new Uint8Array(bytes)
         stream = AV.Stream.fromBuffer(new AV.Buffer(bytes))

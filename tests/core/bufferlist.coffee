@@ -1,4 +1,4 @@
-module 'core/bufferlist', ->
+describe 'core/bufferlist', ->
     test 'append', ->
         list = new AV.BufferList
         buffer = new AV.Buffer(new Uint8Array([1, 2, 3]))

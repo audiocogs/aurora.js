@@ -24,12 +24,9 @@ the "tests" folder to the `HTTP_BASE` variable in `config.coffee`.
 
 ## To run in the browser:
 1. Follow the setup steps above.
-2. Start servers to host Aurora and the tests themselves:
+2. Build the tests and Aurora.js
 
-        importer ../browser.coffee -p 3030
-        importer test.coffee -p 3031
-        
-    You may need to install `importer` using `npm install importer -g` first.
+        make browser_test
     
 3. Open `test.html` in your browser, using the HTTP server that you set up above.
     

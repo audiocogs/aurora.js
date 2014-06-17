@@ -1,4 +1,4 @@
-module 'core/stream', ->
+describe 'core/stream', ->
     makeStream = (arrays...) ->
         list = new AV.BufferList
     

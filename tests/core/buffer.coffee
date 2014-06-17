@@ -1,4 +1,4 @@
-module 'core/buffer', ->
+describe 'core/buffer', ->
     bytes = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     buffer = new AV.Buffer(bytes)
     
@@ -66,7 +66,7 @@ module 'core/buffer', ->
         assert.equal 9, buf.data.length
         assert.deepEqual buf, new AV.Buffer(new Uint8Array(9))
 
-    if AV.isNode
+    if global.Buffer?
         test 'create from node buffer', ->
             buf = new AV.Buffer(new Buffer([1,2,3,4,5,6,7,8,9]))
             assert.equal 9, buf.length

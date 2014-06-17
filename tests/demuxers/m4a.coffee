@@ -1,6 +1,6 @@
-#import "shared.coffee"
+demuxerTest = require './shared'
 
-module 'demuxers/m4a', ->
+describe 'demuxers/m4a', ->
     demuxerTest 'base', 
         file: 'm4a/base.m4a'
         format:

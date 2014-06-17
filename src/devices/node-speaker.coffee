@@ -1,5 +1,8 @@
-class NodeSpeakerDevice extends AV.EventEmitter
-    AV.AudioDevice.register(NodeSpeakerDevice)
+EventEmitter = require '../core/events'
+AudioDevice = require '../device'
+
+class NodeSpeakerDevice extends EventEmitter
+    AudioDevice.register(NodeSpeakerDevice)
     
     try 
         Speaker = require('speaker')

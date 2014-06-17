@@ -1,7 +1,9 @@
-#import "resampler.js"
+EventEmitter = require '../core/events'
+AudioDevice = require '../device'
+Resampler = require './resampler'
 
-class WebAudioDevice extends AV.EventEmitter
-    AV.AudioDevice.register(WebAudioDevice)
+class WebAudioDevice extends EventEmitter
+    AudioDevice.register(WebAudioDevice)
     
     # determine whether this device is supported by the browser
     AudioContext = global.AudioContext or global.webkitAudioContext

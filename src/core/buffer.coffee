@@ -1,4 +1,4 @@
-class AV.Buffer
+class AVBuffer
     constructor: (input) ->
         if input instanceof Uint8Array                  # Uint8Array
             @data = input
@@ -6,13 +6,13 @@ class AV.Buffer
         else if input instanceof ArrayBuffer or         # ArrayBuffer
           Array.isArray(input) or                       # normal JS Array
           typeof input is 'number' or                   # number (i.e. length)
-          AV.isNode and global.Buffer?.isBuffer(input)  # Node Buffer
+          global.Buffer?.isBuffer(input)                # Node Buffer
             @data = new Uint8Array(input)
             
         else if input.buffer instanceof ArrayBuffer     # typed arrays other than Uint8Array
             @data = new Uint8Array(input.buffer, input.byteOffset, input.length * input.BYTES_PER_ELEMENT)
             
-        else if input instanceof AV.Buffer              # AV.Buffer, make a shallow copy
+        else if input instanceof AVBuffer               # AVBuffer, make a shallow copy
             @data = input.data
                         
         else
@@ -25,16 +25,16 @@ class AV.Buffer
         @prev = null
     
     @allocate: (size) ->
-        return new AV.Buffer(size)
+        return new AVBuffer(size)
     
     copy: ->
-        return new AV.Buffer(new Uint8Array(@data))
+        return new AVBuffer(new Uint8Array(@data))
     
     slice: (position, length = @length) ->
         if position is 0 and length >= @length
-            return new AV.Buffer(@data)
+            return new AVBuffer(@data)
         else
-            return new AV.Buffer(@data.subarray(position, position + length))
+            return new AVBuffer(@data.subarray(position, position + length))
     
     # prefix-free
     BlobBuilder = global.BlobBuilder or global.MozBlobBuilder or global.WebKitBlobBuilder
@@ -61,7 +61,9 @@ class AV.Buffer
         URL?.revokeObjectURL url
     
     toBlob: ->
-        return Buffer.makeBlob @data.buffer
+        return AVBuffer.makeBlob @data.buffer
         
     toBlobURL: ->
-        return Buffer.makeBlobURL @data.buffer
+        return AVBuffer.makeBlobURL @data.buffer
+        
+module.exports = AVBuffer

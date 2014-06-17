@@ -1,5 +1,7 @@
-class LPCMDecoder extends AV.Decoder
-    AV.Decoder.register('lpcm', LPCMDecoder)
+Decoder = require '../decoder'
+
+class LPCMDecoder extends Decoder
+    Decoder.register('lpcm', LPCMDecoder)
     
     readChunk: =>
         stream = @stream
