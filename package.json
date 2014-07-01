@@ -30,11 +30,6 @@
     "node >= v0.6.0"
   ],
   "main": "./node",
-  "browserify": {
-    "transform": [
-      "coffeeify"
-    ]
-  },
   "browser": {
     "./node": "./browser.coffee",
     "./src/sources/node/file.coffee": "./src/sources/browser/file.coffee",

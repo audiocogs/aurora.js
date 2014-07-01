@@ -4,6 +4,7 @@ js: src/**/*.coffee
 browser: src/**/*.coffee
 	mkdir -p build/
 	./node_modules/.bin/browserify \
+        --transform coffeeify \
 		--standalone AV \
 		--extension .coffee \
 		--debug \
@@ -13,6 +14,7 @@ browser: src/**/*.coffee
 browser_slim: src/**/*.coffee
 	mkdir -p build/
 	./node_modules/.bin/browserify \
+        --transform coffeeify \
 		--standalone AV \
 		--extension .coffee \
 		--debug \
@@ -20,7 +22,7 @@ browser_slim: src/**/*.coffee
 		| ./node_modules/.bin/exorcist build/aurora_slim.js.map > build/aurora_slim.js
 		
 browser_test:
-	./node_modules/.bin/browserify tests/test.coffee --extension .coffee -o tests/test.js
+	./node_modules/.bin/browserify tests/test.coffee --transform coffeeify --extension .coffee -o tests/test.js
 		
 clean:
 	mv src/devices/resampler.js resampler.js.tmp
