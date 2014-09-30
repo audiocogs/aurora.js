@@ -80,8 +80,14 @@ class Demuxer extends EventEmitter
             
     @find: (buffer) ->
         stream = Stream.fromBuffer(buffer)        
-        for format in formats when format.probe(stream)
-            return format
+        for format in formats
+            offset = stream.offset
+            try
+                 return format if format.probe(stream)
+            catch e
+                # an underflow or other error occurred
+                
+            stream.seek(offset)
             
         return null
         
