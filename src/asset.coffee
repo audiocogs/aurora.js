@@ -31,8 +31,8 @@ class Asset extends EventEmitter
         @source.on 'progress', (@buffered) =>
             @emit 'buffer', @buffered
             
-    @fromURL: (url) ->
-        return new Asset new HTTPSource(url)
+    @fromURL: (url, opts) ->
+        return new Asset new HTTPSource(url, opts)
 
     @fromFile: (file) ->
         return new Asset new FileSource(file)
