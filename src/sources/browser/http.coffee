@@ -2,9 +2,11 @@ EventEmitter = require '../../core/events'
 AVBuffer = require '../../core/buffer'
 
 class HTTPSource extends EventEmitter
-    constructor: (@url) ->
+    constructor: (@url, @opts = {}) ->
         @chunkSize = 1 << 20
         @inflight = false
+        if @opts.length
+            @length = @opts.length
         @reset()
         
     start: ->
