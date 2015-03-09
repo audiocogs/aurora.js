@@ -68,6 +68,7 @@ class HTTPSource extends EventEmitter
         @xhr.responseType = "arraybuffer"
 
         endPos = Math.min(@offset + @chunkSize, @length)
+        @xhr.setRequestHeader("If-None-Match", "webkit-no-cache")
         @xhr.setRequestHeader("Range", "bytes=#{@offset}-#{endPos}")
         @xhr.overrideMimeType('text/plain; charset=x-user-defined')
         @xhr.send(null)
