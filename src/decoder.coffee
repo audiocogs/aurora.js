@@ -39,7 +39,7 @@ class Decoder extends EventEmitter
         return
         
     decode: ->
-        @waiting = false
+        @waiting = not @receivedFinalBuffer
         offset = @bitstream.offset()
         
         try
@@ -52,6 +52,8 @@ class Decoder extends EventEmitter
         # if a packet was successfully read, emit it
         if packet
             @emit 'data', packet
+            if @receivedFinalBuffer
+              @emit 'end'
             return true
             
         # if we haven't reached the end, jump back and try again when we have more data
