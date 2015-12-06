@@ -19,7 +19,6 @@ class NodeSpeakerDevice extends EventEmitter
             signed: true
             
         @buffer = null
-        @arr = null
         @currentFrame = 0
         @ended = false
             
@@ -29,12 +28,10 @@ class NodeSpeakerDevice extends EventEmitter
         @input.pipe @speaker
                 
     refill: (n) =>
-        {arr,buffer} = this
+        {buffer} = this
         
-        # reuse the same buffers if possible
         len = n / 4
-        if arr?.length isnt len
-            @arr = arr = new Float32Array(len)
+        arr = new Float32Array(len)
             
         @emit 'refill', arr
         return if @ended
