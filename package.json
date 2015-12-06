@@ -13,7 +13,7 @@
   },
   "bugs": "https://github.com/audiocogs/aurora.js/issues",
   "optionalDependencies": {
-    "speaker": "~0.0.10"
+    "speaker": "~0.2.5"
   },
   "devDependencies": {
     "coffee-script": ">=1.0",
