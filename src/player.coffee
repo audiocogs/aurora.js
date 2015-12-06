@@ -47,8 +47,8 @@ class Player extends EventEmitter
         @asset.on 'error', (error) =>
             @emit 'error', error
                 
-    @fromURL: (url) ->
-        return new Player Asset.fromURL(url)
+    @fromURL: (url, opts) ->
+        return new Player Asset.fromURL(url, opts)
         
     @fromFile: (file) ->
         return new Player Asset.fromFile(file)
