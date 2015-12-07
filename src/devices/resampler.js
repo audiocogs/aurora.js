@@ -28,7 +28,7 @@ Resampler.prototype.initialize = function () {
 					as linear interpolation produces a gradient that we want
 					and works fine with two input sample points per output in this case.
 				*/
-				this.compileLinearInterpolationFunction();
+				this.useLinearInterpolationFunction();
 				this.lastWeight = 1;
 			}
 			else {
@@ -37,7 +37,7 @@ Resampler.prototype.initialize = function () {
 					like standard linear interpolation in high downsampling.
 					This is more accurate than linear interpolation on downsampling.
 				*/
-				this.compileMultiTapFunction();
+				this.useMultiTapFunction();
 				this.tailExists = false;
 				this.lastWeight = 0;
 			}
@@ -50,124 +50,238 @@ Resampler.prototype.initialize = function () {
 	}
 };
 
-Resampler.prototype.compileLinearInterpolationFunction = function () {
-	var toCompile = "var bufferLength = buffer.length;\
-	var outLength = this.outputBufferSize;\
-	if ((bufferLength % " + this.channels + ") == 0) {\
-		if (bufferLength > 0) {\
-			var ratioWeight = this.ratioWeight;\
-			var weight = this.lastWeight;\
-			var firstWeight = 0;\
-			var secondWeight = 0;\
-			var sourceOffset = 0;\
-			var outputOffset = 0;\
-			var outputBuffer = this.outputBuffer;\
-			for (; weight < 1; weight += ratioWeight) {\
-				secondWeight = weight % 1;\
-				firstWeight = 1 - secondWeight;";
-	for (var channel = 0; channel < this.channels; ++channel) {
-		toCompile += "outputBuffer[outputOffset++] = (this.lastOutput[" + channel + "] * firstWeight) + (buffer[" + channel + "] * secondWeight);";
+Resampler.prototype.useLinearInterpolationFunction = function () {
+	/**
+	 * Special case for 2 channels, allows optimize computations. Obtained from generic function
+	 */
+	if (this.channels == 2) {
+		this.resampler = function (buffer) {
+			var bufferLength = buffer.length;
+			var outLength = this.outputBufferSize;
+			if (bufferLength % 2 == 0) {
+				if (bufferLength > 0) {
+					var ratioWeight = this.ratioWeight;
+					var weight = this.lastWeight;
+					var firstWeight = 0;
+					var secondWeight = 0;
+					var sourceOffset = 0;
+					var outputOffset = 0;
+					var outputBuffer = this.outputBuffer;
+					for (; weight < 1; weight += ratioWeight) {
+						secondWeight = weight % 1;
+						firstWeight = 1 - secondWeight;
+						outputBuffer[outputOffset++] = (this.lastOutput[0] * firstWeight) + (buffer[0] * secondWeight);
+						outputBuffer[outputOffset++] = (this.lastOutput[1] * firstWeight) + (buffer[1] * secondWeight);
+					}
+					weight -= 1;
+					for (bufferLength -= 2, sourceOffset = Math.floor(weight) * 2; outputOffset < outLength && sourceOffset < bufferLength;) {
+						secondWeight = weight % 1;
+						firstWeight = 1 - secondWeight;
+						outputBuffer[outputOffset++] = (buffer[sourceOffset] * firstWeight) + (buffer[sourceOffset + 2] * secondWeight);
+						outputBuffer[outputOffset++] = (buffer[sourceOffset + 1] * firstWeight) + (buffer[sourceOffset + 3] * secondWeight);
+						weight += ratioWeight;
+						sourceOffset = Math.floor(weight) * 2;
+					}
+					this.lastOutput[0] = buffer[sourceOffset++];
+					this.lastOutput[1] = buffer[sourceOffset];
+					this.lastWeight = weight % 1;
+					return this.bufferSlice(outputOffset);
+				} else {
+					return this.noReturn ? 0 : [];
+				}
+			} else {
+				throw(new Error("Buffer was of incorrect sample length."));
+			}
+		};
+	/**
+	 * Generic function for any other number of channels
+	 */
+	} else {
+		this.resampler = function (buffer) {
+			var bufferLength = buffer.length;
+			var outLength = this.outputBufferSize;
+			if ((bufferLength % this.channels) == 0) {
+				if (bufferLength > 0) {
+					var ratioWeight = this.ratioWeight;
+					var weight = this.lastWeight;
+					var firstWeight = 0;
+					var secondWeight = 0;
+					var sourceOffset = 0;
+					var outputOffset = 0;
+					var outputBuffer = this.outputBuffer;
+					var channel = 0;
+					for (; weight < 1; weight += ratioWeight) {
+						secondWeight = weight % 1;
+						firstWeight = 1 - secondWeight;
+						for (channel = 0; channel < this.channels; ++channel) {
+							outputBuffer[outputOffset++] = (this.lastOutput[channel] * firstWeight) + (buffer[channel] * secondWeight);
+						}
+					}
+					weight -= 1;
+					for (bufferLength -= this.channels, sourceOffset = Math.floor(weight) * this.channels; outputOffset < outLength && sourceOffset < bufferLength;) {
+						secondWeight = weight % 1;
+						firstWeight = 1 - secondWeight;
+						for (channel = 0; channel < this.channels; ++channel) {
+							outputBuffer[outputOffset++] = (buffer[sourceOffset + (channel > 0 ? channel : 0)] * firstWeight) + (buffer[sourceOffset + (this.channels + channel)] * secondWeight);
+						}
+						weight += ratioWeight;
+						sourceOffset = Math.floor(weight) * this.channels;
+					}
+					for (channel = 0; channel < this.channels; ++channel) {
+						this.lastOutput[channel] = buffer[sourceOffset++];
+					}
+					this.lastWeight = weight % 1;
+					return this.bufferSlice(outputOffset);
+				} else {
+					return this.noReturn ? 0 : [];
+				}
+			} else {
+				throw(new Error("Buffer was of incorrect sample length."));
+			}
+		};
 	}
-	toCompile += "}\
-			weight -= 1;\
-			for (bufferLength -= " + this.channels + ", sourceOffset = Math.floor(weight) * " + this.channels + "; outputOffset < outLength && sourceOffset < bufferLength;) {\
-				secondWeight = weight % 1;\
-				firstWeight = 1 - secondWeight;";
-	for (var channel = 0; channel < this.channels; ++channel) {
-		toCompile += "outputBuffer[outputOffset++] = (buffer[sourceOffset" + ((channel > 0) ? (" + " + channel) : "") + "] * firstWeight) + (buffer[sourceOffset + " + (this.channels + channel) + "] * secondWeight);";
-	}
-	toCompile += "weight += ratioWeight;\
-				sourceOffset = Math.floor(weight) * " + this.channels + ";\
-			}";
-	for (var channel = 0; channel < this.channels; ++channel) {
-		toCompile += "this.lastOutput[" + channel + "] = buffer[sourceOffset++];";
-	}
-	toCompile += "this.lastWeight = weight % 1;\
-			return this.bufferSlice(outputOffset);\
-		}\
-		else {\
-			return (this.noReturn) ? 0 : [];\
-		}\
-	}\
-	else {\
-		throw(new Error(\"Buffer was of incorrect sample length.\"));\
-	}";
-	this.resampler = Function("buffer", toCompile);
 };
 
-Resampler.prototype.compileMultiTapFunction = function () {
-	var toCompile = "var bufferLength = buffer.length;\
-	var outLength = this.outputBufferSize;\
-	if ((bufferLength % " + this.channels + ") == 0) {\
-		if (bufferLength > 0) {\
-			var ratioWeight = this.ratioWeight;\
-			var weight = 0;";
-	for (var channel = 0; channel < this.channels; ++channel) {
-		toCompile += "var output" + channel + " = 0;"
+Resampler.prototype.useMultiTapFunction = function () {
+	/**
+	 * Special case for 2 channels, allows optimize computations. Obtained from generic function
+	 */
+	if (this.channels == 2) {
+		this.resampler = function (buffer) {
+			var bufferLength = buffer.length;
+			var outLength = this.outputBufferSize;
+			if ((bufferLength % 2) == 0) {
+				if (bufferLength > 0) {
+					var ratioWeight = this.ratioWeight;
+					var weight = 0;
+					var output0 = 0;
+					var output1 = 0;
+					var actualPosition = 0;
+					var amountToNext = 0;
+					var alreadyProcessedTail = !this.tailExists;
+					this.tailExists = false;
+					var outputBuffer = this.outputBuffer;
+					var outputOffset = 0;
+					var currentPosition = 0;
+					do {
+						if (alreadyProcessedTail) {
+							weight = ratioWeight;
+							output0 = 0;
+							output1 = 0;
+						} else {
+							weight = this.lastWeight;
+							output0 = this.lastOutput[0];
+							output1 = this.lastOutput[1];
+							alreadyProcessedTail = true;
+						}
+						while (weight > 0 && actualPosition < bufferLength) {
+							amountToNext = 1 + actualPosition - currentPosition;
+							if (weight >= amountToNext) {
+								output0 += buffer[actualPosition++] * amountToNext;
+								output1 += buffer[actualPosition++] * amountToNext;
+								currentPosition = actualPosition;
+								weight -= amountToNext;
+							} else {
+								output0 += buffer[actualPosition] * weight;
+								output1 += buffer[actualPosition + 1] * weight;
+								currentPosition += weight;
+								weight = 0;
+								break;
+							}
+						}
+						if (weight == 0) {
+							outputBuffer[outputOffset++] = output0 / ratioWeight;
+							outputBuffer[outputOffset++] = output1 / ratioWeight;
+						} else {
+							this.lastWeight = weight;
+							this.lastOutput[0] = output0;
+							this.lastOutput[1] = output1;
+							this.tailExists = true;
+							break;
+						}
+					} while (actualPosition < bufferLength && outputOffset < outLength);
+					return this.bufferSlice(outputOffset);
+				} else {
+					return this.noReturn ? 0 : [];
+				}
+			} else {
+				throw(new Error("Buffer was of incorrect sample length."));
+			}
+		};
+	/**
+	 * Generic function for any other number of channels
+	 */
+	} else {
+		this.resampler = function (buffer) {
+			var bufferLength = buffer.length;
+			var outLength = this.outputBufferSize;
+			if ((bufferLength % this.channels) == 0) {
+				if (bufferLength > 0) {
+					var ratioWeight = this.ratioWeight;
+					var weight = 0;
+					var output = {};
+					for (var channel = 0; channel < this.channels; ++channel) {
+						output[channel] = 0;
+					}
+					var actualPosition = 0;
+					var amountToNext = 0;
+					var alreadyProcessedTail = !this.tailExists;
+					this.tailExists = false;
+					var outputBuffer = this.outputBuffer;
+					var outputOffset = 0;
+					var currentPosition = 0;
+					do {
+						if (alreadyProcessedTail) {
+							weight = ratioWeight;
+							for (channel = 0; channel < this.channels; ++channel) {
+								output[channel] = 0;
+							}
+						} else {
+							weight = this.lastWeight;
+							for (channel = 0; channel < this.channels; ++channel) {
+								output[channel] = this.lastOutput[channel];
+							}
+							alreadyProcessedTail = true;
+						}
+						while (weight > 0 && actualPosition < bufferLength) {
+							amountToNext = 1 + actualPosition - currentPosition;
+							if (weight >= amountToNext) {
+								for (channel = 0; channel < this.channels; ++channel) {
+									output[channel] += buffer[actualPosition++] * amountToNext;
+								}
+								currentPosition = actualPosition;
+								weight -= amountToNext;
+							} else {
+								for (channel = 0; channel < this.channels; ++channel) {
+									output[channel] += buffer[actualPosition + (channel > 0 ? channel : 0)] * weight;
+								}
+								currentPosition += weight;
+								weight = 0;
+								break;
+							}
+						}
+						if (weight == 0) {
+							for (channel = 0; channel < this.channels; ++channel) {
+								outputBuffer[outputOffset++] = output[channel] / ratioWeight;
+							}
+						} else {
+							this.lastWeight = weight;
+							for (channel = 0; channel < this.channels; ++channel) {
+								this.lastOutput[channel] = output[channel];
+							}
+							this.tailExists = true;
+							break;
+						}
+					} while (actualPosition < bufferLength && outputOffset < outLength);
+					return this.bufferSlice(outputOffset);
+				} else {
+					return this.noReturn ? 0 : [];
+				}
+			} else {
+				throw(new Error("Buffer was of incorrect sample length."));
+			}
+		};
 	}
-	toCompile += "var actualPosition = 0;\
-			var amountToNext = 0;\
-			var alreadyProcessedTail = !this.tailExists;\
-			this.tailExists = false;\
-			var outputBuffer = this.outputBuffer;\
-			var outputOffset = 0;\
-			var currentPosition = 0;\
-			do {\
-				if (alreadyProcessedTail) {\
-					weight = ratioWeight;";
-	for (channel = 0; channel < this.channels; ++channel) {
-		toCompile += "output" + channel + " = 0;"
-	}
-	toCompile += "}\
-				else {\
-					weight = this.lastWeight;";
-	for (channel = 0; channel < this.channels; ++channel) {
-		toCompile += "output" + channel + " = this.lastOutput[" + channel + "];"
-	}
-	toCompile += "alreadyProcessedTail = true;\
-				}\
-				while (weight > 0 && actualPosition < bufferLength) {\
-					amountToNext = 1 + actualPosition - currentPosition;\
-					if (weight >= amountToNext) {";
-	for (channel = 0; channel < this.channels; ++channel) {
-		toCompile += "output" + channel + " += buffer[actualPosition++] * amountToNext;"
-	}
-	toCompile += "currentPosition = actualPosition;\
-						weight -= amountToNext;\
-					}\
-					else {";
-	for (channel = 0; channel < this.channels; ++channel) {
-		toCompile += "output" + channel + " += buffer[actualPosition" + ((channel > 0) ? (" + " + channel) : "") + "] * weight;"
-	}
-	toCompile += "currentPosition += weight;\
-						weight = 0;\
-						break;\
-					}\
-				}\
-				if (weight == 0) {";
-	for (channel = 0; channel < this.channels; ++channel) {
-		toCompile += "outputBuffer[outputOffset++] = output" + channel + " / ratioWeight;"
-	}
-	toCompile += "}\
-				else {\
-					this.lastWeight = weight;";
-	for (channel = 0; channel < this.channels; ++channel) {
-		toCompile += "this.lastOutput[" + channel + "] = output" + channel + ";"
-	}
-	toCompile += "this.tailExists = true;\
-					break;\
-				}\
-			} while (actualPosition < bufferLength && outputOffset < outLength);\
-			return this.bufferSlice(outputOffset);\
-		}\
-		else {\
-			return (this.noReturn) ? 0 : [];\
-		}\
-	}\
-	else {\
-		throw(new Error(\"Buffer was of incorrect sample length.\"));\
-	}";
-	this.resampler = Function("buffer", toCompile);
 };
 
 Resampler.prototype.bypassResampler = function (buffer) {
