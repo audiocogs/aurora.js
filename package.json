@@ -1,7 +1,7 @@
 {
   "name": "av",
   "description": "Audio decoding framework",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "author": {
     "name": "Audiocogs",
     "url": "http://audiocogs.org/"
