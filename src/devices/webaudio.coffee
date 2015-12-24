@@ -25,7 +25,7 @@ class WebAudioDevice extends EventEmitter
         
         # if the sample rate doesn't match the hardware sample rate, create a resampler
         if @deviceSampleRate isnt @sampleRate
-            @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, 4096 * @channels)
+            @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, @bufferSize)
 
         @node = @context[createProcessor](4096, @channels, @channels)
         @node.onaudioprocess = @refill
