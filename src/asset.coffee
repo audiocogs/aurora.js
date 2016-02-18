@@ -150,4 +150,10 @@ class Asset extends EventEmitter
         continue while @decoder.decode() and @active
         @decoder.once 'data', @_decode if @active
         
+    destroy: ->
+        @demuxer?.off()
+        @decoder?.off()
+        @source?.off()
+        @off()
+        
 module.exports = Asset
