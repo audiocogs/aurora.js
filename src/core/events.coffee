@@ -7,9 +7,15 @@ class EventEmitter extends Base
         @events[event].push(fn)
         
     off: (event, fn) ->
-        return unless @events?[event]
-        index = @events[event].indexOf(fn)
-        @events[event].splice(index, 1) if ~index
+        return unless @events?
+        if @events?[event]
+            if fn?
+                index = @events[event].indexOf(fn)
+                @events[event].splice(index, 1) if ~index
+            else
+                @events[event]
+        else unless event?
+            events = {}
         
     once: (event, fn) ->
         @on event, cb = ->
