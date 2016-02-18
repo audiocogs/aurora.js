@@ -8,3 +8,5 @@ ehthumbs.db
 Thumbs.db
 node_modules
 /build/
+*.js
+!src/devices/resampler.js
