@@ -35,7 +35,7 @@ class AudioDevice extends EventEmitter
         
     destroy: ->
         @stop()
-        @device.destroy()
+        @device?.destroy()
         
     seek: (@currentTime) ->
         @_lastTime = @device.getDeviceTime() if @playing
