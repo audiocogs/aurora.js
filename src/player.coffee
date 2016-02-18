@@ -159,4 +159,10 @@ class Player extends EventEmitter
         @device.start() if @playing
         @emit 'ready'
         
+    destroy: ->
+        @stop()
+        @device?.off()
+        @asset?.destroy()
+        @off()
+        
 module.exports = Player
