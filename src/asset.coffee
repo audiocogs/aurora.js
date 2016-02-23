@@ -151,6 +151,7 @@ class Asset extends EventEmitter
         @decoder.once 'data', @_decode if @active
         
     destroy: ->
+        @stop()
         @demuxer?.off()
         @decoder?.off()
         @source?.off()
