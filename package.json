@@ -21,7 +21,8 @@
     "coffeeify": "^0.6.0",
     "exorcist": "^0.1.6",
     "mocha": "^2.5.3",
-    "mochify": "^2.18.0"
+    "mochify": "^2.18.0",
+    "node-static": "^0.7.7"
   },
   "scripts": {
     "prepublish": "make js",
