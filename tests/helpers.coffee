@@ -1,12 +1,6 @@
 global.AV = require '../'
+global.assert = require 'assert'
 
-# make QUnit print test results to the console in Node
-if not QUnit? and require?
-    global.QUnit = require 'qunit-cli'
-            
-# setup testing environment
-global.assert = QUnit
-global.test = QUnit.test
-global.describe = (name, fn) ->
-    QUnit.module name
-    fn()
+global.expect = (count, done) ->
+  return ->
+    done() if --count is 0

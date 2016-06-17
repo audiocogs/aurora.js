@@ -1,8 +1,6 @@
 CRC32 = require '../crc32'
 
 describe 'sources/file', ->
-    asyncTest = assert.asyncTest
-        
     getSource = (fn) ->
         # if we're in Node, we can read any file we like, otherwise simulate by reading 
         # a blob from an XHR and loading it using a FileSource
@@ -16,7 +14,7 @@ describe 'sources/file', ->
             xhr.onload = ->
                 fn new AV.FileSource(xhr.response)
     
-    asyncTest 'data', ->
+    it 'data', (done) ->
         getSource (source) ->
             crc = new CRC32
             source.on 'data', (chunk) ->
@@ -24,11 +22,11 @@ describe 'sources/file', ->
             
             source.on 'end', ->
                 assert.equal crc.toHex(), '84d9f967'
-                assert.start()
+                done()
             
             source.start()
         
-    asyncTest 'progress', ->
+    it 'progress', (done) ->
         getSource (source) ->
             lastProgress = 0
             source.on 'progress', (progress) ->
@@ -38,6 +36,6 @@ describe 'sources/file', ->
             
             source.on 'end', ->
                 assert.equal lastProgress, 100
-                assert.start()
+                done()
             
             source.start()

@@ -1,5 +1,5 @@
 describe 'core/events', ->    
-    test 'on', ->
+    it 'on', ->
         emitter = new AV.EventEmitter
         times = 0
         
@@ -12,7 +12,7 @@ describe 'core/events', ->
         emitter.emit 'test', 'a', 'b'
         assert.equal 2, times
         
-    test 'off', ->
+    it 'off', ->
         emitter = new AV.EventEmitter
         times = 0
         
@@ -25,7 +25,7 @@ describe 'core/events', ->
         
         assert.equal 1, times
         
-    test 'once', ->
+    it 'once', ->
         emitter = new AV.EventEmitter
         times = 0
         
@@ -38,7 +38,7 @@ describe 'core/events', ->
         
         assert.equal 1, times
         
-    test 'emit', ->
+    it 'emit', ->
         emitter = new AV.EventEmitter
         times = 0
         

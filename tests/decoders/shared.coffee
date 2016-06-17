@@ -1,7 +1,7 @@
 CRC32 = require '../crc32'
 
 module.exports = (name, config) ->
-    assert.asyncTest name, ->
+    it name, (done) ->
         if global.Buffer?
             source = new AV.FileSource "#{__dirname}/../data/#{config.file}"
         else
@@ -21,7 +21,7 @@ module.exports = (name, config) ->
                     
                 decoder.on 'end', ->
                     assert.equal crc.toHex(), config.data
-                    assert.start()
+                    done()
                     
                 do read = ->
                     continue while decoder.decode()

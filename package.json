@@ -16,11 +16,11 @@
     "speaker": "~0.2.6"
   },
   "devDependencies": {
-    "coffee-script": ">=1.0",
-    "qunit-cli": "*",
     "browserify": "^4.1.10",
+    "coffee-script": ">=1.0",
     "coffeeify": "^0.6.0",
-    "exorcist": "^0.1.6"
+    "exorcist": "^0.1.6",
+    "mocha": "^2.5.3"
   },
   "scripts": {
     "prepublish": "make js",

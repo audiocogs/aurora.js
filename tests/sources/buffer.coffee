@@ -1,7 +1,6 @@
 CRC32 = require '../crc32'
 
 describe 'sources/buffer', ->
-    asyncTest = assert.asyncTest
     buffer = null
     
     getData = (fn) ->
@@ -22,7 +21,7 @@ describe 'sources/buffer', ->
                 buffer = new Uint8Array(xhr.response)
                 fn()
     
-    asyncTest 'single AV.Buffer', ->
+    it 'single AV.Buffer', (done) ->
         getData ->
             crc = new CRC32
             source = new AV.BufferSource new AV.Buffer(buffer)
@@ -35,11 +34,11 @@ describe 'sources/buffer', ->
             
             source.on 'end', ->
                 assert.equal crc.toHex(), '84d9f967'
-                assert.start()
+                done()
             
             source.start()
         
-    asyncTest 'single Uint8Array', ->
+    it 'single Uint8Array', (done) ->
         getData ->
             crc = new CRC32
             source = new AV.BufferSource buffer
@@ -52,11 +51,11 @@ describe 'sources/buffer', ->
         
             source.on 'end', ->
                 assert.equal crc.toHex(), '84d9f967'
-                assert.start()
+                done()
         
             source.start()
         
-    asyncTest 'single ArrayBuffer', ->
+    it 'single ArrayBuffer', (done) ->
         getData ->
             crc = new CRC32
             source = new AV.BufferSource buffer.buffer
@@ -69,11 +68,11 @@ describe 'sources/buffer', ->
         
             source.on 'end', ->
                 assert.equal crc.toHex(), '84d9f967'
-                assert.start()
+                done()
         
             source.start()
         
-    asyncTest 'AV.BufferList', ->
+    it 'AV.BufferList', (done) ->
         getData ->
             list = new AV.BufferList
             buffers = [
@@ -98,6 +97,6 @@ describe 'sources/buffer', ->
         
             source.on 'end', ->
                 assert.equal count, 3
-                assert.start()
+                done()
         
             source.start()
