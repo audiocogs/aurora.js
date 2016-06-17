@@ -1,3 +1,6 @@
+AV = require '../../'
+assert = require 'assert'
+
 describe 'core/bitstream', ->
     makeBitstream = (bytes) ->
         bytes = new Uint8Array(bytes)

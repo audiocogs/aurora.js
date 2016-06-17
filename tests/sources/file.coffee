@@ -1,4 +1,7 @@
+AV = require '../../'
+assert = require 'assert'
 CRC32 = require '../crc32'
+config = require '../config'
 
 describe 'sources/file', ->
     getSource = (fn) ->
@@ -8,7 +11,7 @@ describe 'sources/file', ->
             fn new AV.FileSource "#{__dirname}/../data/m4a/base.m4a"
         else
             xhr = new XMLHttpRequest
-            xhr.open 'GET', "#{HTTP_BASE}/data/m4a/base.m4a"
+            xhr.open 'GET', "#{config.HTTP_BASE}/data/m4a/base.m4a"
             xhr.responseType = 'blob'
             xhr.send()
             xhr.onload = ->

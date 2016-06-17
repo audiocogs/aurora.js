@@ -1,3 +1,6 @@
+AV = require '../../'
+assert = require 'assert'
+
 describe 'core/bufferlist', ->
     it 'append', ->
         list = new AV.BufferList

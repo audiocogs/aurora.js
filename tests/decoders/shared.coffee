@@ -1,4 +1,7 @@
+AV = require '../../'
+assert = require 'assert'
 CRC32 = require '../crc32'
+{HTTP_BASE} = require '../config'
 
 module.exports = (name, config) ->
     it name, (done) ->

@@ -20,12 +20,13 @@
     "coffee-script": ">=1.0",
     "coffeeify": "^0.6.0",
     "exorcist": "^0.1.6",
-    "mocha": "^2.5.3"
+    "mocha": "^2.5.3",
+    "mochify": "^2.18.0"
   },
   "scripts": {
     "prepublish": "make js",
     "postpublish": "make clean",
-    "test": "coffee tests/test.coffee"
+    "test": "make test"
   },
   "engine": [
     "node >= v0.6.0"

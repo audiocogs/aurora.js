@@ -1,10 +1,13 @@
+AV = require '../../'
+assert = require 'assert'
 CRC32 = require '../crc32'
+config = require '../config'
 
 describe 'sources/http', ->
     # check that the data returned by the source is correct, using a CRC32 checksum
     it 'data', (done) ->
         crc = new CRC32
-        source = new AV.HTTPSource "#{HTTP_BASE}/data/m4a/base.m4a"
+        source = new AV.HTTPSource "#{config.HTTP_BASE}/data/m4a/base.m4a"
         
         source.on 'data', (chunk) ->
             crc.update chunk
@@ -16,7 +19,7 @@ describe 'sources/http', ->
         source.start()
         
     it 'progress', (done) ->
-        source = new AV.HTTPSource "#{HTTP_BASE}/data/m4a/base.m4a"
+        source = new AV.HTTPSource "#{config.HTTP_BASE}/data/m4a/base.m4a"
         
         lastProgress = 0
         source.on 'progress', (progress) ->
@@ -40,7 +43,7 @@ describe 'sources/http', ->
         source.start()
         
     it '404', (done) ->
-        source = new AV.HTTPSource "#{HTTP_BASE}/nothing.m4a"
+        source = new AV.HTTPSource "#{config.HTTP_BASE}/nothing.m4a"
         
         source.on 'error', (error) ->
             assert.ok true

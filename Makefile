@@ -1,3 +1,5 @@
+.PHONY: js browser browser_slim test browser_test clean
+
 js: src/**/*.coffee
 	./node_modules/.bin/coffee -c node.coffee src/*.coffee src/**/*.coffee src/**/**/*.coffee
 
@@ -18,9 +20,21 @@ browser_slim: src/**/*.coffee
 		--debug \
 		browser_slim.coffee \
 		| ./node_modules/.bin/exorcist build/aurora_slim.js.map > build/aurora_slim.js
+
+test_node:
+	@./node_modules/.bin/mocha \
+		--compilers coffee:coffee-script/register \
+		--recursive \
+		tests
 		
-browser_test:
-	./node_modules/.bin/browserify tests/test.coffee --extension .coffee -o tests/test.js
+test_browser:
+	@./node_modules/.bin/mochify \
+		--extension .coffee \
+		--reporter spec \
+		--timeout 10000 \
+		tests/**/*.coffee
+		
+test: test_node test_browser
 		
 clean:
 	mv src/devices/resampler.js resampler.js.tmp

@@ -1,3 +1,6 @@
+AV = require '../../'
+assert = require 'assert'
+
 describe 'core/events', ->    
     it 'on', ->
         emitter = new AV.EventEmitter

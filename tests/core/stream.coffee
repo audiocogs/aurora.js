@@ -1,3 +1,6 @@
+AV = require '../../'
+assert = require 'assert'
+
 describe 'core/stream', ->
     makeStream = (arrays...) ->
         list = new AV.BufferList

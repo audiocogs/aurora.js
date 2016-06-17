@@ -1,4 +1,7 @@
+AV = require '../../'
+assert = require 'assert'
 CRC32 = require '../crc32'
+config = require '../config'
 
 describe 'sources/buffer', ->
     buffer = null
@@ -14,7 +17,7 @@ describe 'sources/buffer', ->
                 fn()
         else
             xhr = new XMLHttpRequest
-            xhr.open 'GET', "#{HTTP_BASE}/data/m4a/base.m4a"
+            xhr.open 'GET', "#{config.HTTP_BASE}/data/m4a/base.m4a"
             xhr.responseType = 'arraybuffer'
             xhr.send()
             xhr.onload = ->

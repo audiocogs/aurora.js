@@ -1,4 +1,11 @@
+AV = require '../../'
+assert = require 'assert'
 CRC32 = require '../crc32'
+{HTTP_BASE} = require '../config'
+
+expect = (count, done) ->
+  return ->
+    done() if --count is 0
 
 module.exports = (name, config) ->
     it name, (done) ->
