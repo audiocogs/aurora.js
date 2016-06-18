@@ -16,7 +16,7 @@
     "speaker": "~0.2.6"
   },
   "devDependencies": {
-    "browserify": "^4.1.10",
+    "browserify": "^13.0.1",
     "coffee-script": ">=1.0",
     "coffeeify": "^0.6.0",
     "exorcist": "^0.1.6",
