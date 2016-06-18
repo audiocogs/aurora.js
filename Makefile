@@ -32,13 +32,13 @@ server.pid:
 stop_server:
 	@kill `cat server.pid` && rm -f server.pid
 
-test_node: server.pid
+test_node: clean server.pid
 	@./node_modules/.bin/mocha \
 		--compilers coffee:coffee-script/register \
 		--recursive \
 		tests
 		
-test_browser: server.pid
+test_browser: clean server.pid
 	@./node_modules/.bin/mochify \
 		--extension .coffee \
 		--reporter spec \
@@ -50,6 +50,6 @@ test-node: test_node stop_server
 test-browser: test_browser stop_server
 		
 clean:
-	mv src/devices/resampler.js resampler.js.tmp
-	rm -rf build/ node.js src/*.js src/**/*.js src/**/**/*.js tests/test.js
-	mv resampler.js.tmp src/devices/resampler.js
+	@mv src/devices/resampler.js resampler.js.tmp
+	@rm -rf build/ node.js src/*.js src/**/*.js src/**/**/*.js tests/test.js
+	@mv resampler.js.tmp src/devices/resampler.js
