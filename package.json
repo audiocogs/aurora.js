@@ -12,13 +12,15 @@
     "url": "https://github.com/audiocogs/aurora.js.git"
   },
   "bugs": "https://github.com/audiocogs/aurora.js/issues",
+  "dependencies": {
+    "coffeeify": "^0.6.0"
+  },
   "optionalDependencies": {
     "speaker": "^0.3.0"
   },
   "devDependencies": {
     "browserify": "^13.0.1",
     "coffee-script": ">=1.0",
-    "coffeeify": "^0.6.0",
     "exorcist": "^0.1.6",
     "mocha": "^2.5.3",
     "mochify": "^2.18.0",
