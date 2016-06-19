@@ -26,7 +26,7 @@ server.pid:
 		-p 8000 \
 		-H '{"access-control-expose-headers": "content-length", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Range, Content-Length, If-None-Match"}' \
 		tests \
-		&> /dev/null \
+		> /dev/null \
 		& echo $$! > $@
 		
 stop_server:
