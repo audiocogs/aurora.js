@@ -1,7 +1,14 @@
+AV = require '../../'
+assert = require 'assert'
 CRC32 = require '../crc32'
+{HTTP_BASE} = require '../config'
+
+expect = (count, done) ->
+  return ->
+    done() if --count is 0
 
 module.exports = (name, config) ->
-    assert.asyncTest name, ->
+    it name, (done) ->
         if global.Buffer?
             source = new AV.FileSource "#{__dirname}/../data/#{config.file}"
         else
@@ -11,16 +18,18 @@ module.exports = (name, config) ->
             Demuxer = AV.Demuxer.find(chunk)
             demuxer = new Demuxer(source, chunk)
                 
-            expect = config.format? + config.duration? + config.metadata? + config.chapters? + config.cookie? + config.data?
-            assert.expect(expect)
+            expected = config.format? + config.duration? + config.metadata? + config.chapters? + config.cookie? + config.data?
+            done = expect(expected, done)
                 
             if config.format
                 demuxer.once 'format', (format) ->
                     assert.deepEqual format, config.format
+                    done()
                     
             if config.duration
                 demuxer.once 'duration', (duration) ->
                     assert.equal duration, config.duration
+                    done()
                     
             if config.metadata
                 demuxer.once 'metadata', (metadata) ->
@@ -31,10 +40,12 @@ module.exports = (name, config) ->
                         metadata.coverArt = crc.toHex()
                         
                     assert.deepEqual metadata, config.metadata
+                    done()
                         
             if config.chapters
                 demuxer.once 'chapters', (chapters) ->
                     assert.deepEqual chapters, config.chapters
+                    done()
                         
             if config.data
                 crc = new CRC32
@@ -44,7 +55,8 @@ module.exports = (name, config) ->
             demuxer.on 'end', ->
                 if config.data
                     assert.equal crc.toHex(), config.data
+                    done()
                     
-                assert.start()
+                done()
                     
         source.start()

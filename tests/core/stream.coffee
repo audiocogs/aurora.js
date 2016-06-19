@@ -1,3 +1,6 @@
+AV = require '../../'
+assert = require 'assert'
+
 describe 'core/stream', ->
     makeStream = (arrays...) ->
         list = new AV.BufferList
@@ -7,14 +10,14 @@ describe 'core/stream', ->
         
         return new AV.Stream(list)
         
-    test 'copy', ->
+    it 'copy', ->
         stream = makeStream [10, 160], [20, 29, 119]
         copy = stream.copy()
         
         assert.notEqual copy, stream
         assert.deepEqual copy, stream
         
-    test 'advance', ->
+    it 'advance', ->
         stream = makeStream [10, 160], [20, 29, 119]
         assert.equal 0, stream.offset
         
@@ -25,7 +28,7 @@ describe 'core/stream', ->
             stream.advance(10)
         , AV.UnderflowError
         
-    test 'rewind', ->
+    it 'rewind', ->
         stream = makeStream [10, 160], [20, 29, 119]
         
         stream.advance(4)
@@ -57,7 +60,7 @@ describe 'core/stream', ->
             stream.rewind(10)
         , AV.UnderflowError
         
-    test 'seek', ->
+    it 'seek', ->
         stream = makeStream [10, 160], [20, 29, 119]
         
         stream.seek(3)
@@ -76,25 +79,25 @@ describe 'core/stream', ->
             stream.seek(-10)
         , AV.UnderflowError
         
-    test 'remainingBytes', ->
+    it 'remainingBytes', ->
         stream = makeStream [10, 160], [20, 29, 119]
         assert.equal 5, stream.remainingBytes()
         
         stream.advance(2)
         assert.equal 3, stream.remainingBytes()
         
-    test 'buffer', ->
+    it 'buffer', ->
         stream = makeStream [10, 160], [20, 29, 119]
         assert.deepEqual new AV.Buffer(new Uint8Array([10, 160, 20, 29])), stream.peekBuffer(0, 4)
         assert.deepEqual new AV.Buffer(new Uint8Array([160, 20, 29, 119])), stream.peekBuffer(1, 4)
         assert.deepEqual new AV.Buffer(new Uint8Array([10, 160, 20, 29])), stream.readBuffer(4)
         
-    test 'single buffer', ->
+    it 'single buffer', ->
         stream = makeStream [10, 160], [20, 29, 119]
         assert.deepEqual new AV.Buffer(new Uint8Array([10, 160])), stream.peekSingleBuffer(0, 4)
         assert.deepEqual new AV.Buffer(new Uint8Array([10, 160])), stream.readSingleBuffer(4)
 
-    test 'uint8', ->
+    it 'uint8', ->
         stream = makeStream [10, 160], [20, 29, 119]
         values = [10, 160, 20, 29, 119]
 
@@ -118,7 +121,7 @@ describe 'core/stream', ->
         stream = makeStream([255, 23])
         assert.equal 255, stream.readUInt8()
         
-    test 'int8', ->
+    it 'int8', ->
         stream = makeStream [0x23, 0xff, 0x87], [0xab, 0x7c, 0xef]
         values = [0x23, -1, -121, -85, 124, -17]
 
@@ -130,7 +133,7 @@ describe 'core/stream', ->
         for value in values
             assert.equal value, stream.readInt8()
             
-    test 'uint16', ->
+    it 'uint16', ->
         stream = makeStream [0, 0x23, 0x42], [0x3f]
         copy = stream.copy()
 
@@ -155,7 +158,7 @@ describe 'core/stream', ->
         assert.equal 0xfefe, stream.peekUInt16(0)
         assert.equal 0xfefe, stream.peekUInt16(0, true)
         
-    test 'int16', ->
+    it 'int16', ->
         stream = makeStream [0x16, 0x79, 0xff], [0x80]
         copy = stream.copy()
 
@@ -175,7 +178,7 @@ describe 'core/stream', ->
         for value, i in [0x7916, -32513]
             assert.equal value, copy.readInt16(true)
             
-    test 'uint24', ->
+    it 'uint24', ->
         stream = makeStream [0x23, 0x16], [0x56, 0x11, 0x78, 0xaf]
         copy = stream.copy()
 
@@ -194,7 +197,7 @@ describe 'core/stream', ->
         for value in [0x561623, 0xaf7811]
             assert.equal value, copy.readUInt24(true)
             
-    test 'int24', ->
+    it 'int24', ->
         stream = makeStream [0x23, 0x16, 0x56], [0xff, 0x10, 0xfa]
         copy = stream.copy()
 
@@ -214,7 +217,7 @@ describe 'core/stream', ->
         for value in [0x561623, -388865]
             assert.equal value, copy.readInt24(true)
             
-    test 'uint32', ->
+    it 'uint32', ->
         stream = makeStream [0x32, 0x65, 0x42], [0x56, 0x23], [0xff, 0x45, 0x11]
         copy = stream.copy()
 
@@ -234,7 +237,7 @@ describe 'core/stream', ->
         for value in [0x56426532, 0x1145ff23]
             assert.equal value, copy.readUInt32(true)
             
-    test 'int32', ->
+    it 'int32', ->
         stream = makeStream [0x43, 0x53], [0x16, 0x79, 0xff, 0xfe], [0xef, 0xfa]
         copy = stream.copy()
 
@@ -267,7 +270,7 @@ describe 'core/stream', ->
         assert.equal -1, stream.peekInt32()
         assert.equal -1, stream.peekInt32(0, true)
         
-    test 'float32', ->
+    it 'float32', ->
         stream = makeStream [0, 0, 0x80], [0x3f, 0, 0, 0, 0xc0], [0xab, 0xaa], 
                             [0xaa, 0x3e, 0, 0, 0, 0], [0, 0, 0], [0x80, 0, 0, 0x80], [0x7f, 0, 0, 0x80, 0xff]
         copy = stream.copy()
@@ -296,7 +299,7 @@ describe 'core/stream', ->
         assert.ok isNaN(stream2.peekFloat32(0))
         assert.equal 3.4028234663852886e+38, stream2.peekFloat32(0, true)
         
-    test 'float64', ->
+    it 'float64', ->
         stream = makeStream [0x55, 0x55, 0x55, 0x55, 0x55, 0x55], [0xd5, 0x3f]
         copy = stream.copy()
         assert.equal 1.1945305291680097e+103, stream.peekFloat64(0)
@@ -376,7 +379,7 @@ describe 'core/stream', ->
         assert.equal 3.04814e-319, stream.readFloat64()
         assert.equal -Infinity, copy.readFloat64(true)
         
-    test 'float80', ->
+    it 'float80', ->
         stream = makeStream [0x3f, 0xff, 0x80, 0x00, 0x00, 0x00], [0x00, 0x00, 0x00, 0x00]
         copy = stream.copy()
         assert.equal 1, stream.peekFloat80()
@@ -456,7 +459,7 @@ describe 'core/stream', ->
         assert.equal 1.1945305291680097e+103, stream.peekFloat80()
         assert.equal 1.1945305291680097e+103, stream.readFloat80()
         
-    test 'ascii/latin1', ->
+    it 'ascii/latin1', ->
         stream = makeStream [0x68, 0x65, 0x6c, 0x6c, 0x6f]
         assert.equal 'hello', stream.peekString(0, 5)
         assert.equal 'hello', stream.peekString(0, 5, 'ascii')
@@ -464,14 +467,14 @@ describe 'core/stream', ->
         assert.equal 'hello', stream.readString(5, 'ascii')
         assert.equal 5, stream.offset
 
-    test 'ascii/latin1 null terminated', ->
+    it 'ascii/latin1 null terminated', ->
         stream = makeStream [0x68, 0x65, 0x6c, 0x6c, 0x6f, 0]
         assert.equal 'hello\0', stream.peekString(0, 6)
         assert.equal 'hello', stream.peekString(0, null)
         assert.equal 'hello', stream.readString(null)
         assert.equal 6, stream.offset
 
-    test 'utf8', ->
+    it 'utf8', ->
         stream = makeStream [195, 188, 98, 101, 114]
         assert.equal 'Ã¼ber', stream.peekString(0, 5, 'utf8')
         assert.equal 'Ã¼ber', stream.readString(5, 'utf8')
@@ -483,8 +486,8 @@ describe 'core/stream', ->
         assert.equal 11, stream.offset
 
         stream = makeStream [0xf0, 0x9f, 0x91, 0x8d]
-        assert.equal 'í ½í±', stream.peekString(0, 4, 'utf8')
-        assert.equal 'í ½í±', stream.readString(4, 'utf8')
+        assert.equal 'ğŸ‘', stream.peekString(0, 4, 'utf8')
+        assert.equal 'ğŸ‘', stream.readString(4, 'utf8')
         assert.equal 4, stream.offset
 
         stream = makeStream [0xe2, 0x82, 0xac]
@@ -492,7 +495,7 @@ describe 'core/stream', ->
         assert.equal 'â‚¬', stream.readString(3, 'utf8')
         assert.equal 3, stream.offset
 
-    test 'utf-8 null terminated', ->
+    it 'utf-8 null terminated', ->
         stream = makeStream [195, 188, 98, 101, 114, 0]
         assert.equal 'Ã¼ber', stream.peekString(0, null, 'utf-8')
         assert.equal 'Ã¼ber', stream.readString(null, 'utf-8')
@@ -504,8 +507,8 @@ describe 'core/stream', ->
         assert.equal 12, stream.offset
 
         stream = makeStream [0xf0, 0x9f, 0x91, 0x8d, 0]
-        assert.equal 'í ½í±', stream.peekString(0, null, 'utf8')
-        assert.equal 'í ½í±', stream.readString(null, 'utf8')
+        assert.equal 'ğŸ‘', stream.peekString(0, null, 'utf8')
+        assert.equal 'ğŸ‘', stream.readString(null, 'utf8')
         assert.equal 5, stream.offset
 
         stream = makeStream [0xe2, 0x82, 0xac, 0]
@@ -513,7 +516,7 @@ describe 'core/stream', ->
         assert.equal 'â‚¬', stream.readString(null, 'utf8')
         assert.equal 4, stream.offset
 
-    test 'utf16be', ->
+    it 'utf16be', ->
         stream = makeStream [0, 252, 0, 98, 0, 101, 0, 114]
         assert.equal 'Ã¼ber', stream.peekString(0, 8, 'utf16be')
         assert.equal 'Ã¼ber', stream.readString(8, 'utf16be')
@@ -530,11 +533,11 @@ describe 'core/stream', ->
         assert.equal 8, stream.offset
 
         stream = makeStream [0xd8, 0x3d, 0xdc, 0x4d]
-        assert.equal 'í ½í±', stream.peekString(0, 4, 'utf16be')
-        assert.equal 'í ½í±', stream.readString(4, 'utf16be')
+        assert.equal 'ğŸ‘', stream.peekString(0, 4, 'utf16be')
+        assert.equal 'ğŸ‘', stream.readString(4, 'utf16be')
         assert.equal 4, stream.offset
 
-    test 'utf16-be null terminated', ->
+    it 'utf16-be null terminated', ->
         stream = makeStream [0, 252, 0, 98, 0, 101, 0, 114, 0, 0]
         assert.equal 'Ã¼ber', stream.peekString(0, null, 'utf16-be')
         assert.equal 'Ã¼ber', stream.readString(null, 'utf16-be')
@@ -551,11 +554,11 @@ describe 'core/stream', ->
         assert.equal 10, stream.offset
 
         stream = makeStream [0xd8, 0x3d, 0xdc, 0x4d, 0, 0]
-        assert.equal 'í ½í±', stream.peekString(0, null, 'utf16be')
-        assert.equal 'í ½í±', stream.readString(null, 'utf16be')
+        assert.equal 'ğŸ‘', stream.peekString(0, null, 'utf16be')
+        assert.equal 'ğŸ‘', stream.readString(null, 'utf16be')
         assert.equal 6, stream.offset
 
-    test 'utf16le', ->
+    it 'utf16le', ->
         stream = makeStream [252, 0, 98, 0, 101, 0, 114, 0]
         assert.equal 'Ã¼ber', stream.peekString(0, 8, 'utf16le')
         assert.equal 'Ã¼ber', stream.readString(8, 'utf16le')
@@ -577,11 +580,11 @@ describe 'core/stream', ->
         assert.equal 10, stream.offset
 
         stream = makeStream [0x3d, 0xd8, 0x4d, 0xdc]
-        assert.equal 'í ½í±', stream.peekString(0, 4, 'utf16le')
-        assert.equal 'í ½í±', stream.readString(4, 'utf16le')
+        assert.equal 'ğŸ‘', stream.peekString(0, 4, 'utf16le')
+        assert.equal 'ğŸ‘', stream.readString(4, 'utf16le')
         assert.equal 4, stream.offset
 
-    test 'utf16-le null terminated', ->
+    it 'utf16-le null terminated', ->
         stream = makeStream [252, 0, 98, 0, 101, 0, 114, 0, 0, 0]
         assert.equal 'Ã¼ber', stream.peekString(0, null, 'utf16-le')
         assert.equal 'Ã¼ber', stream.readString(null, 'utf16-le')
@@ -603,11 +606,11 @@ describe 'core/stream', ->
         assert.equal 12, stream.offset
 
         stream = makeStream [0x3d, 0xd8, 0x4d, 0xdc, 0, 0]
-        assert.equal 'í ½í±', stream.peekString(0, null, 'utf16le')
-        assert.equal 'í ½í±', stream.readString(null, 'utf16le')
+        assert.equal 'ğŸ‘', stream.peekString(0, null, 'utf16le')
+        assert.equal 'ğŸ‘', stream.readString(null, 'utf16le')
         assert.equal 6, stream.offset
 
-    test 'utf16bom big endian', ->
+    it 'utf16bom big endian', ->
         stream = makeStream [0xfe, 0xff, 0, 252, 0, 98, 0, 101, 0, 114]
         assert.equal 'Ã¼ber', stream.peekString(0, 10, 'utf16bom')
         assert.equal 'Ã¼ber', stream.readString(10, 'utf16bom')
@@ -624,11 +627,11 @@ describe 'core/stream', ->
         assert.equal 10, stream.offset
 
         stream = makeStream [0xfe, 0xff, 0xd8, 0x3d, 0xdc, 0x4d]
-        assert.equal 'í ½í±', stream.peekString(0, 6, 'utf16bom')
-        assert.equal 'í ½í±', stream.readString(6, 'utf16bom')
+        assert.equal 'ğŸ‘', stream.peekString(0, 6, 'utf16bom')
+        assert.equal 'ğŸ‘', stream.readString(6, 'utf16bom')
         assert.equal 6, stream.offset
 
-    test 'utf16-bom big endian, null terminated', ->
+    it 'utf16-bom big endian, null terminated', ->
         stream = makeStream [0xfe, 0xff, 0, 252, 0, 98, 0, 101, 0, 114, 0, 0]
         assert.equal 'Ã¼ber', stream.peekString(0, null, 'utf16-bom')
         assert.equal 'Ã¼ber', stream.readString(null, 'utf16-bom')
@@ -645,11 +648,11 @@ describe 'core/stream', ->
         assert.equal 12, stream.offset
 
         stream = makeStream [0xfe, 0xff, 0xd8, 0x3d, 0xdc, 0x4d, 0, 0]
-        assert.equal 'í ½í±', stream.peekString(0, null, 'utf16bom')
-        assert.equal 'í ½í±', stream.readString(null, 'utf16bom')
+        assert.equal 'ğŸ‘', stream.peekString(0, null, 'utf16bom')
+        assert.equal 'ğŸ‘', stream.readString(null, 'utf16bom')
         assert.equal 8, stream.offset
 
-    test 'utf16bom little endian', ->
+    it 'utf16bom little endian', ->
         stream = makeStream [0xff, 0xfe, 252, 0, 98, 0, 101, 0, 114, 0]
         assert.equal 'Ã¼ber', stream.peekString(0, 10, 'utf16bom')
         assert.equal 'Ã¼ber', stream.readString(10, 'utf16bom')
@@ -666,11 +669,11 @@ describe 'core/stream', ->
         assert.equal 10, stream.offset
 
         stream = makeStream [0xff, 0xfe, 0x3d, 0xd8, 0x4d, 0xdc]
-        assert.equal 'í ½í±', stream.peekString(0, 6, 'utf16bom')
-        assert.equal 'í ½í±', stream.readString(6, 'utf16bom')
+        assert.equal 'ğŸ‘', stream.peekString(0, 6, 'utf16bom')
+        assert.equal 'ğŸ‘', stream.readString(6, 'utf16bom')
         assert.equal 6, stream.offset
 
-    test 'utf16-bom little endian, null terminated', ->
+    it 'utf16-bom little endian, null terminated', ->
         stream = makeStream [0xff, 0xfe, 252, 0, 98, 0, 101, 0, 114, 0, 0, 0]
         assert.equal 'Ã¼ber', stream.peekString(0, null, 'utf16-bom')
         assert.equal 'Ã¼ber', stream.readString(null, 'utf16-bom')
@@ -687,6 +690,6 @@ describe 'core/stream', ->
         assert.equal 12, stream.offset
 
         stream = makeStream [0xff, 0xfe, 0x3d, 0xd8, 0x4d, 0xdc, 0, 0]
-        assert.equal 'í ½í±', stream.peekString(0, null, 'utf16bom')
-        assert.equal 'í ½í±', stream.readString(null, 'utf16bom')
+        assert.equal 'ğŸ‘', stream.peekString(0, null, 'utf16bom')
+        assert.equal 'ğŸ‘', stream.readString(null, 'utf16bom')
         assert.equal 8, stream.offset

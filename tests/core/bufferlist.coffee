@@ -1,5 +1,8 @@
+AV = require '../../'
+assert = require 'assert'
+
 describe 'core/bufferlist', ->
-    test 'append', ->
+    it 'append', ->
         list = new AV.BufferList
         buffer = new AV.Buffer(new Uint8Array([1, 2, 3]))
         list.append buffer
@@ -26,7 +29,7 @@ describe 'core/bufferlist', ->
         assert.equal buffer, buffer2.prev
         assert.equal null, buffer2.next
         
-    test 'advance', ->
+    it 'advance', ->
         list = new AV.BufferList
         buffer1 = AV.Buffer.allocate(3)
         buffer2 = AV.Buffer.allocate(3)
@@ -50,7 +53,7 @@ describe 'core/bufferlist', ->
         assert.equal 0, list.availableBuffers
         assert.equal 0, list.availableBytes
         
-    test 'rewind', ->
+    it 'rewind', ->
         list = new AV.BufferList
         buffer1 = AV.Buffer.allocate(3)
         buffer2 = AV.Buffer.allocate(3)
@@ -94,7 +97,7 @@ describe 'core/bufferlist', ->
         assert.equal 1, list.availableBuffers
         assert.equal 3, list.availableBytes
         
-    test 'reset', ->
+    it 'reset', ->
         list = new AV.BufferList
         buffer1 = AV.Buffer.allocate(3)
         buffer2 = AV.Buffer.allocate(3)
@@ -126,7 +129,7 @@ describe 'core/bufferlist', ->
         assert.equal 3, list.availableBuffers
         assert.equal 9, list.availableBytes
         
-    test 'copy', ->
+    it 'copy', ->
         list = new AV.BufferList
         buffer = AV.Buffer.allocate(3)
         list.append buffer

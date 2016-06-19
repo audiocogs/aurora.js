@@ -16,16 +16,18 @@
     "speaker": "~0.2.6"
   },
   "devDependencies": {
+    "browserify": "^13.0.1",
     "coffee-script": ">=1.0",
-    "qunit-cli": "*",
-    "browserify": "^4.1.10",
     "coffeeify": "^0.6.0",
-    "exorcist": "^0.1.6"
+    "exorcist": "^0.1.6",
+    "mocha": "^2.5.3",
+    "mochify": "^2.18.0",
+    "node-static": "^0.7.7"
   },
   "scripts": {
     "prepublish": "make js",
     "postpublish": "make clean",
-    "test": "coffee tests/test.coffee"
+    "test": "make test"
   },
   "engine": [
     "node >= v0.6.0"

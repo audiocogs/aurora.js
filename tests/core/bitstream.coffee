@@ -1,17 +1,20 @@
+AV = require '../../'
+assert = require 'assert'
+
 describe 'core/bitstream', ->
     makeBitstream = (bytes) ->
         bytes = new Uint8Array(bytes)
         stream = AV.Stream.fromBuffer(new AV.Buffer(bytes))
         return new AV.Bitstream(stream)
         
-    test 'copy', ->
+    it 'copy', ->
         bitstream = makeBitstream [10, 160], [20, 29, 119]
         copy = bitstream.copy()
         
         assert.notEqual copy, bitstream
         assert.deepEqual copy, bitstream
         
-    test 'advance', ->
+    it 'advance', ->
         bitstream = makeBitstream [10, 160]
         
         assert.equal 0, bitstream.bitPosition
@@ -29,7 +32,7 @@ describe 'core/bitstream', ->
             bitstream.advance(40)
         , AV.UnderflowError
         
-    test 'rewind', ->
+    it 'rewind', ->
         bitstream = makeBitstream [10, 160]
         
         assert.equal 0, bitstream.bitPosition
@@ -55,7 +58,7 @@ describe 'core/bitstream', ->
             bitstream.rewind(10)
         , AV.UnderflowError
         
-    test 'seek', ->
+    it 'seek', ->
         bitstream = makeBitstream [10, 160]
         
         assert.equal 0, bitstream.bitPosition
@@ -81,7 +84,7 @@ describe 'core/bitstream', ->
             bitstream.seek(-10)
         , AV.UnderflowError
         
-    test 'align', ->
+    it 'align', ->
         bitstream = makeBitstream [10, 160]
         
         assert.equal 0, bitstream.bitPosition
@@ -96,7 +99,7 @@ describe 'core/bitstream', ->
         assert.equal 0, bitstream.bitPosition
         assert.equal 8, bitstream.offset()
         
-    test 'read/peek unsigned', ->
+    it 'read/peek unsigned', ->
         # 0101 1101 0110 1111 1010 1110 1100 1000 -> 0x5d6faec8
         # 0111 0000 1001 1010 0010 0101 1111 0011 -> 0x709a25f3
         bitstream = makeBitstream [0x5d, 0x6f, 0xae, 0xc8, 0x70, 0x9a, 0x25, 0xf3]
@@ -141,7 +144,7 @@ describe 'core/bitstream', ->
         assert.equal 0xfffffffff, bitstream.peek(36)
         assert.equal 0xffffffffff, bitstream.peek(40)
         
-    test 'read/peek signed', ->
+    it 'read/peek signed', ->
         bitstream = makeBitstream [0x5d, 0x6f, 0xae, 0xc8, 0x70, 0x9a, 0x25, 0xf3]
 
         assert.equal 5, bitstream.peek(4, true)
@@ -190,7 +193,7 @@ describe 'core/bitstream', ->
         assert.equal -1, bitstream.peek(36, true)
         assert.equal -1, bitstream.peek(40, true)
         
-    test 'readLSB unsigned', ->
+    it 'readLSB unsigned', ->
         # {     byte 1     }{    byte 2  }
         # { 3   2      1   }{       3    }
         # { 1][111] [1100] }{ [0000 1000 } -> 0xfc08
@@ -235,7 +238,7 @@ describe 'core/bitstream', ->
         assert.equal 0xfffffffff, bitstream.peekLSB(36)
         assert.equal 0xffffffffff, bitstream.peekLSB(40)
         
-    test 'readLSB signed', ->
+    it 'readLSB signed', ->
         bitstream = makeBitstream [0xfc, 0x08]
         assert.equal -4, bitstream.peekLSB(4, true)
         assert.equal -4, bitstream.readLSB(4, true)
