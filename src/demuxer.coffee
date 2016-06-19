@@ -15,7 +15,10 @@ class Demuxer extends EventEmitter
         source.on 'data', (chunk) =>
             received = true
             list.append chunk
-            @readChunk chunk
+            try
+              @readChunk chunk
+            catch e
+              @emit 'error', e
             
         source.on 'error', (err) =>
             @emit 'error', err
