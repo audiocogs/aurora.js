@@ -1,0 +1,17 @@
+language: node_js
+
+node_js:
+  - stable
+
+cache:
+  directories:
+    - travis-phantomjs
+
+before_install:
+  - export TARGET_PHANTOMJS_VERSION=2.1.1
+  - export PATH=$PWD/travis-phantomjs/phantomjs-$TARGET_PHANTOMJS_VERSION-linux-x86_64/bin:$PATH
+  - if [ $(phantomjs --version) != "$TARGET_PHANTOMJS_VERSION" ]; then rm -rf $PWD/travis-phantomjs; mkdir travis-phantomjs; fi
+  - if [ $(phantomjs --version) != "$TARGET_PHANTOMJS_VERSION" ]; then wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$TARGET_PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis-phantomjs/phantomjs-$TARGET_PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi
+  - if [ $(phantomjs --version) != "$TARGET_PHANTOMJS_VERSION" ]; then tar -xvf $PWD/travis-phantomjs/phantomjs-$TARGET_PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis-phantomjs; fi
+  - export PATH=$PWD/travis-phantomjs/phantomjs-$TARGET_PHANTOMJS_VERSION-linux-x86_64/bin:$PATH
+  - phantomjs --version
