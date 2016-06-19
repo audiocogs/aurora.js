@@ -42,7 +42,7 @@
   },
   "browser": {
     "./node": "./browser.coffee",
-    "./src/sources/node/file.coffee": "./src/sources/browser/file.coffee",
-    "./src/sources/node/http.coffee": "./src/sources/browser/http.coffee"
+    "./src/sources/node/file": "./src/sources/browser/file.coffee",
+    "./src/sources/node/http": "./src/sources/browser/http.coffee"
   }
 }
