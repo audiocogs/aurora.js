@@ -6,10 +6,10 @@ import {Readable} from 'stream';
  * parent Demuxer so it can control stream backpressure.
  */
 export default class Track extends Readable {
-  constructor(demuxer, type, format, duration) {
+  constructor(type, format, duration) {
     super();
     
-    this._demuxer = demuxer;
+    this._demuxer = null;
     this.type = type;
     this.format = format;
     this.duration = duration;
@@ -30,6 +30,10 @@ export default class Track extends Readable {
    * Writes data to the track. For use by demuxers.
    */
   write(chunk) {
+    if (!this._demuxer) {
+      throw new Error('The track must be added to a demuxer');
+    }
+    
     this._demuxer._startedData = true;
     
     if (!this._discarded) {

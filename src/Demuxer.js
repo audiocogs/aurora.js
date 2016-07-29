@@ -35,8 +35,8 @@ export default class Demuxer extends Writable {
     throw new Error('Not implemented');
   }
   
-  addTrack(type, format, duration) {
-    let track = new Track(this, type, format, duration);
+  addTrack(track) {
+    track._demuxer = this;
     this.tracks.push(track);
     this.emit('track', track);
     return track;
