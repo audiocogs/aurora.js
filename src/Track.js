@@ -6,7 +6,7 @@ import {Readable} from 'stream';
  * parent Demuxer so it can control stream backpressure.
  */
 export default class Track extends Readable {
-  constructor(type, format, duration) {
+  constructor(type = Track.AUDIO, format = {}, duration = 0) {
     super();
     
     this._demuxer = null;
@@ -16,6 +16,12 @@ export default class Track extends Readable {
     this.seekPoints = [];
     this._discarded = false;
   }
+  
+  // track media types
+  static AUDIO = 'audio';
+  static VIDEO = 'video';
+  static SUBTITLE = 'subtitle';
+  static TEXT = 'text';
   
   /**
    * Marks the track for discard, so that the
