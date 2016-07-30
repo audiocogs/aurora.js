@@ -1,4 +1,6 @@
 import Demuxer from './Demuxer';
+import Track from './Track';
+import {UnderflowError} from 'stream-reader';
 
 // common file type identifiers
 // see http://mp4ra.org/filetype.html for a complete list
@@ -23,74 +25,52 @@ class M4ADemuxer extends Demuxer {
     
     // m4a files can have multiple tracks
     this.track = null;
-    return this._tracks = [];
   }
-    
+  
   readChunk() {
-    this.break = false;
-    
-    while (this.stream.available(1) && !this.break) {
-      // if we're ready to read a new atom, add it to the stack
-      if (!this.readHeaders) {
-        if (!this.stream.available(8)) { return false; }
-        
-        this.len = this.stream.readUInt32() - 8;
-        this.type = this.stream.readString(4);
-        
-        if (this.len === 0) { continue; }
-        
-        this.atoms.push(this.type);
-        this.offsets.push(this.stream.offset + this.len);
-        this.readHeaders = true;
+    if (!this.readHeaders) {
+      this.len = this.stream.readUInt32() - 8;
+      this.type = this.stream.readString(4);
+      if (this.len === 0) {
+        return;
       }
-        
-      // find a handler for the current atom heirarchy
-      let path = this.atoms.join('.');        
-      let handler = atoms[path];
       
-      if (handler && handler.fn) {
-        // wait until we have enough data, unless this is the mdat atom
-        if (!this.stream.available(this.len) && path !== 'mdat') {
-          return false;
-        }
-
-        // call the parser for the atom type
-        handler.fn.call(this);
-        
-        // check if this atom can contain sub-atoms
-        if (path in containers) {
-          this.readHeaders = false;
-        }
-          
-      // handle container atoms
-      } else if (path in containers) {
-        this.readHeaders = false;
-        
-      // unknown atom
-      } else {
-        // wait until we have enough data
-        if (!this.stream.available(this.len)) {
-          return false;
-        }
-          
-        this.stream.advance(this.len);
-      }
-        
-      // pop completed items from the stack
-      while (this.stream.offset >= this.offsets[this.offsets.length - 1]) {
-        // call after handler
-        handler = atoms[this.atoms.join('.')];
-        if (handler && handler.after) {
-          handler.after.call(this);
-        }
-        
-        let type = this.atoms.pop();
-        this.offsets.pop();
-        this.readHeaders = false;
-      }
+      this.atoms.push(this.type);
+      this.offsets.push(this.stream.offset + this.len);
+      this.readHeaders = true;
     }
     
-    return !this.break;
+    // find a handler for the current atom heirarchy
+    let path = this.atoms.join('.');        
+    let handler = atoms[path];
+    let isContainer = !!containers[path];
+    
+    if (handler && handler.fn) {
+      // call the parser for the atom type
+      handler.fn.call(this);
+      
+    // unknown atom
+    } else if (!isContainer) {
+      this.stream.advance(this.len);
+    }
+    
+    // handle container atoms
+    if (isContainer) {
+      this.readHeaders = false;
+    }
+    
+    // pop completed items from the stack
+    while (this.stream.offset >= this.offsets[this.offsets.length - 1]) {
+      // call after handler
+      handler = atoms[this.atoms.join('.')];
+      if (handler && handler.after) {
+        handler.after.call(this);
+      }
+      
+      this.atoms.pop();
+      this.offsets.pop();
+      this.readHeaders = false;
+    }
   }
     
   // reads a variable length integer
@@ -106,7 +86,7 @@ class M4ADemuxer extends Demuxer {
 
     return len;
   }
-    
+  
   static readEsds(stream) {
     stream.advance(4); // version and flags
     
@@ -156,11 +136,12 @@ class M4ADemuxer extends Demuxer {
     
   // once we have all the information we need, generate the seek table for this track
   setupSeekPoints() {
-    if ((this.track.chunkOffsets == null) || (this.track.stsc == null) || (this.track.sampleSize == null) || (this.track.stts == null)) { return; }
+    if ((this.track.chunkOffsets == null) || (this.track.stsc == null) || (this.track.sampleSize == null) || (this.track.stts == null)) {
+      return;
+    }
     
     let stscIndex = 0;
     let sttsIndex = 0;
-    sttsIndex = 0;
     let sttsSample = 0;
     let sampleIndex = 0;
     
@@ -169,33 +150,30 @@ class M4ADemuxer extends Demuxer {
     this.track.seekPoints = [];
     
     for (let i = 0; i < this.track.chunkOffsets.length; i++) {
-      let position = this.track.chunkOffsets[i];
+      offset = this.track.chunkOffsets[i];
+      while (stscIndex + 1 < this.track.stsc.length && i + 1 === this.track.stsc[stscIndex + 1].first) {
+        stscIndex++;
+      }
+      
       for (let j = 0, len = this.track.stsc[stscIndex].count; j < len; j++) {
-        // push the timestamp and both the physical position in the file
-        // and the offset without gaps from the start of the data
+        let length = this.track.sampleSize || this.track.sampleSizes[sampleIndex++];
+        let duration = this.track.stts[sttsIndex].duration;
         this.track.seekPoints.push({
           offset,
-          position,
-          timestamp
+          length,
+          timestamp,
+          duration
         });
         
-        let size = this.track.sampleSize || this.track.sampleSizes[sampleIndex++];
-        offset += size;
-        position += size;
-        timestamp += this.track.stts[sttsIndex].duration;
+        offset += length;
+        timestamp += duration;
         
         if (sttsIndex + 1 < this.track.stts.length && ++sttsSample === this.track.stts[sttsIndex].count) {
           sttsSample = 0;
           sttsIndex++;
         }
       }
-          
-      if (stscIndex + 1 < this.track.stsc.length && i + 1 === this.track.stsc[stscIndex + 1].first) {
-        stscIndex++;
-      }
     }
-        
-    return;
   }
       
   parseChapters() {
@@ -203,8 +181,8 @@ class M4ADemuxer extends Demuxer {
 
     // find the chapter track
     let id = this.track.chapterTracks[0];
-    for (let i = 0; i < this._tracks.length; i++) {
-      var track = this._tracks[i];
+    for (let i = 0; i < this.tracks.length; i++) {
+      var track = this.tracks[i];
       if (track.id === id) { break; }
     }
 
@@ -220,16 +198,16 @@ class M4ADemuxer extends Demuxer {
       let point = track.seekPoints[this.chapters.length];
       
       // make sure we have enough data
-      if (!this.stream.available(point.position - this.stream.offset + 32)) { return false; }
+      // if (!this.stream.available(point.offset - this.stream.offset + 32)) { return false; }
 
       // jump to the title offset
-      this.stream.seek(point.position);
+      this.stream.seek(point.offset);
 
       // read the length of the title string
       let len = this.stream.readUInt16();
       let title = null;
       
-      if (!this.stream.available(len)) { return false; }
+      // if (!this.stream.available(len)) { return false; }
       
       // if there is a BOM marker, read a utf16 string
       if (len > 2) {
@@ -290,8 +268,7 @@ atom('ftyp', function() {
 });
 
 atom('moov.trak', function() {
-  this.track = {};
-  return this._tracks.push(this.track);
+  this.track = new Track;
 });
   
 atom('moov.trak.tkhd', function() {
@@ -300,32 +277,40 @@ atom('moov.trak.tkhd', function() {
   this.stream.advance(8); // creation and modification time
   this.track.id = this.stream.readUInt32();
   
-  return this.stream.advance(this.len - 16);
+  this.stream.advance(this.len - 16);
 });
-  
+
+// https://developer.apple.com/library/mac/documentation/QuickTime/QTFF/QTFFChap3/qtff3.html#//apple_ref/doc/uid/TP40000939-CH205-75770
+const TRACK_TYPES = {
+  vide: Track.VIDEO,
+  soun: Track.AUDIO,
+  sbtl: Track.SUBTITLE,
+  text: Track.TEXT
+};
+
 atom('moov.trak.mdia.hdlr', function() {
   this.stream.advance(4); // version and flags
   
   this.stream.advance(4); // component type
-  this.track.type = this.stream.readString(4);
+  this.track.type = TRACK_TYPES[this.stream.readString(4)];
   
   this.stream.advance(12); // component manufacturer, flags, and mask
-  return this.stream.advance(this.len - 24); // component name
+  this.stream.advance(this.len - 24); // component name
 });
 
 atom('moov.trak.mdia.mdhd', function() {
   this.stream.advance(4); // version and flags
   this.stream.advance(8); // creation and modification dates
   
-  this.track.timeScale = this.stream.readUInt32();
-  this.track.duration = this.stream.readUInt32();
+  let timeScale = this.stream.readUInt32();
+  this.track.duration = this.stream.readUInt32() / timeScale * 1000 | 0;
   
-  return this.stream.advance(4); // language and quality
+  this.stream.advance(4); // language and quality
 });
   
 // corrections to bits per channel, base on formatID
 // (ffmpeg appears to always encode the bitsPerChannel as 16)
-let BITS_PER_CHANNEL = { 
+const BITS_PER_CHANNEL = { 
   ulaw: 8,
   alaw: 8,
   in24: 24,
@@ -340,7 +325,7 @@ atom('moov.trak.mdia.minf.stbl.stsd', function() {
   let numEntries = this.stream.readUInt32();
   
   // just ignore the rest of the atom if this isn't an audio track
-  if (this.track.type !== 'soun') {
+  if (this.track.type !== Track.AUDIO) {
     return this.stream.advance(this.len - 8);
   }
   
@@ -350,7 +335,7 @@ atom('moov.trak.mdia.minf.stbl.stsd', function() {
     
   this.stream.advance(4); // size
   
-  let format = this.track.format = {};
+  let format = this.track.format;
   format.formatID = this.stream.readString(4);
   
   this.stream.advance(6); // reserved
@@ -385,23 +370,23 @@ atom('moov.trak.mdia.minf.stbl.stsd', function() {
   format.littleEndian = format.formatID === 'sowt' && format.bitsPerChannel > 8;
   
   if (['twos', 'sowt', 'in24', 'in32', 'fl32', 'fl64', 'raw ', 'NONE'].indexOf(format.formatID) !== -1) {
-    return format.formatID = 'lpcm';
+    format.formatID = 'lpcm';
   }
 });
   
 atom('moov.trak.mdia.minf.stbl.stsd.alac', function() {
   this.stream.advance(4);
-  return this.track.cookie = this.stream.readBuffer(this.len - 4);
+  this.track.format.cookie = this.stream.readBuffer(this.len - 4);
 });
   
 atom('moov.trak.mdia.minf.stbl.stsd.esds', function() {
   let offset = this.stream.offset + this.len;
-  this.track.cookie = M4ADemuxer.readEsds(this.stream);
-  return this.stream.seek(offset); // skip garbage at the end 
+  this.track.format.cookie = M4ADemuxer.readEsds(this.stream);
+  this.stream.seek(offset); // skip garbage at the end 
 });
   
 atom('moov.trak.mdia.minf.stbl.stsd.wave.enda', function() {
-  return this.track.format.littleEndian = !!this.stream.readUInt16();
+  this.track.format.littleEndian = !!this.stream.readUInt16();
 });
   
 // time to sample
@@ -417,7 +402,7 @@ atom('moov.trak.mdia.minf.stbl.stts', function() {
     };
   }
     
-  return this.setupSeekPoints();
+  this.setupSeekPoints();
 });
 
 // sample to chunk
@@ -434,7 +419,7 @@ atom('moov.trak.mdia.minf.stbl.stsc', function() {
     };
   }
     
-  return this.setupSeekPoints();
+  this.setupSeekPoints();
 });
 
 // sample size
@@ -451,7 +436,7 @@ atom('moov.trak.mdia.minf.stbl.stsz', function() {
     }
   }
     
-  return this.setupSeekPoints();
+  this.setupSeekPoints();
 });
 
 // chunk offsets
@@ -464,7 +449,7 @@ atom('moov.trak.mdia.minf.stbl.stco', function() { // TODO: co64
     this.track.chunkOffsets[i] = this.stream.readUInt32();
   }
   
-  return this.setupSeekPoints();
+  this.setupSeekPoints();
 });
 
 // chapter track reference
@@ -474,35 +459,32 @@ atom('moov.trak.tref.chap', function() {
   for (let i = 0; i < entries; i++) {
     this.track.chapterTracks[i] = this.stream.readUInt32();
   }
-  
-  return;
+});
+
+after('moov.trak', function() {
+  this.addTrack(this.track);
+  this.track = null;
 });
     
-after('moov', function() {    
+after('moov', function() {
+  // create a sorted list of data chunks, linking back to their associated tracks
+  this.chunks = [];
+  for (let track of this.tracks) {
+    for (let seekPoint of track.seekPoints) {
+      this.chunks.push({
+        track: track,
+        offset: seekPoint.offset,
+        length: seekPoint.length
+      });
+    }
+  }
+  
+  this.chunks.sort((a, b) => a.offset - b.offset);
+  
   // if the mdat block was at the beginning rather than the end, jump back to it
   if (this.mdatOffset != null) {
     this.stream.seek(this.mdatOffset - 8);
   }
-
-  // choose a track
-  for (let i = 0; i < this._tracks.length; i++) {
-    let track = this._tracks[i];
-    if (track.type === 'soun') {
-      this.track = track;
-      break;
-    }
-  }
-
-  if (this.track.type !== 'soun') {
-    this.track = null;
-    return this.emit('error', 'No audio tracks in m4a file.');
-  }
-  
-  this.track.format.cookie = this.track.cookie;
-  this.addTrack('audio', this.track.format, this.track.duration / this.track.timeScale * 1000 | 0);
-
-  // use the seek points from the selected track
-  return this.seekPoints = this.track.seekPoints;
 });
 
 atom('mdat', function() {
@@ -512,7 +494,7 @@ atom('mdat', function() {
     // if we haven't read the headers yet, the mdat atom was at the beginning
     // rather than the end. Skip over it for now to read the headers first, and
     // come back later.
-    if (this._tracks.length === 0) {
+    if (this.tracks.length === 0) {
       let bytes = Math.min(this.stream.remainingBytes(), this.len);
       this.stream.advance(bytes);
       this.len -= bytes;
@@ -520,93 +502,48 @@ atom('mdat', function() {
     }
 
     this.chunkIndex = 0;
-    this.stscIndex = 0;
-    this.sampleIndex = 0;
-    this.tailOffset = 0;
-    this.tailSamples = 0;
-
+    this.chunkOffset = 0;
     this.startedData = true;
   }
 
   // read the chapter information if any
   if (!this.readChapters) {
-    this.readChapters = this.parseChapters();
-    if (this.break = !this.readChapters) { return; }
-    this.stream.seek(this.mdatOffset);
+    // this.readChapters = this.parseChapters();
+    // if (!this.readChapters) { return; }
+    // this.stream.seek(this.mdatOffset);
   }
 
-  // get the starting offset
-  let offset = this.track.chunkOffsets[this.chunkIndex] + this.tailOffset;
-  let length = 0;
-
-  // make sure we have enough data to get to the offset
-  if (!this.stream.available(offset - this.stream.offset)) {
-    this.break = true;
-    return;
-  }
+  // get the next chunk
+  let chunk = this.chunks[this.chunkIndex];
+  let offset = chunk.offset + this.chunkOffset;
+  let length = chunk.length - this.chunkOffset;
 
   // seek to the offset
   this.stream.seek(offset);
-
-  // calculate the maximum length we can read at once
-  while (this.chunkIndex < this.track.chunkOffsets.length) {
-    // calculate the size in bytes of the chunk using the sample size table
-    let numSamples = this.track.stsc[this.stscIndex].count - this.tailSamples;
-    let chunkSize = 0;
-    let sample = 0;
-    for (; sample < numSamples; sample++) {
-      let size = this.track.sampleSize || this.track.sampleSizes[this.sampleIndex];
   
-      // if we don't have enough data to add this sample, jump out
-      if (!this.stream.available(length + size)) { break; }
+  // read as much as we can, and write to the track
+  let buffer = this.stream.readSingleBuffer(length);
+  chunk.track.write(buffer);
   
-      length += size;
-      chunkSize += size;
-      this.sampleIndex++;
-    }
-
-    // if we didn't make it through the whole chunk, add what we did use to the tail
-    if (sample < numSamples) {
-      this.tailOffset += chunkSize;
-      this.tailSamples += sample;
-      break;
-    } else {
-      // otherwise, we can move to the next chunk
-      this.chunkIndex++;
-      this.tailOffset = 0;
-      this.tailSamples = 0;
-  
-      // if we've made it to the end of a list of subsequent chunks with the same number of samples,
-      // go to the next sample to chunk entry
-      if (this.stscIndex + 1 < this.track.stsc.length && this.chunkIndex + 1 === this.track.stsc[this.stscIndex + 1].first) {
-        this.stscIndex++;
-      }
-  
-      // if the next chunk isn't right after this one, jump out
-      if (offset + length !== this.track.chunkOffsets[this.chunkIndex]) {
-        break;
-      }
-    }
-  }
-
-  // emit some data if we have any, otherwise wait for more
-  if (length > 0) {
-    this.tracks[0].write(this.stream.readBuffer(length));
-    return this.break = this.chunkIndex === this.track.chunkOffsets.length;
+  // if we read the whole chunk, advance to the next.
+  // otherwise, advance the offset in the current chunk.
+  if (buffer.length === length) {
+    this.chunkIndex++;
+    this.chunkOffset = 0;
   } else {
-    return this.break = true;
+    this.chunkOffset += buffer.length;
   }
 });
-        
+
 // metadata chunk
 atom('moov.udta.meta', function() {
   this.metadata = {};    
-  return this.stream.advance(4); // version and flags
+  this.stream.advance(4); // version and flags
 });
 
 // emit when we're done
 after('moov.udta.meta', function() {
-  return this.emit('metadata', this.metadata);
+  this.emit('metadata', this.metadata);
 });
 
 // convienience function to generate metadata atom handler
@@ -614,13 +551,13 @@ let meta = (field, name, fn) =>
   atom(`moov.udta.meta.ilst.${field}.data`, function() {
     this.stream.advance(8);
     this.len -= 8;
-    return fn.call(this, name);
+    this.metadata[field] = fn.call(this, name);
   })
 ;
 
 // string field reader
 let string = function(field) {
-  return this.metadata[field] = this.stream.readString(this.len, 'utf8');
+   return this.stream.readString(this.len, 'utf8');
 };
 
 // from http://atomicparsley.sourceforge.net/mpeg-4files.html
@@ -654,7 +591,7 @@ meta('©too', 'encoder', string);
 meta('©wrt', 'composer', string);
 
 meta('covr', 'coverArt', function(field) {
-  return this.metadata[field] = this.stream.readBuffer(this.len);
+  return this.stream.readBuffer(this.len);
 });
 
 // standard genres
@@ -682,29 +619,30 @@ let genres = [
 ];
 
 meta('gnre', 'genre', function(field) {
-  return this.metadata[field] = genres[this.stream.readUInt16() - 1];
+  return genres[this.stream.readUInt16() - 1];
 });
 
 meta('tmpo', 'tempo', function(field) {
-  return this.metadata[field] = this.stream.readUInt16();
+  return this.stream.readUInt16();
 });
 
 meta('rtng', 'rating', function(field) {
   let rating = this.stream.readUInt8();
-  return this.metadata[field] = rating === 2 ? 'Clean' : rating !== 0 ? 'Explicit' : 'None';
+  return rating === 2 ? 'Clean' : rating !== 0 ? 'Explicit' : 'None';
 });
 
 let diskTrack = function(field) {
   this.stream.advance(2);
-  this.metadata[field] = this.stream.readUInt16() + ' of ' + this.stream.readUInt16();
-  return this.stream.advance(this.len - 6);
+  let res = this.stream.readUInt16() + ' of ' + this.stream.readUInt16();
+  this.stream.advance(this.len - 6);
+  return res;
 };
 
 meta('disk', 'diskNumber', diskTrack);
 meta('trkn', 'trackNumber', diskTrack);
 
 let bool = function(field) {
-  return this.metadata[field] = this.stream.readUInt8() === 1;
+  return this.stream.readUInt8() === 1;
 };
 
 meta('cpil', 'compilation', bool);
