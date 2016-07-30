@@ -1,5 +1,5 @@
 import {Writable} from 'stream';
-import {BufferList, Stream} from 'stream-reader';
+import {BufferList, Stream, UnderflowError} from 'stream-reader';
 import Track from './Track';
 
 const formats = [];
@@ -22,13 +22,6 @@ export default class Demuxer extends Writable {
     this.tracks = [];
     
     this.init();
-    
-    // End all of the tracks at the end of the input
-    this.once('prefinish', () => {
-      for (let track of this.tracks) {
-        track.end();
-      }
-    });
   }
   
   static probe(buffer) {
@@ -55,19 +48,34 @@ export default class Demuxer extends Writable {
   }
   
   _readChunk() {
-    // Nothing available, wait until we have more data
-    if (this.list.availableBytes === 0) {
-      this._needsRead = true;
-      return;
+    this._needsRead = true;
+    
+    while (this.stream.remainingBytes() > 0 && (!this._startedData || this._needsRead)) {
+      let offset = this.stream.offset;
+      
+      try {
+        this.readChunk();
+        this._needsRead = false;
+      } catch (err) {
+        // If we hit an underflow, seek back to the start of 
+        // the chunk and try again when we have more data.
+        if (err instanceof UnderflowError) {
+          this.stream.seek(offset);
+          this._needsRead = true;
+          this.list.callback();
+        } else {
+          this.emit('error', err);
+        }
+        
+        return;
+      }
     }
     
-    var res = this.readChunk();
-    if (res === false) {
-      // Not enough data. Wait for more.
-      this._needsRead = true;
-      this.list.callback();
-    } else {
-      this._needsRead = false;
+    // End all of the tracks at the end of the input
+    if (this._writableState.finished && this.stream.remainingBytes() === 0) {
+      for (let track of this.tracks) {
+        track.end();
+      }
     }
   }
   
