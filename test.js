@@ -1,6 +1,6 @@
 import fs from 'fs';
 import WAVDemuxer from './src/WAVDemuxer';
-import M4ADemuxer from './src/M4ADemuxer';
+import {MP4Demuxer} from 'mp4';
 import Speaker from 'speaker';
 import AACDecoder from 'aac/src/decoder';
 
