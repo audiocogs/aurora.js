@@ -15,6 +15,7 @@ export default class Track extends Readable {
     this.duration = duration;
     this.seekPoints = [];
     this._discarded = false;
+    this._needsRead = false;
   }
   
   // track media types
@@ -42,6 +43,11 @@ export default class Track extends Readable {
     
     this._demuxer._startedData = true;
     
+    if (this._needsRead) {
+      this._demuxer._needsRead--;
+      this._needsRead = false;
+    }
+    
     if (!this._discarded) {
       this.push(new Buffer(chunk));
     }
@@ -58,6 +64,11 @@ export default class Track extends Readable {
   
   _read() {
     setImmediate(() => {
+      if (!this._needsRead) {
+        this._demuxer._needsRead++;
+        this._needsRead = true;
+      }
+      
       this._demuxer._readChunk();
     });
   }

@@ -15,7 +15,7 @@ export default class Demuxer extends Writable {
     super();
     
     this._startedData = false;
-    this._needsRead = false;
+    this._needsRead = 0;
     
     this.list = new BufferList;
     this.stream = new Stream(this.list);
@@ -48,20 +48,16 @@ export default class Demuxer extends Writable {
   }
   
   _readChunk() {
-    this._needsRead = true;
-    
     while (this.stream.remainingBytes() > 0 && (!this._startedData || this._needsRead)) {
       let offset = this.stream.offset;
       
       try {
         this.readChunk();
-        this._needsRead = false;
       } catch (err) {
         // If we hit an underflow, seek back to the start of 
         // the chunk and try again when we have more data.
         if (err instanceof UnderflowError) {
           this.stream.seek(offset);
-          this._needsRead = true;
           this.list.callback();
         } else {
           this.emit('error', err);
