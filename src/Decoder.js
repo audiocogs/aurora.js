@@ -32,6 +32,16 @@ export default class Decoder extends Duplex {
     // This should cause a read roughly once a second
     this._readableState.highWaterMark = format.sampleRate * format.channelsPerFrame * 4;
     this._readableState.needReadable = true;
+    
+    this.once('prefinish', () => {
+      // Flush remainining packets
+      if (this.stream.remainingBytes()) {
+        this._read(Infinity);
+      }
+      
+      // End stream
+      this.push(null);
+    });
   }
   
   _write(chunk, encoding, callback) {
@@ -75,11 +85,6 @@ export default class Decoder extends Duplex {
         this.list.callback(this.list.last);
         break;
       }
-    }
-    
-    // End the readable stream if we've consumed all of the input
-    if (this._writableState.finished && this.stream.remainingBytes() === 0) {
-      this.push(null);
     }
   }
   
