@@ -1,21 +1,26 @@
-import {Readable} from 'stream';
+import {Duplex} from 'stream';
 
 /**
  * A Track is a readable stream representing a single
  * track within a media container. It is attached to its
  * parent Demuxer so it can control stream backpressure.
  */
-export default class Track extends Readable {
+export default class Track extends Duplex {
   constructor(type = Track.AUDIO, format = {}, duration = 0) {
     super();
     
     this._demuxer = null;
+    this._muxer = null;
+    
     this.type = type;
     this.format = format;
     this.duration = duration;
+    this.id = 0;
     this.seekPoints = [];
     this._discarded = false;
     this._needsRead = false;
+    this._writeChunk = null;
+    this._writeCallback = null;
   }
   
   // track media types
@@ -36,33 +41,53 @@ export default class Track extends Readable {
   /**
    * Writes data to the track. For use by demuxers.
    */
-  write(chunk) {
+  write(chunk, encoding, callback) {
+    // Call super if this track is attached to a muxer
+    if (this._muxer) {
+      return super.write(chunk, encoding, callback);
+    }
+    
     if (!this._demuxer) {
       throw new Error('The track must be added to a demuxer');
     }
     
-    this._demuxer._startedData = true;
+    if (this._demuxer) {
+      this._demuxer._startedData = true;
     
-    if (this._needsRead) {
-      this._demuxer._needsRead--;
-      this._needsRead = false;
+      if (this._needsRead) {
+        this._demuxer._needsRead--;
+        this._needsRead = false;
+      }
     }
+    
+    this._needsRead = false;
     
     if (!this._discarded) {
-      this.push(new Buffer(chunk));
+      return this.push(new Buffer(chunk));
     }
+    
+    return true;
   }
   
   /**
    * Ends the track. For use by demuxers.
    */
-  end() {
+  end(chunk, encoding, callback) {
+    if (this._muxer) {
+      return super.end(chunk, encoding, callback);
+    }
+    
     if (!this._readableState.ended) {
       this.push(null);
     }
   }
   
   _read() {
+    if (!this._demuxer) {
+      this._needsRead = true;
+      return;
+    }
+    
     setImmediate(() => {
       if (!this._needsRead) {
         this._demuxer._needsRead++;
@@ -71,6 +96,14 @@ export default class Track extends Readable {
       
       this._demuxer._readChunk();
     });
+  }
+  
+  _write(chunk, encoding, callback) {
+    this._writeChunk = chunk;
+    this._writeCallback = callback;
+    if (this._muxer._needsRead) {
+      this._muxer._read();
+    }
   }
   
   addSeekPoint(offset, timestamp) {

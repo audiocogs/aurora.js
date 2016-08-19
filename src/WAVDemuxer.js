@@ -8,7 +8,7 @@ const formats = {
   0x0007: 'ulaw'
 };
 
-export default class WAVDemuxer extends Demuxer {  
+export default class WAVDemuxer extends Demuxer {
   static probe(buffer) {
     return buffer.peekString(0, 4) === 'RIFF' && 
            buffer.peekString(8, 4) === 'WAVE';
@@ -68,7 +68,7 @@ export default class WAVDemuxer extends Demuxer {
       default:
         this.stream.advance(this.len);
     }
-          
+    
     if (this.type !== 'data' || this.len === 0) {
       this.type = null;
     }
