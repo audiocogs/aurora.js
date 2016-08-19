@@ -14,7 +14,7 @@
   },
   "bugs": "https://github.com/audiocogs/aurora.js/issues",
   "dependencies": {
-    "stream-reader": "^1.0.0"
+    "binary-io": "^1.0.0"
   },
   "optionalDependencies": {
     "speaker": "^0.3.0"

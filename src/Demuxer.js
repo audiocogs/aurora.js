@@ -1,5 +1,5 @@
 import {Writable} from 'stream';
-import {BufferList, Stream, UnderflowError} from 'stream-reader';
+import {BufferList, Stream, UnderflowError} from 'binary-io';
 import Track from './Track';
 
 const formats = [];

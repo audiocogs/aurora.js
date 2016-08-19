@@ -1,5 +1,5 @@
 import {Duplex} from 'stream';
-import {BufferList, Stream, Bitstream, UnderflowError} from 'stream-reader';
+import {BufferList, Stream, Bitstream, UnderflowError} from 'binary-io';
 
 const codecs = {};
 
