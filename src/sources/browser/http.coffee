@@ -11,8 +11,9 @@ class HTTPSource extends EventEmitter
         
     start: ->
         if @length
+            return if @offset >= @length
             return @loop() unless @inflight
-        
+
         @inflight = true
         @xhr = new XMLHttpRequest()
         
