@@ -32,7 +32,7 @@ class LPCMDecoder extends Decoder
                 when 8
                     output = new Int8Array(samples)
                     for i in [0...samples] by 1
-                        output[i] = stream.readInt8()
+                        output[i] = stream.readInt8() - 128
                 
                 when 16
                     output = new Int16Array(samples)
