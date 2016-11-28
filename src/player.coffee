@@ -21,6 +21,7 @@ class Player extends EventEmitter
         @duration = 0
         @volume = 100
         @pan = 0 # -50 for left, 50 for right, 0 for center
+        @checkQueueInterval = 0
         @metadata = {}
         
         @filters = [
@@ -34,6 +35,10 @@ class Player extends EventEmitter
         @asset.on 'decodeStart', =>
             @queue = new Queue(@asset)
             @queue.once 'ready', @startPlaying
+            @queue.on 'buffering', =>
+                @device.stop()
+                @queue.once 'ready', =>
+                    @device.start()
             
         @asset.on 'format', (@format) =>
             @emit 'format', @format
@@ -44,6 +49,9 @@ class Player extends EventEmitter
         @asset.on 'duration', (@duration) =>
             @emit 'duration', @duration
             
+        @asset.on 'progress', (@progress) =>
+            @emit 'progress', @progress
+            
         @asset.on 'error', (error) =>
             @emit 'error', error
                 
@@ -52,7 +60,13 @@ class Player extends EventEmitter
         
     @fromFile: (file) ->
         return new Player Asset.fromFile(file)
-        
+
+    @fromWebSocket: (url, file) ->
+        return new Player Asset.fromWebSocket(url, file)
+
+    @fromWSWorker: (url, file) ->
+        return new Player Asset.fromWSWorker(url, file)
+
     @fromBuffer: (buffer) ->
         return new Player Asset.fromBuffer(buffer)
         
@@ -125,6 +139,7 @@ class Player extends EventEmitter
                 frameOffset = 0
 
             bufferOffset = 0
+
             while frame and bufferOffset < buffer.length
                 max = Math.min(frame.length - frameOffset, buffer.length - bufferOffset)
                 for i in [0...max] by 1
@@ -154,7 +169,7 @@ class Player extends EventEmitter
                     @device.stop()
                     
             return
-        
+
         @device.on 'refill', @refill
         @device.start() if @playing
         @emit 'ready'

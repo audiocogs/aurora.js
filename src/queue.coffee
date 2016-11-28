@@ -2,7 +2,8 @@ EventEmitter = require './core/events'
 
 class Queue extends EventEmitter
     constructor: (@asset) ->
-        @readyMark = 64
+        @bufferSize = 0
+        @readyMark = 22464
         @finished = false
         @buffering = true
         @ended = false
@@ -16,18 +17,23 @@ class Queue extends EventEmitter
         
     write: (buffer) =>
         @buffers.push buffer if buffer
+        @bufferSize += buffer.length
         
         if @buffering
-            if @buffers.length >= @readyMark or @ended
+            @asset.decodePacket()
+            if @bufferSize >= @readyMark or @ended
                 @buffering = false
                 @emit 'ready'
-            else    
-                @asset.decodePacket()
             
     read: ->
         return null if @buffers.length is 0
-        
-        @asset.decodePacket()
+        unless @buffering
+            @asset.decodePacket()
+        @bufferSize -= @buffers[0].length
+        if @bufferSize <= 0
+            @buffering = true
+            @emit 'buffering'
+
         return @buffers.shift()
         
     reset: ->

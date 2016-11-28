@@ -18,16 +18,21 @@ class WebAudioDevice extends EventEmitter
     constructor: (@sampleRate, @channels) ->
         @context = sharedContext ?= new AudioContext
         @deviceSampleRate = @context.sampleRate
+        if createProcessor is 'createJavaScriptNode'
+            scriptBufferSize = 4096
+        else
+            scriptBufferSize = 0
         
+        @node = @context[createProcessor](scriptBufferSize, @channels, @channels)
+
         # calculate the buffer size to read
-        @bufferSize = Math.ceil(4096 / (@deviceSampleRate / @sampleRate) * @channels)
+        @bufferSize = Math.ceil(@node.bufferSize / (@deviceSampleRate / @sampleRate) * @channels)
         @bufferSize += @bufferSize % @channels
         
         # if the sample rate doesn't match the hardware sample rate, create a resampler
         if @deviceSampleRate isnt @sampleRate
             @resampler = new Resampler(@sampleRate, @deviceSampleRate, @channels, @bufferSize)
 
-        @node = @context[createProcessor](4096, @channels, @channels)
         @node.onaudioprocess = @refill
         @node.connect(@context.destination)
         
@@ -47,12 +52,12 @@ class WebAudioDevice extends EventEmitter
         # resample if necessary    
         if @resampler
             data = @resampler.resampler(data)
-        
+
         # write data to output
         for i in [0...outputBuffer.length] by 1
             for n in [0...channelCount] by 1
                 channels[n][i] = data[i * channelCount + n]
-                
+
         return
         
     destroy: ->

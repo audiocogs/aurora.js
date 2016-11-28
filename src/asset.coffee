@@ -6,12 +6,14 @@
 # file to linear PCM raw audio data.
 #
 
-EventEmitter = require './core/events'
-HTTPSource   = require './sources/node/http'
-FileSource   = require './sources/node/file'
-BufferSource = require './sources/buffer'
-Demuxer      = require './demuxer'
-Decoder      = require './decoder'
+EventEmitter    = require './core/events'
+HTTPSource      = require './sources/node/http'
+FileSource      = require './sources/node/file'
+WebSocketSource = require './sources/browser/websocket'
+WSWorkerSource = require './sources/browser/wsWorker'
+BufferSource    = require './sources/buffer'
+Demuxer         = require './demuxer'
+Decoder         = require './decoder'
 
 class Asset extends EventEmitter
     constructor: (@source) ->
@@ -36,7 +38,13 @@ class Asset extends EventEmitter
 
     @fromFile: (file) ->
         return new Asset new FileSource(file)
-        
+
+    @fromWebSocket: (url, file) ->
+        return new Asset new WebSocketSource(url, file)
+
+    @fromWSWorker: (url, file) ->
+        return new Asset new WSWorkerSource(url, file)
+
     @fromBuffer: (buffer) ->
         return new Asset new BufferSource(buffer)
         
@@ -95,7 +103,6 @@ class Asset extends EventEmitter
     
     probe: (chunk) =>
         return unless @active
-        
         demuxer = Demuxer.find(chunk)
         if not demuxer
             return @emit 'error', 'A demuxer for this container was not found.'

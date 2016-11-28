@@ -9,6 +9,8 @@ exports.UnderflowError = require './core/underflow'
 # browserify will replace these with the browser versions
 exports.HTTPSource = require './sources/node/http'
 exports.FileSource = require './sources/node/file'
+exports.WebSocketSource = require './sources/browser/websocket'
+exports.WSWorkerSource = require './sources/browser/wsWorker'
 exports.BufferSource = require './sources/buffer'
 
 exports.Demuxer = require './demuxer'

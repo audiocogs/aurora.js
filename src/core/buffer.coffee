@@ -1,23 +1,6 @@
 class AVBuffer
     constructor: (input) ->
-        if input instanceof Uint8Array                  # Uint8Array
-            @data = input
-            
-        else if input instanceof ArrayBuffer or         # ArrayBuffer
-          Array.isArray(input) or                       # normal JS Array
-          typeof input is 'number' or                   # number (i.e. length)
-          global.Buffer?.isBuffer(input)                # Node Buffer
-            @data = new Uint8Array(input)
-            
-        else if input.buffer instanceof ArrayBuffer     # typed arrays other than Uint8Array
-            @data = new Uint8Array(input.buffer, input.byteOffset, input.length * input.BYTES_PER_ELEMENT)
-            
-        else if input instanceof AVBuffer               # AVBuffer, make a shallow copy
-            @data = input.data
-                        
-        else
-            throw new Error "Constructing buffer with unknown type."
-        
+        @data = AVBuffer.sanitize input
         @length = @data.length
         
         # used when the buffer is part of a bufferlist
@@ -27,6 +10,34 @@ class AVBuffer
     @allocate: (size) ->
         return new AVBuffer(size)
     
+    @sanitize: (input) ->
+        if input instanceof Uint8Array                  # Uint8Array
+            return input
+            
+        else if input instanceof ArrayBuffer or         # ArrayBuffer
+          Array.isArray(input) or                       # normal JS Array
+          typeof input is 'number' or                   # number (i.e. length)
+          global.Buffer?.isBuffer(input)                # Node Buffer
+            return new Uint8Array(input)
+            
+        else if input.buffer instanceof ArrayBuffer     # typed arrays other than Uint8Array
+            return new Uint8Array(input.buffer, input.byteOffset, input.length * input.BYTES_PER_ELEMENT)
+            
+        else if input instanceof AVBuffer               # AVBuffer, make a shallow copy
+            return input.data
+                        
+        else
+            throw new Error "Constructing buffer with unknown type."
+        
+    append: (input) ->
+        data = AVBuffer.sanitize input
+        newData = new Uint8Array(@length + data.length)
+        newData.set @data
+        newData.set data, @length
+        @data = newData
+        @length = @data.length
+        
+
     copy: ->
         return new AVBuffer(new Uint8Array(@data))
     

@@ -6,13 +6,13 @@ UnderflowError = require './core/underflow'
 
 class Decoder extends EventEmitter
     constructor: (@demuxer, @format) ->
+
         list = new BufferList
         @stream = new Stream(list)
         @bitstream = new Bitstream(@stream)
         
         @receivedFinalBuffer = false
-        @waiting = false
-        
+        @waiting = false        
         @demuxer.on 'cookie', (cookie) =>
             try
                 @setCookie cookie
@@ -45,6 +45,7 @@ class Decoder extends EventEmitter
         try
             packet = @readChunk()
         catch error
+
             if error not instanceof UnderflowError
                 @emit 'error', error
                 return false
