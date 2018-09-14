@@ -1,6 +1,7 @@
 EventEmitter = require '../../core/events'
 AVBuffer = require '../../core/buffer'
 http = require 'http'
+https = require 'https'
 
 class HTTPSource extends EventEmitter
     constructor: (@url) ->
@@ -14,7 +15,7 @@ class HTTPSource extends EventEmitter
         if @response?
             return @response.resume()
         
-        @request = http.get @url
+        @request = if (@url.lastIndexOf('https:', 0) == 0) then https.get @url else http.get @url
         @request.on 'response', (@response) =>
             if @response.statusCode isnt 200
                 return @errorHandler 'Error loading file. HTTP status code ' + @response.statusCode
