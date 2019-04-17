@@ -53,7 +53,7 @@ For much more detailed information on how to use Aurora.js, check out the
 We use [browserify](https://github.com/substack/node-browserify) to build Aurora.js.  To build Aurora.js 
 for the browser yourself, use the following commands:
 
-    npm install
+    npm ci
     make browser
     
 This will place a built `aurora.js` file, as well as a source map in the `build/` directory.
