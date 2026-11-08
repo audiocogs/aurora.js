@@ -295,7 +295,7 @@ class M4ADemuxer extends Demuxer
         @setupSeekPoints()
     
     # chunk offsets
-    atom 'moov.trak.mdia.minf.stbl.stco', -> # TODO: co64
+    atom 'moov.trak.mdia.minf.stbl.stco', ->
         @stream.advance(4) # version and flags
         
         entries = @stream.readUInt32()
@@ -303,6 +303,18 @@ class M4ADemuxer extends Demuxer
         for i in [0...entries] by 1
             @track.chunkOffsets[i] = @stream.readUInt32()
             
+        @setupSeekPoints()
+
+    atom 'moov.trak.mdia.minf.stbl.co64', ->
+        @stream.advance(4) # version and flags
+
+        entries = @stream.readUInt32()
+        @track.chunkOffsets = []
+        for i in [0...entries] by 1
+            high = @stream.readUInt32()
+            low = @stream.readUInt32()
+            @track.chunkOffsets[i] = high * 0x100000000 + low
+
         @setupSeekPoints()
         
     # chapter track reference
